@@ -142,7 +142,7 @@ uint32_t get_elasped_time_in_ms(void)
 
 void initialized_notification(void)
 {
-	printf("Welcome ESB TX NOACK!!\r\n");    
+	printf("Welcome ESB PTX NOACK!!\r\n");    
 	
 #ifdef _ENABLE_LED_AND_BEEP	
 	{

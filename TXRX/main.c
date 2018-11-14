@@ -148,7 +148,7 @@ uint32_t get_elasped_time_in_ms(void)
 void initialized_notification(void)
 {
 	//printf("Welcome to FiYu :: enhanced shockblast!!\r\n");    
-	printf("Welcome ESB NOACK!!\r\n");    
+	printf("Welcome ESB TXRX NOACK!!\r\n");    
 #ifdef _ENABLE_LED_AND_BEEP	
 	{
 		int i;	
