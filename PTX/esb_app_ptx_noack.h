@@ -1,6 +1,6 @@
 
-#ifndef _ESP_APP_NOACK_H_
-#define _ESP_APP_NOACK_H_
+#ifndef _ESP_APP_PTX_NOACK_H_
+#define _ESP_APP_PTX_NOACK_H_
 
 #include <stdint.h>
 
@@ -62,4 +62,4 @@ void esb_send_data(hal_nrf_address_t tx_pipe_number, uint8_t *p_data, uint8_t le
 
 #define ESB_MAX_PAYLOAD_LEN											(32)
 
-#endif /*_ESP_APP_NOACK_H_*/
+#endif /*_ESP_APP_PTX_NOACK_H_*/
