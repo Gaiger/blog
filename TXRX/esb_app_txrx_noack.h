@@ -7,6 +7,7 @@
 #include "hal_nrf.h"
 #include "hal_nrf_hw.h"
 
+//#define _RELAYER
 
 #define TX_PIPE																	(HAL_NRF_PIPE3)
 #define RX_PIPE																	(HAL_NRF_PIPE5)
