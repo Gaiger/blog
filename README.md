@@ -1,6 +1,6 @@
 # enhanced-ehockburst-designating-destinations-and-sources.
-Demonstrate how to operate nRF24LE1 as a multi-sender and multi-receiver, the destination and source are designated
-This code is based on nRF24LE1, but is very easy to port to the other microcontroller.
+Demonstrate how to operate enhanced shockburst transceiver as a multi-sender and multi-receiver whilethe destination and source are designated.
+This code is based on nRF24LE1, but is easy to be ported to the other microcontroller.
 
 Folder PRX ::  An primary receiver receives the packets from the designated pipe(s). If you define the macro _RX_FOR_ALL_CHANNEL in file esb_app_prx_noack.h, the receiver would receive the packets from all(six) pipes.
 
