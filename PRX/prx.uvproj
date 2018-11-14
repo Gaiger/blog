@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>PTX</TargetName>
+      <TargetName>PRX</TargetName>
       <ToolsetNumber>0x0</ToolsetNumber>
       <ToolsetName>MCS-51</ToolsetName>
       <TargetOption>
@@ -45,7 +45,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>ptx</OutputName>
+          <OutputName>prx</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -369,9 +369,9 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>esb_app_ptx_noack.c</FileName>
+              <FileName>esb_app_prx_noack.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\esb_app_ptx_noack.c</FilePath>
+              <FilePath>.\esb_app_prx_noack.c</FilePath>
             </File>
           </Files>
         </Group>
