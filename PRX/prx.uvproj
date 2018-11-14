@@ -311,7 +311,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\compiler\c51;..\compiler\common;..\hal;..\hal\nrf24le1;..\hal\nrf24l01p</IncludePath>
+              <IncludePath>..\compiler\c51;..\compiler\common;..\hal;..\hal\nrf24le1;..\hal\nrf24l01p;..</IncludePath>
             </VariousControls>
           </C51>
           <Ax51>
