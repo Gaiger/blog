@@ -18,7 +18,7 @@
 #include "esb_app_tx_ack.h"
 
 
-#define _ENABLE_LED_AND_BEEP
+//#define _ENABLE_LED_AND_BEEP
 
 #define ENTER_CRITICAL_SECTION(XX)				(EA = 0)
 #define EXIT_CRITICAL_SECTION(XX)					(EA = 1)
