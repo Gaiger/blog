@@ -1,2 +1,2 @@
-# Enhanced-shockburst-with-acknowloege
+# Enhanced-shockburst-with-acknowledge
 Demonstrate how to enable nRF24LE1 acknowledge mechanism,  It brings the transmission being reliable.
