@@ -70,7 +70,7 @@ void esb_ptx_init(void)
 
 	hal_nrf_set_auto_retr(MAX_RETRRANS_TIME, RF_RETRANS_DELAY_IN_US);		
 	
-		hal_nrf_set_crc_mode(HAL_NRF_CRC_16BIT);
+	hal_nrf_set_crc_mode(HAL_NRF_CRC_16BIT);
 		
 	/*enable all rf-interrupt for properly working */
 	hal_nrf_set_irq_mode(HAL_NRF_MAX_RT, true);
