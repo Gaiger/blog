@@ -1,4 +1,6 @@
 # enhanced-ehockburst-designating-destinations-and-sources.
+Explanation is here : https://gaiger-programming.blogspot.com/2018/11/make-nordic-enhanced-shockburst-esb.html
+
 Demonstrate how to operate enhanced shockburst transceiver as a multi-sender and multi-receiver whilethe destination and source are designated.
 This code is based on nRF24LE1, but is easy to be ported to the other microcontroller.
 
