@@ -174,13 +174,12 @@ void run_event_loop(void)
 {
 	uint8_t buffer[ESB_MAX_PAYLOAD_LEN];
 	uint8_t len;
-	
-#define LED_BLINKING_INTERVAL_IN_MS							(10)						
+						
 	if(0 != g_is_need_to_print_time)
 	{							
 		printf(" %lu sec\r\n", get_elasped_time_in_ms()/1000L);															
 		g_is_need_to_print_time = 0;		
-	}/*if */						
+	}/*if */
 	
 	
 	if(0 != g_is_need_to_send_data)
@@ -219,7 +218,8 @@ void run_event_loop(void)
 		
 		
 		g_is_need_to_send_data = 0;
-#ifdef _ENABLE_LED_AND_BEEP		
+#ifdef _ENABLE_LED_AND_BEEP	
+	#define LED_BLINKING_INTERVAL_IN_MS					(10)	
 		D1 = 0;
 		delay_ms(LED_BLINKING_INTERVAL_IN_MS);	
 		D1 = 1;
