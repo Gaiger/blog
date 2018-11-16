@@ -179,15 +179,18 @@ uint8_t g_sending_packet_serial_number = 0;
 void run_event_loop(void)
 {		
 	uint8_t buffer[ESB_MAX_PAYLOAD_LEN];
-	uint8_t len;
-	
-#define LED_BLINKING_INTERVAL_IN_MS							(10)					
+	uint8_t len;						
+
 	
 	if(0 != g_is_need_to_print_time)
 	{							
 		printf(" %lu sec\r\n", get_elasped_time_in_ms()/1000L);															
 		g_is_need_to_print_time = 0;		
-	}/*if */					
+	}/*if */
+	
+#ifdef _ENABLE_LED_AND_BEEP		
+	#define LED_BLINKING_INTERVAL_IN_MS						(10)
+#endif
 	
 #if  !defined(_RELAYER)
 	if(0 != g_is_need_to_send_data)
