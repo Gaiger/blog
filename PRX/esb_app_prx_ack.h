@@ -1,6 +1,6 @@
 
-#ifndef _ESB_APP_ACK_H_
-#define _ESB_APP_ACK_H_
+#ifndef _ESB_APP_PRX_ACK_H_
+#define _ESB_APP_PRX_ACK_H_
 
 #include <stdint.h>
 

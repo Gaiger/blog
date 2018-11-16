@@ -15,7 +15,7 @@
 #include "nordic_common.h"
 
 
-#include "esb_app_tx_ack.h"
+#include "esb_app_ptx_ack.h"
 
 
 //#define _ENABLE_LED_AND_BEEP

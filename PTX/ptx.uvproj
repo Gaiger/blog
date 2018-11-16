@@ -369,9 +369,9 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>esb_app_tx_ack.c</FileName>
+              <FileName>esb_app_ptx_ack.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\esb_app_tx_ack.c</FilePath>
+              <FilePath>.\esb_app_ptx_ack.c</FilePath>
             </File>
           </Files>
         </Group>
