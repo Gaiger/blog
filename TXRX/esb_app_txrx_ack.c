@@ -65,7 +65,7 @@ void esb_txrx_init(void)
 	}/*hal_nrf_set_rx_payload_width(HAL_NRF_ALL, MAX_PAYLOAD_LEN) does not work*/
 #endif		
 	
-	hal_nrf_enable_dynamic_ack(true);
+	hal_nrf_enable_dynamic_ack(false);
 	hal_nrf_enable_ack_payload(true);
 	
 #define MAX_RETRRANS_TIME							(4)	
