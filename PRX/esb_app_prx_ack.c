@@ -48,9 +48,7 @@ void esb_prx_init(void)
 #else
 	hal_nrf_open_pipe(RX_PIPE, true); 
 #endif	
-
 	
-	hal_nrf_open_pipe(HAL_NRF_PIPE0, true);
 	
 #if(1)	
 	hal_nrf_setup_dynamic_payload(HAL_NRF_ALL);
