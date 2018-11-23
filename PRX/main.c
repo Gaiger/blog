@@ -92,10 +92,6 @@ uint8_t g_is_need_to_feed_the_watchdog = 0;
 #define PRINT_TIME_INTERVAL_IN_MS								(1000L)
 uint8_t g_is_need_to_print_time = 0;
 
-#ifndef _PRX
-#define SEND_DATA_INTERVAL_IN_MS								(500L)
-uint8_t g_is_need_to_send_data = 0;
-#endif
 
 xdata uint32_t g_elaspsed_time_in_ms = 0L;
 
@@ -118,10 +114,7 @@ void timer0_irq() interrupt INTERRUPT_T0
 		
 		if(0 == g_elaspsed_time_in_ms % PRINT_TIME_INTERVAL_IN_MS)
 			g_is_need_to_print_time = 1;
-#if !defined(_PRX) && !defined(_RELAYER)
-		if(0 == g_elaspsed_time_in_ms % SEND_DATA_INTERVAL_IN_MS)
-			g_is_need_to_send_data = 1;	
-#endif		
+
 	}/*if */	
 	
 }/*timer0_irq*/
