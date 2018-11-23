@@ -66,18 +66,7 @@ void clock_init(void)
 	
 	//32 KHz from 32KRCOSC
 	hal_clklf_set_source(HAL_CLKLF_RCOSC32K);
-	
-#ifdef _ENABLE_POWER_SAVING
-	hal_rtc_set_compare_mode(HAL_RTC_COMPARE_MODE_0); 	
-	hal_rtc_set_compare_value(0x7FFF);
-	
-	//disable XOSC16 during register retention power down mode
-	hal_clk_regret_xosc16m_on(false);  	
-	
-	WUIRQ = 1;//IEN1 = 0x20;  /*Internal wakeup (TICK) interrupt enable */
-	hal_rtc_start(true);	
-#endif	
-	
+		
 	while(false == hal_clklf_ready()); 
 }/*clock_init*/
 
