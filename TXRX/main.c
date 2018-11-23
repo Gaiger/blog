@@ -84,7 +84,7 @@ uint8_t g_is_need_to_feed_the_watchdog = 0;
 #define PRINT_TIME_INTERVAL_IN_MS								(1000L)
 uint8_t g_is_need_to_print_time = 0;
 
-#ifndef _PRX
+#ifndef _RELAYER
 #define SEND_DATA_INTERVAL_IN_MS								(500L)
 uint8_t g_is_need_to_send_data = 0;
 #endif
@@ -110,7 +110,7 @@ void timer0_irq() interrupt INTERRUPT_T0
 		
 		if(0 == g_elaspsed_time_in_ms % PRINT_TIME_INTERVAL_IN_MS)
 			g_is_need_to_print_time = 1;
-#if !defined(_PRX) && !defined(_RELAYER)
+#if !defined(_RELAYER)
 		if(0 == g_elaspsed_time_in_ms % SEND_DATA_INTERVAL_IN_MS)
 			g_is_need_to_send_data = 1;	
 #endif		
@@ -257,11 +257,11 @@ void run_event_loop(void)
 		D2 = 1;
 #endif
 
-#ifdef _RELAYER		
+#if defined(_RELAYER)
 		{
 			uint8_t i;		
 						
-			esb_send(TX_PIPE, &buffer[0], len);						
+			esb_send_data(TX_PIPE, &buffer[0], len);						
 			printf("rf rly in pipe = %bu, len = %bu::", 
 				TX_PIPE, len);				
 			for(i = 0; i< len; i++)
