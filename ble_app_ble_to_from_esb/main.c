@@ -51,12 +51,25 @@
 #include "ble_advdata.h"
 #include "ble_advertising.h"
 
+
+//#define _INTACT
+
+#if !defined(_INTACT)
+#include "ble_esb_to_from_ble.h"
+#include "esb_timeslot.h"
+#endif
+
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
 #define CENTRAL_LINK_COUNT               0                                          /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT            1                                          /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
-#define DEVICE_NAME                      "Nordic_Template"                          /**< Name of device. Will be included in the advertising data. */
+#if !defined(_INTACT)
+	#define DEVICE_NAME                      "ESB to/from BLE"
+#else
+	#define DEVICE_NAME                      "Nordic_Template"                          /**< Name of device. Will be included in the advertising data. */	
+#endif
+
 #define MANUFACTURER_NAME                "NordicSemiconductor"                      /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                 300                                        /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
 #define APP_ADV_TIMEOUT_IN_SECONDS       180                                        /**< The advertising timeout in units of seconds. */
@@ -88,6 +101,14 @@ static dm_application_instance_t         m_app_handle;                          
 
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 
+#if !defined(_INTACT)
+
+static uint32_t  g_is_esb_enabled = 0;
+static ble_esb_to_from_ble_t  m_esb_to_from_ble;
+APP_TIMER_DEF(m_one_sec_timer_id);
+
+#endif
+
 /* YOUR_JOB: Declare all services structure your application is using
 static ble_xx_service_t                     m_xxs;
 static ble_yy_service_t                     m_yys;
@@ -113,6 +134,16 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
+#if !defined(_INTACT)	
+static uint32_t l_is_need_to_print_time = 0;
+
+static void one_sec_timeout_handler(void * p_context)
+{   		
+		UNUSED_PARAMETER(p_context);
+		
+		l_is_need_to_print_time = 1;
+}/*one_sec_timeout_handler*/
+#endif
 
 /**@brief Function for the Timer initialization.
  *
@@ -120,7 +151,9 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
  */
 static void timers_init(void)
 {
-
+#if !defined(_INTACT)		
+		uint32_t err_code;
+#endif	
     // Initialize timer module.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
 
@@ -133,6 +166,12 @@ static void timers_init(void)
     uint32_t err_code;
     err_code = app_timer_create(&m_app_timer_id, APP_TIMER_MODE_REPEATED, timer_timeout_handler);
     APP_ERROR_CHECK(err_code); */
+#if !defined(_INTACT)
+		err_code = app_timer_create(&m_one_sec_timer_id,
+									APP_TIMER_MODE_REPEATED,
+									one_sec_timeout_handler);
+		APP_ERROR_CHECK(err_code);		
+#endif	
 }
 
 
@@ -195,6 +234,26 @@ static void on_yys_evt(ble_yy_service_t     * p_yy_service,
     }
 }*/
 
+
+#if !defined(_INTACT)	
+
+static uint8_t g_ble_received_data[GATT_MTU_SIZE_DEFAULT];
+static uint8_t g_ble_received_data_len = 0;
+
+void ble_data_receiver(ble_esb_to_from_ble_t * p_to_from_esb_t, 
+	uint8_t * p_data, uint16_t len)
+{	
+		g_ble_received_data_len = (uint8_t)len;
+
+		if(g_ble_received_data_len > GATT_MTU_SIZE_DEFAULT)
+			g_ble_received_data_len = GATT_MTU_SIZE_DEFAULT;
+		
+		memcpy(&g_ble_received_data[0], p_data, 
+			g_ble_received_data_len);
+		
+}/*ble_data_receiver*/
+#endif
+
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
@@ -222,6 +281,17 @@ static void services_init(void)
     err_code = ble_yy_service_init(&yys_init, &yy_init);
     APP_ERROR_CHECK(err_code);
     */
+	
+#if !defined(_INTACT)		
+		uint32_t       err_code;
+    ble_esb_to_from_ble_init_t esb_to_from_ble_init;
+			
+		esb_to_from_ble_init.data_receving_handler = ble_data_receiver;		
+		err_code = ble_esb_to_from_ble_init(&m_esb_to_from_ble, 
+			&esb_to_from_ble_init);
+				
+    APP_ERROR_CHECK(err_code);
+#endif
 }
 
 
@@ -288,7 +358,14 @@ static void application_timers_start(void)
     uint32_t err_code;
     err_code = app_timer_start(m_app_timer_id, TIMER_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code); */
+#if !defined(_INTACT)			
+		uint32_t err_code;
    
+    err_code = app_timer_start(m_one_sec_timer_id, 
+			APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER), NULL);
+	
+    APP_ERROR_CHECK(err_code);
+#endif   
 }
 
 
@@ -381,6 +458,9 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
     ble_xxs_on_ble_evt(&m_xxs, p_ble_evt);
     ble_yys_on_ble_evt(&m_yys, p_ble_evt);
     */
+#if !defined(_INTACT)		
+		ble_esb_to_from_ble_on_ble_evt(&m_esb_to_from_ble, p_ble_evt);
+#endif	
 }
 
 
@@ -545,8 +625,13 @@ static void advertising_init(void)
     ble_adv_modes_config_t options = {0};
     options.ble_adv_fast_enabled  = BLE_ADV_FAST_ENABLED;
     options.ble_adv_fast_interval = APP_ADV_INTERVAL;
+		
+#if !defined(_INTACT)
+		options.ble_adv_fast_timeout  = BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED;		
+#else		
     options.ble_adv_fast_timeout  = APP_ADV_TIMEOUT_IN_SECONDS;
-
+#endif
+		
     err_code = ble_advertising_init(&advdata, NULL, &options, on_adv_evt, NULL);
     APP_ERROR_CHECK(err_code);
 }
@@ -581,6 +666,103 @@ static void power_manage(void)
 }
 
 
+#if !defined(_INTACT)
+#include "app_uart.h"
+
+#define UART_TX_BUF_SIZE  (256) 
+#define UART_RX_BUF_SIZE  (256) 
+
+/**
+ * @brief UART events handler.
+ */
+void uart_events_handler(app_uart_evt_t * p_event)
+{
+	 switch (p_event->evt_type)
+	 {
+	 case APP_UART_DATA_READY:
+			break;
+
+	 case APP_UART_COMMUNICATION_ERROR: 
+		 APP_ERROR_HANDLER(p_event->data.error_communication);
+		 break;
+
+	 case APP_UART_FIFO_ERROR:          
+		 APP_ERROR_HANDLER(p_event->data.error_code);
+		 break;
+
+	 case APP_UART_TX_EMPTY:
+		 break;
+
+	 case APP_UART_DATA:
+		 break;
+
+	 default: 
+		break;
+	 }
+}
+
+/**
+ * @brief UART initialization.
+ */
+void uart_init(void)
+{
+		uint32_t                     err_code;
+		const app_uart_comm_params_t comm_params =
+	 {
+		RX_PIN_NUMBER,
+		TX_PIN_NUMBER,
+		RTS_PIN_NUMBER,
+		CTS_PIN_NUMBER,
+		APP_UART_FLOW_CONTROL_DISABLED,
+		false,
+		UART_BAUDRATE_BAUDRATE_Baud38400
+	 };
+
+	 APP_UART_FIFO_INIT(&comm_params,
+					UART_RX_BUF_SIZE,
+					UART_TX_BUF_SIZE,
+					uart_events_handler,
+					APP_IRQ_PRIORITY_LOW,
+					err_code);
+		
+	 APP_ERROR_CHECK(err_code);
+}
+#endif
+
+
+#if !defined(_INTACT)
+
+uint8_t g_esb_rx_payload[NRF_ESB_MAX_PAYLOAD_LENGTH];
+uint8_t g_esb_rx_len = 0;
+
+
+static void esb_timeslot_data_handler(nrf_esb_payload_t *p_esb_rx_payload)
+{
+		g_esb_rx_len = (uint8_t)p_esb_rx_payload->length;	
+		memcpy(&g_esb_rx_payload[0], p_esb_rx_payload->data, g_esb_rx_len);			
+}/*esb_timeslot_start*/
+
+
+static void esb_timeslot_start(void)
+{
+    uint32_t err_code;
+    
+    err_code = esb_timeslot_init(esb_timeslot_data_handler);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = esb_timeslot_sd_start();
+    APP_ERROR_CHECK(err_code);
+
+    g_is_esb_enabled = 1;
+}/*esb_timeslot_start*/
+
+#endif
+
+
+#if !defined(_INTACT)
+static uint32_t g_second_count = 0;
+#endif
+
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -589,10 +771,14 @@ int main(void)
     bool erase_bonds;
 
     // Initialize.
+#if !defined(_INTACT)	
+		uart_init();	
+#endif
     timers_init();
     buttons_leds_init(&erase_bonds);
     ble_stack_init();
     device_manager_init(erase_bonds);
+	
     gap_params_init();
     advertising_init();
     services_init();
@@ -603,11 +789,75 @@ int main(void)
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
 
+#if !defined(_INTACT)
+		esb_timeslot_start();		 
+	
+		printf("%s START..\r\n", DEVICE_NAME);
+#endif
+
     // Enter main loop.
+#if !defined(_INTACT)
+		while(1)
+		{
+				uint32_t  err_code;
+				uint8_t i;		
+				uint8_t len;
+				uint8_t buffer[NRF_ESB_MAX_PAYLOAD_LENGTH];
+			
+				if(0 != l_is_need_to_print_time)
+				{
+					g_second_count++;					
+					printf("%u\r\n", g_second_count);					
+					l_is_need_to_print_time = 0;							
+				}/*if */
+				
+				if(0 < g_esb_rx_len)
+				{					
+					printf("ESB RCV :: ");
+					for(i = 0; i < g_esb_rx_len; i++)
+						printf("%02x ", g_esb_rx_payload[i]);
+					printf("\r\n");	
+												
+					len = g_esb_rx_len;
+					memcpy(&buffer[0], &g_esb_rx_payload[0], len);
+					
+					ble_esb_to_from_ble_send_to_ble(&m_esb_to_from_ble, 
+						&buffer[0], len);
+					g_esb_rx_len = 0;
+				}/*if esb rcv*/
+				
+				if(0 < g_ble_received_data_len)
+				{										
+					uint8_t pipe;					
+					
+					printf("BLE RCV :: ");
+					for(i = 0; i < g_ble_received_data_len; i++)
+						printf("%02x ", g_ble_received_data[i]);
+					printf("\r\n");
+					
+					len = g_ble_received_data_len;
+					
+					if(NRF_ESB_MAX_PAYLOAD_LENGTH < len)
+						len = NRF_ESB_MAX_PAYLOAD_LENGTH;
+					memcpy(&buffer[0], &g_ble_received_data[0], len);
+															
+#define TX_PIPE							(3)						
+					pipe = TX_PIPE;
+					err_code = esb_timeslot_send_data(pipe, &buffer[0], len);
+					APP_ERROR_CHECK(err_code);
+					printf("ESB SEND packet\r\n");																
+					
+					g_ble_received_data_len = 0;
+				}/*if ble received data*/
+				
+				power_manage();
+		}
+#else	
     for (;;)
     {
         power_manage();
     }
+#endif		
 }
 
 /**
