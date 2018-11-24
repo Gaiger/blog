@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'ble_app_template_s130_pca10028' 
+ * Project: 'ble_app_ble_to_from_esb_s130_pca10028' 
  * Target:  'nrf51422_xxac_s130' 
  */
 
