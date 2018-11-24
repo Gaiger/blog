@@ -7,7 +7,9 @@
 #include "hal_nrf.h"
 #include "hal_nrf_hw.h"
 
-#include "trscvr_para.h"
+
+#define ESB_MAX_PAYLOAD_LEN											(32)
+#define ESB_MAX_ACK_PAYLOAD_LEN									(4) //DOC said it is 32, but my tring revealed it being 4 
 
 
 #define TX_PIPE													(HAL_NRF_PIPE3)
