@@ -79,7 +79,7 @@ uint8_t g_is_need_to_feed_the_watchdog = 0;
 #define PRINT_TIME_INTERVAL_IN_MS								(1000L)
 uint8_t g_is_need_to_print_time = 0;
 
-#define SEND_DATA_INTERVAL_IN_MS								(100L)
+#define SEND_DATA_INTERVAL_IN_MS								(500L)
 uint8_t g_is_need_to_send_data = 0;
 
 xdata uint32_t g_elaspsed_time_in_ms = 0L;
