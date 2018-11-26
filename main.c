@@ -65,7 +65,11 @@
 #define PERIPHERAL_LINK_COUNT            1                                          /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
 #if !defined(_INTACT)
-	#define DEVICE_NAME                      "ESB to/from BLE"
+	#if defined(NRF51)
+		#define DEVICE_NAME                      "NRF51 ESB to/from BLE"
+	#elif defined(NRF52)
+		#define DEVICE_NAME                      "NRF52 ESB to/from BLE"
+	#endif	
 #else
 	#define DEVICE_NAME                      "Nordic_Template"                          /**< Name of device. Will be included in the advertising data. */	
 #endif
