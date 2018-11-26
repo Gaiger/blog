@@ -87,7 +87,6 @@ static uint32_t to_esb_char_add(ble_esb_to_from_ble_t *p_esb_to_from_ble,
 	
 	memset(&char_md, 0, sizeof(char_md));
 
-	//char_md.char_props.read   	= 1;
 	char_md.char_props.write         = 1;
 	//char_md.char_props.write_wo_resp = 1;
 	char_md.p_char_user_desc         = NULL;

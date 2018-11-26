@@ -547,8 +547,11 @@ uint32_t esb_timeslot_init(ut_data_handler_t evt_handler)
 #endif
     return NRF_SUCCESS;
 }
-#if !defined(_INTACT)	
 
+
+
+
+#if !defined(_INTACT)	
 void fetch_esb_rx_data(void)
 {
 		nrf_esb_payload_t rx_payload;
