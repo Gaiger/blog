@@ -11,9 +11,13 @@ Download the code and place it under the SDK directory, nRF5_SDK_11.0.0_89a8197\
 The folder structure be : 
 
 config : boardchip function configuration, which is as the nRF5X default projects.
+
 esb : here contents the esb code, which is modified, not as the same as nRF5_SDK_11.0.0_89a8197\components\properitary_rf\esb
+
 esb_timeslot : the esb_timeslot code modifies the time-schedule mechanism to register a time-sliced for esb usage.
+
 nRF24LE1 : an ESB sender/receiver, which would periodically send ESB data (to nRF5x) via designated pipe, and it would receive ESB data also.
+
 project for pca10028 : for nRF51
 project for pca10040 : for nRF52
 
