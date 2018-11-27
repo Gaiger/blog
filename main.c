@@ -107,7 +107,7 @@ static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID
 
 #if !defined(_INTACT)
 
-static uint32_t  g_is_esb_enabled = 0;
+//static uint32_t  g_is_esb_enabled = 0;
 static ble_esb_to_from_ble_t  m_esb_to_from_ble;
 APP_TIMER_DEF(m_one_sec_timer_id);
 
@@ -757,7 +757,7 @@ static void esb_timeslot_start(void)
     err_code = esb_timeslot_sd_start();
     APP_ERROR_CHECK(err_code);
 
-    g_is_esb_enabled = 1;
+    //g_is_esb_enabled = 1;
 }/*esb_timeslot_start*/
 
 #endif
