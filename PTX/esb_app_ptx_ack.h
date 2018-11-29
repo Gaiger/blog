@@ -21,13 +21,14 @@
 
 void esb_ptx_init(void);
 
-/*for PTX*/
 void esb_send_data(hal_nrf_address_t tx_pipe_number, uint8_t *p_data, uint8_t len);
 
 uint8_t  is_esb_ack_reached(void);
+
 void esb_fetch_ack_data(uint8_t *p_data, uint8_t *p_len);
 
 uint8_t is_esb_max_retry_count_reached(void);
+
 void esb_max_retry_count_reached_has_been_handled(void);
 
 

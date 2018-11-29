@@ -21,10 +21,12 @@
 void esb_prx_init(void);
 
 uint8_t is_esb_received_data(void);
+
 void esb_fetch_received_data(hal_nrf_address_t *p_pipe, 
 	uint8_t *p_data, uint8_t *p_len);
 
 void esb_send_ack_data(uint8_t *p_data, uint8_t len);
+
 void esb_receiving_event_has_been_handled(void);
 
 
