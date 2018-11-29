@@ -87,18 +87,20 @@ uint8_t g_is_need_to_send_data = 0;
 
 xdata uint32_t g_elaspsed_time_in_ms = 0L;
 
-#define ONE_MILLI_SEC_IN_US											(1000)
+#define ONE_SEC_IN_MS														(1000)
+#define ONE_MS_IN_US														(1000)
 #define MINI_TIME_SCALE_IN_US										(100)
+
 
 void timer0_irq() interrupt INTERRUPT_T0
 {	
-	static uint8_t timer0_overflow_counter = 0;		
+	static uint8_t timer0_overflow_count = 0;		
 	
-	timer0_overflow_counter++;	
+	timer0_overflow_count++;	
 	
-	if((ONE_MILLI_SEC_IN_US/MINI_TIME_SCALE_IN_US) <= timer0_overflow_counter)
+	if((ONE_MS_IN_US/MINI_TIME_SCALE_IN_US) <= timer0_overflow_count)
 	{					
-		timer0_overflow_counter = 0;						
+		timer0_overflow_count = 0;						
 		g_elaspsed_time_in_ms++;		
 		
 		if(0 == g_elaspsed_time_in_ms % FEED_DOG_INTERVAL_IN_MS)
@@ -115,19 +117,20 @@ void timer0_irq() interrupt INTERRUPT_T0
 
 void timer0_init(void)
 {	  			
-  uint8_t timer0_overflow_counter = 0;
+  uint8_t timer0_coundown_value;
 	
-	timer0_overflow_counter = 
-		MCU_CRYSTAL_FREQUENCY_IN_HZ/CLOCK_NUMBER_PER_MACHINE_CYCLE/1000L*MINI_TIME_SCALE_IN_US/1000L;		
+	timer0_coundown_value = 		
+		MCU_CRYSTAL_FREQUENCY_IN_HZ/ONE_MS_IN_US/ONE_MS_IN_US
+		*MINI_TIME_SCALE_IN_US/CLOCK_NUMBER_PER_MACHINE_CYCLE;
 	
 	/*timer 0 be mode 2, 8 bit auto reload*/
 	TMOD |= (BIT_1 & ~BIT_0);
 	  
 	
-  TH0 = 0x100 - timer0_overflow_counter;	 
+	TH0 = 0x100 - timer0_coundown_value;	 
 	TL0 = TH1; 	
 
-  ET0  = 1;		 //timer0 interrupt enable
+	ET0  = 1;		 //timer0 interrupt enable
 	TR0  = 1;		
 
 }/*timer0_init*/

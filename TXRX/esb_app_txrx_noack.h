@@ -22,12 +22,12 @@ void esb_txrx_init(void);
 void esb_send_data(hal_nrf_address_t tx_pipe_number, uint8_t *p_data, uint8_t len);
 
 void esb_fetch_received_data(hal_nrf_address_t *p_pipe, uint8_t *p_data, uint8_t *p_len);
+
 uint8_t is_esb_received_data(void);
 
-
 uint8_t is_esb_max_retry_count_reached(void);
-void esb_max_retry_count_reached_has_been_handled(void);
 
+void esb_max_retry_count_reached_has_been_handled(void);
 
 void esb_receiving_event_has_been_done(void);
 
