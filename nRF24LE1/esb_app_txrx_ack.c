@@ -210,7 +210,6 @@ void esb_send_data(hal_nrf_address_t tx_pipe_number,
 }/*esb_send_data*/
 
 
-
 void esb_fetch_received_data(hal_nrf_address_t *p_pipe, 
 	uint8_t *p_data, uint8_t *p_len)
 {	
