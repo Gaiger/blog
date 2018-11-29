@@ -841,7 +841,7 @@ int main(void)
 						len = NRF_ESB_MAX_PAYLOAD_LENGTH;
 					memcpy(&buffer[0], &g_ble_received_data[0], len);
 															
-#define TX_PIPE							(3)						
+	#define TX_PIPE						(3)						
 					pipe = TX_PIPE;
 					err_code = esb_timeslot_send_data(pipe, &buffer[0], len);
 					APP_ERROR_CHECK(err_code);

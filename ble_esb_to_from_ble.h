@@ -37,7 +37,6 @@ struct ble_esb_to_from_ble_s
 
 uint32_t ble_esb_to_from_ble_init(ble_esb_to_from_ble_t *p_esb_to_from_ble, 
 	const ble_esb_to_from_ble_init_t *p_esb_to_from_ble_init);
-
 		 
 void ble_esb_to_from_ble_on_ble_evt(ble_esb_to_from_ble_t * p_esb_to_from_ble, 
 	ble_evt_t * p_ble_evt);
