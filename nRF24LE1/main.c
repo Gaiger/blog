@@ -196,7 +196,7 @@ void run_event_loop(void)
 		
 		memcpy(&buffer[len], &g_sending_packet_serial_number, 
 			sizeof(g_sending_packet_serial_number));
-		len += sizeof(pipe);
+		len += sizeof(g_sending_packet_serial_number);
 		buffer[0] = len;
 		
 		esb_send_data(pipe, &buffer[0], len);						
