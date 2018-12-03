@@ -141,6 +141,7 @@ LOCAL uint8_t l_ack_payload[ESB_MAX_ACK_PAYLOAD_LEN];
 LOCAL uint8_t l_is_ack_reached_flag = 0;
 
 
+
 void esb_irq(void)
 {
 	uint8_t irq_flags;
@@ -187,6 +188,14 @@ void esb_irq(void)
 	}/*HAL_NRF_RX_DR*/
 
 }/*rf_irq*/
+
+
+#if defined(NRF24LE1_H_) || defined(NRF24LU1P_H)
+static void rf_irq(void) interrupt INTERRUPT_RFIRQ
+{
+		esb_irq();
+}/*esb_irq*/
+#endif
 
 
 void esb_send_data(hal_nrf_address_t tx_pipe_number, 
