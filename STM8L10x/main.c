@@ -146,6 +146,7 @@ uint8_t g_is_need_to_send_data = 0;
  
 uint16_t g_elaspsed_time_in_ms = 0;
 uint16_t g_elaspsed_min = 0;
+uint16_t g_elaspsed_hour = 0;
 
 @far @interrupt void timer3_interrupt_handler(void)
 {
@@ -170,12 +171,34 @@ uint16_t g_elaspsed_min = 0;
 	if(0 == g_elaspsed_time_in_ms % SEND_DATA_INTERVAL_IN_MS)
 			g_is_need_to_send_data = 1;
 
+#if(0)
 	if((uint16_t)(60*ONE_SEC_IN_MS) <= g_elaspsed_time_in_ms)
 	{
 		g_elaspsed_time_in_ms %= (uint16_t)(60*ONE_SEC_IN_MS);
 		g_elaspsed_min++;
+
+		if(60 >= g_elaspsed_min)
+		{
+			g_elaspsed_min %= 60;
+			g_elaspsed_hour++;
+		}
 	}/*to minute*/
 	
+#else
+
+	if((uint16_t)(60*ONE_SEC_IN_MS) == g_elaspsed_time_in_ms)
+	{
+		g_elaspsed_time_in_ms = 0;
+		g_elaspsed_min++;
+
+		if(60 == g_elaspsed_min)
+		{
+			g_elaspsed_min = 0;
+			g_elaspsed_hour++;
+		}/*to hour*/
+	}/*to minute*/
+	
+#endif	
 	
 }/*timer3_interrupt_handler*/
 
@@ -365,8 +388,8 @@ void run_event_loop(void)
 			the out of range value will lead hanging.		
 		*/
 		
-		printf(" %u:%02u\r\n", g_elaspsed_min, 
-			g_elaspsed_time_in_ms/ONE_SEC_IN_MS);
+		printf(" %u:%02u:%02u\r\n", g_elaspsed_hour,
+		g_elaspsed_min, g_elaspsed_time_in_ms/ONE_SEC_IN_MS);
 	}/*print time*/
 		
 	
