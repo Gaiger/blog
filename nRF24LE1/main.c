@@ -12,7 +12,7 @@
 #include "hal_delay.h"
 #include "nordic_common.h"
 
-#include "esb_app_txrx_ack.h"
+#include "esb_app.h"
 
 
 //#define _ENABLE_LED_AND_BEEP
@@ -302,7 +302,7 @@ void main(void)
 	while(hal_clk_get_16m_source() != HAL_CLK_XOSC16M); /*wait clock to be stable*/			
 	
 	EXIT_CRITICAL_SECTION();		
-	esb_txrx_init();
+	esb_init();
 	initialized_notification();			
 	
 	

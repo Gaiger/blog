@@ -1,6 +1,6 @@
 
-#ifndef _ESB_APP_ACK_H_
-#define _ESB_APP_ACK_H_
+#ifndef _ESB_APP_H_
+#define _ESB_APP_H_
 
 #include <stdint.h>
 
@@ -16,7 +16,7 @@
 #define RX_PIPE													(HAL_NRF_PIPE3)
 
 
-void esb_txrx_init(void);
+void esb_init(void);
 
 /*for PTX*/
 void esb_send_data(hal_nrf_address_t tx_pipe_number, 
