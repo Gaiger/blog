@@ -1,6 +1,6 @@
 
 #include <string.h>
-#include "esb_app_txrx_ack.h"
+#include "esb_app.h"
 
 
 
@@ -51,7 +51,7 @@ static xdata uint8_t l_pipe_addr[6][5] =
 };										
 
 
-void esb_txrx_init(void)
+void esb_init(void)
 {	
 	CE_LOW();
 

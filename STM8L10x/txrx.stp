@@ -215,7 +215,7 @@ String.6.0=2018,11,30,15,55,22
 [Root.APP]
 ElemType=Folder
 PathName=APP
-Child=Root.APP.esb_app_txrx_ack.c
+Child=Root.APP.esb_app.c
 Next=Root.STM8L10x_StdPeriph_Driver
 Config.0=Root.APP.Config.0
 Config.1=Root.APP.Config.1
@@ -286,14 +286,14 @@ String.4.0=
 String.5.0=
 String.6.0=2018,11,30,15,55,22
 
-[Root.APP.esb_app_txrx_ack.c]
+[Root.APP.esb_app.c]
 ElemType=File
-PathName=esb_app_txrx_ack.c
-Next=Root.APP.esb_app_txrx_ack.h
+PathName=esb_app.c
+Next=Root.APP.esb_app.h
 
-[Root.APP.esb_app_txrx_ack.h]
+[Root.APP.esb_app.h]
 ElemType=File
-PathName=esb_app_txrx_ack.h
+PathName=esb_app.h
 Next=Root.APP.main.c
 
 [Root.APP.main.c]

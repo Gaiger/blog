@@ -6,7 +6,7 @@
 #include "STM8l10x_conf.h"
 #include <stdio.h>
 #include <string.h>
-#include "esb_app_txrx_ack.h"
+#include "esb_app.h"
 
 #define _ENABLE_LED
 
@@ -474,7 +474,7 @@ void main(void)
 	iwdg_init();
 	enableInterrupts();
 	
-	esb_txrx_init();
+	esb_init();
 	initialized_notification();
 	
 	
