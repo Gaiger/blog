@@ -8,15 +8,9 @@
  * WARRENTY of ANY KIND is provided. This heading must NOT be removed from
  * the file.
  *              
- * $LastChangedRevision: 133 $
  */
 
-/** @file
- * @brief Implementation of #hal_nrf_rw for nRF24LU1+
- *
- * #hal_nrf_rw is an SPI function which is hardware dependent. This file
- * contains an implementation for nRF24LU1.
- */
+
 
 #include <stdint.h>
 #include "hal_nrf.h"
