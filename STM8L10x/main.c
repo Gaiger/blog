@@ -92,7 +92,7 @@ char putchar(char c)
 		return;
 		
 	USART_ClearITPendingBit();
-	GPIO_ToggleBits( GPIOA, GPIO_Pin_3);
+	
 }/*usart_received_interrupt*/
 
 
