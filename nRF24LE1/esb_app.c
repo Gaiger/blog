@@ -131,7 +131,7 @@ LOCAL uint8_t l_is_max_retry_count_reached = 0;
 
 xdata uint8_t l_received_pipe = 0xff;
 
-LOCAL uint8_t l_ack_payload[ESB_MAX_ACK_PAYLOAD_LEN];
+
 LOCAL uint8_t l_is_ack_reached_flag = 0;
 
 
