@@ -74,7 +74,7 @@ void esb_init(void)
 	{
 		uint8_t i;
 		for(i = HAL_NRF_PIPE0; i <= HAL_NRF_PIPE5; i++)
-			hal_nrf_set_address(i, l_pipe_addr[i]);
+			hal_nrf_set_address((hal_nrf_address_t)i, l_pipe_addr[i]);
 	}/*set all addresss*/
 
 	
@@ -137,7 +137,7 @@ LOCAL uint8_t l_is_max_retry_count_reached = 0;
 
 xdata uint8_t l_received_pipe = 0xff;
 
-LOCAL uint8_t l_ack_payload[ESB_MAX_ACK_PAYLOAD_LEN];
+
 LOCAL uint8_t l_is_ack_reached_flag = 0;
 
 
@@ -229,7 +229,7 @@ void esb_send_data(hal_nrf_address_t tx_pipe_number,
 void esb_fetch_received_data(hal_nrf_address_t *p_pipe, 
 	uint8_t *p_data, uint8_t *p_len)
 {	
-	*p_pipe = l_received_pipe;
+	*p_pipe = (hal_nrf_address_t)l_received_pipe;
 	*p_len = l_rx_payload_len;
 	memcpy(p_data, &l_rx_payload[0], l_rx_payload_len);
 }/*rf_fetch_received_data*/
