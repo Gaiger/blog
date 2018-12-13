@@ -60,9 +60,6 @@
 
 /* Exported macro ------------------------------------------------------------*/
 
-#define data					
-#define pdata
-#define xdata
 
 
 #ifdef  USE_FULL_ASSERT

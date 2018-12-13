@@ -13,6 +13,9 @@
 #define HAL_NRF_STM8L101XX_H__
 #include "STM8l10x_conf.h"
 
+#define data					
+#define pdata
+#define xdata
 
 /** Macro that set radio's CSN line LOW.
  *
