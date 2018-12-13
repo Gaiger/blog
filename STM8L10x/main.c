@@ -144,57 +144,57 @@ uint8_t g_is_need_to_send_data = 0;
  PRINT_TIME_INTERVAL_IN_MS)  costs too much time bringing 
  system hanging*/
  
-uint16_t g_elaspsed_time_in_ms = 0;
-uint16_t g_elaspsed_min = 0;
-uint16_t g_elaspsed_hour = 0;
+uint16_t g_elapsed_time_in_ms = 0;
+uint16_t g_elapsed_min = 0;
+uint16_t g_elapsed_hour = 0;
 
 @far @interrupt void timer3_interrupt_handler(void)
 {
 	TIM3_ClearFlag(TIM3_IT_Update);
 	
-	g_elaspsed_time_in_ms++;	
+	g_elapsed_time_in_ms++;	
 
 #if(0)
-	if(0 == FAST_MOD_FOR_POWER_2(g_elaspsed_time_in_ms,
+	if(0 == FAST_MOD_FOR_POWER_2(g_elapsed_time_in_ms,
 			FEED_IWDG_INTERVAL_IN_MS) )
 	{
 			g_is_need_to_feed_iwdg = 1;	
 	}/*if feed iwdg */
 #else
-	if(0 == g_elaspsed_time_in_ms%FEED_IWDG_INTERVAL_IN_MS)
+	if(0 == g_elapsed_time_in_ms%FEED_IWDG_INTERVAL_IN_MS)
 		g_is_need_to_feed_iwdg = 1;
 #endif
 
-	if(0 == g_elaspsed_time_in_ms % PRINT_TIME_INTERVAL_IN_MS)
+	if(0 == g_elapsed_time_in_ms % PRINT_TIME_INTERVAL_IN_MS)
 			g_is_need_to_print_time = 1;	
 
-	if(0 == g_elaspsed_time_in_ms % SEND_DATA_INTERVAL_IN_MS)
+	if(0 == g_elapsed_time_in_ms % SEND_DATA_INTERVAL_IN_MS)
 			g_is_need_to_send_data = 1;
 
 #if(0)
-	if((uint16_t)(60*ONE_SEC_IN_MS) <= g_elaspsed_time_in_ms)
+	if((uint16_t)(60*ONE_SEC_IN_MS) <= g_elapsed_time_in_ms)
 	{
-		g_elaspsed_time_in_ms %= (uint16_t)(60*ONE_SEC_IN_MS);
-		g_elaspsed_min++;
+		g_elapsed_time_in_ms %= (uint16_t)(60*ONE_SEC_IN_MS);
+		g_elapsed_min++;
 
-		if(60 >= g_elaspsed_min)
+		if(60 >= g_elapsed_min)
 		{
-			g_elaspsed_min %= 60;
-			g_elaspsed_hour++;
+			g_elapsed_min %= 60;
+			g_elapsed_hour++;
 		}
 	}/*to minute*/
 	
 #else
 
-	if((uint16_t)(60*ONE_SEC_IN_MS) == g_elaspsed_time_in_ms)
+	if((uint16_t)(60*ONE_SEC_IN_MS) == g_elapsed_time_in_ms)
 	{
-		g_elaspsed_time_in_ms = 0;
-		g_elaspsed_min++;
+		g_elapsed_time_in_ms = 0;
+		g_elapsed_min++;
 
-		if(60 == g_elaspsed_min)
+		if(60 == g_elapsed_min)
 		{
-			g_elaspsed_min = 0;
-			g_elaspsed_hour++;
+			g_elapsed_min = 0;
+			g_elapsed_hour++;
 		}/*to hour*/
 	}/*to minute*/
 	
@@ -388,8 +388,8 @@ void run_event_loop(void)
 			the out of range value will lead hanging.		
 		*/
 		
-		printf(" %u:%02u:%02u\r\n", g_elaspsed_hour,
-		g_elaspsed_min, g_elaspsed_time_in_ms/ONE_SEC_IN_MS);
+		printf(" %u:%02u:%02u\r\n", g_elapsed_hour,
+		g_elapsed_min, g_elapsed_time_in_ms/ONE_SEC_IN_MS);
 	}/*print time*/
 		
 	
