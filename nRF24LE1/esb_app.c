@@ -181,8 +181,7 @@ static void esb_irq(void) interrupt INTERRUPT_RFIRQ
 
 void esb_send_data(hal_nrf_address_t tx_pipe_number, 
 	uint8_t *p_data, uint8_t len)
-{	
-	uint32_t snd_k;
+{		
 				
 	CE_LOW();
 
@@ -198,15 +197,16 @@ void esb_send_data(hal_nrf_address_t tx_pipe_number,
 	hal_nrf_write_tx_payload(p_data, len); 
 	
 	CE_PULSE();	         //emit 	
-  l_is_radio_busy = 1;
 	
-	snd_k = 0;
+	CE_HIGH();
+	
+  l_is_radio_busy = 1;
 	while(0 != l_is_radio_busy);//wait done
 		
 	hal_nrf_flush_tx();
 	
 	hal_nrf_set_operation_mode(HAL_NRF_PRX);   //switch to rx	
-	CE_HIGH();	
+		
 }/*esb_send_data*/
 
 
