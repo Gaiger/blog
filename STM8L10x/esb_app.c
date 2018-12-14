@@ -216,13 +216,14 @@ void esb_send_data(hal_nrf_address_t tx_pipe_number,
 	
 	CE_PULSE();	         //emit
 	
+	CE_HIGH();
+	
 	l_is_radio_busy = 1;
 	while(0 != l_is_radio_busy);
 
 	hal_nrf_flush_tx();
 	hal_nrf_set_operation_mode(HAL_NRF_PRX);   //switch to rx	
-	
-	CE_HIGH();
+		
 }/*esb_send_data*/
 
 
