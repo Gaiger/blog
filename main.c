@@ -286,21 +286,24 @@ void spi1_init(void)
 	
 	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOA|RCC_APB2Periph_SPI1, ENABLE);	
 
-#if(0)	
-	goio_init.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 ;
-	goio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-	goio_init.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &goio_init);
-	
-	GPIO_SetBits(GPIOA , GPIO_Pin_2|GPIO_Pin_3);
-#endif	
 
-	goio_init.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	/*
+		 SLK and MOSI
+	*/
+	goio_init.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7;
 	goio_init.GPIO_Mode = GPIO_Mode_AF_PP;
 	goio_init.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &goio_init);
 	
-	GPIO_SetBits(GPIOA , GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7);
+	GPIO_SetBits(GPIOA , GPIO_Pin_5 | GPIO_Pin_7);
+
+	
+	/* MISO */
+	goio_init.GPIO_Pin = GPIO_Pin_6;
+	goio_init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	//goio_init.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &goio_init);
+	
 
 
 	SPI_Cmd(SPI1, DISABLE); 
