@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 	}/*for i*/
 
 
-#if(0)
+#if(1)
 TIMER_LOOP_BEGIN(CPU_SERIAL, ROUND);
 	ConvolutionSerialCPU(width, height, p_input_data,
 		kernel_length, p_kernel_matrix, p_output);
@@ -157,7 +157,7 @@ TIMER_LOOP_END(CPU_SERIAL_EXTERNSION);
 	memcpy(p_output_serial, p_output, 
 		width*height * sizeof(float));
 
-#if(0)
+#if(1)
 TIMER_LOOP_BEGIN(CPU_SSE_EXTERNSION, ROUND);
 	ConvolutionSSEExtensionCPU(width, height, p_extended_data,
 		kernel_length, p_kernel_matrix, p_output);
@@ -187,6 +187,14 @@ TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_EXTERNSION, ROUND);
 TIMER_LOOP_END(CPU_SSE4_MOVPTR_EXTERNSION);
 #endif
 
+#if(1)
+#if(21 == KERNEL_LENGTH)
+TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION, ROUND);
+	ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(width, height, 
+		p_extended_data, kernel_length, p_kernel_matrix, p_output);
+TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION);
+#endif
+#endif
 
 #if(1)
 TIMER_LOOP_BEGIN(CPU_AVX_MOVPTR_EXTERNSION, ROUND);
