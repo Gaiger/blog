@@ -173,10 +173,17 @@ int main(int argc, char *argv[])
 
 
 #if(1)
-	TIMER_LOOP_BEGIN(CPU_SSE3_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionSSE3MovePtrExtensionCPU(width, height, p_extended_data,
+	TIMER_LOOP_BEGIN(CPU_SSE3_HADD_MOVPTR_EXTERNSION, ROUND);
+	ConvolutionSSE3HAddMovePtrExtensionCPU(width, height, p_extended_data,
 		kernel_length, p_kernel_matrix, p_output);
-	TIMER_LOOP_END(CPU_SSE3_MOVPTR_EXTERNSION);
+	TIMER_LOOP_END(CPU_SSE3_HADD_MOVPTR_EXTERNSION);
+#endif
+
+#if(1)
+	TIMER_LOOP_BEGIN(CPU_SSE3_SHUFFLE_MOVPTR_EXTERNSION, ROUND);
+	ConvolutionSSE3ShuMovePtrExtensionCPU(width, height, p_extended_data,
+		kernel_length, p_kernel_matrix, p_output);
+	TIMER_LOOP_END(CPU_SSE3_SHUFFLE_MOVPTR_EXTERNSION);
 #endif
 
 
@@ -186,6 +193,30 @@ int main(int argc, char *argv[])
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE4_MOVPTR_EXTERNSION);
 #endif
+
+
+#if(1)
+	TIMER_LOOP_BEGIN(CPU_AVX_DOT_MOVPTR_EXTERNSION, ROUND);
+	ConvolutionAVXDotMovePtrExtensionCPU(width, height, p_extended_data,
+		kernel_length, p_kernel_matrix, p_output);
+	TIMER_LOOP_END(CPU_AVX_DOT_MOVPTR_EXTERNSION);
+#endif
+
+
+#if(1)
+	TIMER_LOOP_BEGIN(CPU_AVX_SHUFFLE_MOVPTR_EXTERNSION, ROUND);
+	ConvolutionAVXShuMovePtrExtensionCPU(width, height, p_extended_data,
+		kernel_length, p_kernel_matrix, p_output);
+	TIMER_LOOP_END(CPU_AVX_SHUFFLE_MOVPTR_EXTERNSION);
+#endif
+
+#if(1)
+	TIMER_LOOP_BEGIN(CPU_AVX_HADD_MOVPTR_EXTERNSION, ROUND);
+	ConvolutionAVXHAddMovePtrExtensionCPU(width, height, p_extended_data,
+		kernel_length, p_kernel_matrix, p_output);
+	TIMER_LOOP_END(CPU_AVX_HADD_MOVPTR_EXTERNSION);
+#endif
+
 
 #if(1)
 #if(21 == KERNEL_LENGTH)
@@ -229,12 +260,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#if(1)
-TIMER_LOOP_BEGIN(CPU_AVX_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionAVXMovePtrExtensionCPU(width, height, p_extended_data,
-		kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_AVX_MOVPTR_EXTERNSION);
-#endif
+
 
 #if(1)
 	int count = 0;
