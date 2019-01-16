@@ -173,86 +173,28 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(int width, int height,
 				p_mov_kernel = p_kernel + kernel_length*jj;
 				p_mov_input = p_extended_input + y*extended_width + i;
 				
-				{
-					float temp_sum;
+#define ONE_SSE4_ROUND()					\
+				{						\
+					float temp_sum;			\
+											\
+					m_kernel = _mm_loadu_ps(p_mov_kernel); \
+					m_src = _mm_loadu_ps(p_mov_input); \
+					\
+					\
+					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1); \
+					temp_sum = _mm_cvtss_f32(m_temp0); \
+					\
+					sum += temp_sum; \
+										\
+					p_mov_kernel += sizeof(__m128) / sizeof(float); \
+					p_mov_input += sizeof(__m128) / sizeof(float); \
+				}	
 
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-					
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
+				ONE_SSE4_ROUND();
+				ONE_SSE4_ROUND();
+				ONE_SSE4_ROUND();
+				ONE_SSE4_ROUND();
+				ONE_SSE4_ROUND();
 				{
 					sum += p_mov_kernel[0] * p_mov_input[0];
 				}/*for ii*/
@@ -336,85 +278,28 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(
 				p_mov_kernel = p_kernel + kernel_length_alignment16*jj;
 				p_mov_input = p_extended_input + y*extended_width + i;
 
-				{
-					float temp_sum;
-
-					m_kernel = _mm_load_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
+#define ONE_SSE4_KERNEL_ALIGN16_ROUND()			\
+				{							\
+					float temp_sum;			\
+											\
+					m_kernel = _mm_load_ps(p_mov_kernel); \
+					m_src = _mm_loadu_ps(p_mov_input); \
+					\
+					\
+					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1); \
+					temp_sum = _mm_cvtss_f32(m_temp0); \
+					\
+					sum += temp_sum; \
+					\
+					p_mov_kernel += sizeof(__m128) / sizeof(float); \
+					p_mov_input += sizeof(__m128) / sizeof(float); \
 				}
 
-				{
-					float temp_sum;
-
-					m_kernel = _mm_load_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_load_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_load_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
-
-				{
-					float temp_sum;
-
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
-
-
-					m_temp0 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp0);
-
-					sum += temp_sum;
-
-					p_mov_kernel += sizeof(__m128) / sizeof(float);
-					p_mov_input += sizeof(__m128) / sizeof(float);
-				}
+				ONE_SSE4_KERNEL_ALIGN16_ROUND();
+				ONE_SSE4_KERNEL_ALIGN16_ROUND();
+				ONE_SSE4_KERNEL_ALIGN16_ROUND();
+				ONE_SSE4_KERNEL_ALIGN16_ROUND();
+				ONE_SSE4_KERNEL_ALIGN16_ROUND();
 
 				{
 					sum += p_mov_kernel[0] * p_mov_input[0];
