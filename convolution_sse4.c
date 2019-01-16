@@ -47,7 +47,6 @@ int ConvolutionSSE4MovePtrExtensionCPU(int width, int height,
 
 
 	for (j = 0; j < height; j++) {
-		
 
 		for (i = 0; i < width; i++) {
 
@@ -151,7 +150,6 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(int width, int height,
 
 	for (j = 0; j < height; j++) {
 
-
 		for (i = 0; i < width; i++) {
 
 			int y;
@@ -252,10 +250,9 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(
 	}/*if */
 
 	kernel_length_alignment16 
-		= (1 + kernel_length * sizeof(float) / 16)*step_size;
+		= (1 + kernel_length * sizeof(float) / 16)*(16/sizeof(float));
 
 	for (j = 0; j < height; j++) {
-
 
 		for (i = 0; i < width; i++) {
 
