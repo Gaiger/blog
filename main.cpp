@@ -82,11 +82,11 @@ int main(int argc, char *argv[])
 	extended_width = width + 2 * kernel_radius;
 	extended_height = height + 2 * kernel_radius;
 
-	
+
 	p_kernel_matrix = (float*)malloc(
 		kernel_length*kernel_length * sizeof(float));
-	memset(p_kernel_matrix, 0, 
-		kernel_length*kernel_length *sizeof(float));
+	memset(p_kernel_matrix, 0,
+		kernel_length*kernel_length * sizeof(float));
 
 
 	p_input_data = (float*)malloc(
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 
 	p_extended_data = (float*)malloc(
 		extended_width*extended_height * sizeof(float));
-	
+
 	p_output = (float*)malloc(
 		width*height * sizeof(float));
 
@@ -143,57 +143,90 @@ int main(int argc, char *argv[])
 
 
 #if(1)
-TIMER_LOOP_BEGIN(CPU_SERIAL, ROUND);
+	TIMER_LOOP_BEGIN(CPU_SERIAL, ROUND);
 	ConvolutionSerialCPU(width, height, p_input_data,
 		kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SERIAL);
+	TIMER_LOOP_END(CPU_SERIAL);
 #endif
 
-TIMER_LOOP_BEGIN(CPU_SERIAL_EXTERNSION, ROUND);
+	TIMER_LOOP_BEGIN(CPU_SERIAL_EXTERNSION, ROUND);
 	ConvolutionSerialExtensionCPU(width, height, p_extended_data,
 		kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SERIAL_EXTERNSION);
+	TIMER_LOOP_END(CPU_SERIAL_EXTERNSION);
 
-	memcpy(p_output_serial, p_output, 
+	memcpy(p_output_serial, p_output,
 		width*height * sizeof(float));
 
 #if(1)
-TIMER_LOOP_BEGIN(CPU_SSE_EXTERNSION, ROUND);
+	TIMER_LOOP_BEGIN(CPU_SSE_EXTERNSION, ROUND);
 	ConvolutionSSEExtensionCPU(width, height, p_extended_data,
 		kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SSE_EXTERNSION);
+	TIMER_LOOP_END(CPU_SSE_EXTERNSION);
 #endif
 
 #if(1)
-TIMER_LOOP_BEGIN(CPU_SSE_MOVPTR_EXTERNSION, ROUND);
+	TIMER_LOOP_BEGIN(CPU_SSE_MOVPTR_EXTERNSION, ROUND);
 	ConvolutionSSEMovePtrExtensionCPU(width, height, p_extended_data,
 		kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SSE_MOVPTR_EXTERNSION);
+	TIMER_LOOP_END(CPU_SSE_MOVPTR_EXTERNSION);
 #endif
 
 
 #if(1)
-TIMER_LOOP_BEGIN(CPU_SSE3_MOVPTR_EXTERNSION, ROUND);
+	TIMER_LOOP_BEGIN(CPU_SSE3_MOVPTR_EXTERNSION, ROUND);
 	ConvolutionSSE3MovePtrExtensionCPU(width, height, p_extended_data,
-	kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SSE3_MOVPTR_EXTERNSION);
+		kernel_length, p_kernel_matrix, p_output);
+	TIMER_LOOP_END(CPU_SSE3_MOVPTR_EXTERNSION);
 #endif
 
 
 #if(1)
-TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_EXTERNSION, ROUND);
+	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_EXTERNSION, ROUND);
 	ConvolutionSSE4MovePtrExtensionCPU(width, height, p_extended_data,
 		kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SSE4_MOVPTR_EXTERNSION);
+	TIMER_LOOP_END(CPU_SSE4_MOVPTR_EXTERNSION);
 #endif
 
 #if(1)
 #if(21 == KERNEL_LENGTH)
-TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION, ROUND);
-	ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(width, height, 
+	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION, ROUND);
+	ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(width, height,
 		p_extended_data, kernel_length, p_kernel_matrix, p_output);
-TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION);
+	TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION);
 #endif
+#endif
+
+#if(1)
+{
+	int kernel_length_alignment16;
+	float *p_aligned_kernel_matrix;
+
+	kernel_length_alignment16
+		= (1 + kernel_length * sizeof(float) / 16)*(16/sizeof(float));
+
+	p_aligned_kernel_matrix = 
+		(float*)_aligned_malloc(kernel_length_alignment16*kernel_length*sizeof(float), 16);
+
+	memset(p_aligned_kernel_matrix, 0, 
+		kernel_length_alignment16*kernel_length * sizeof(float));
+
+	for (j = 0; j < kernel_length; j++) {
+
+		float *p_mov;
+		p_mov = p_aligned_kernel_matrix + kernel_length_alignment16*j;
+
+		for (i = 0; i < kernel_length; i++) 
+			p_mov[i] = p_kernel_matrix[j*kernel_length + i];
+	}/*for j*/
+
+#if(21 == KERNEL_LENGTH)
+	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_KERNEL_ALIGNMENT_EXTERNSION, ROUND);
+	ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(width, height,
+		p_extended_data, kernel_length, p_aligned_kernel_matrix, p_output);
+	TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_KERNEL_ALIGNMENT_EXTERNSION);
+#endif
+	_aligned_free(p_aligned_kernel_matrix);
+}
 #endif
 
 #if(1)
