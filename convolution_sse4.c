@@ -157,7 +157,7 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(int width, int height,
 			int y;
 			float sum;
 
-			int ii, jj;
+			int jj;
 
 			sum = 0;
 			y = j;
@@ -262,7 +262,7 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(
 			int y;
 			float sum;
 
-			int ii, jj;
+			int jj;
 
 			sum = 0;
 			y = j;

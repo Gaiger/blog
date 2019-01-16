@@ -3,7 +3,9 @@
 #include "convolution_sse4.h"
 #include "convolution_serial.h"
 
+#pragma warning(disable:4752)
 #include <immintrin.h>
+
 
 
 int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
@@ -41,6 +43,12 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 
 	step_size_avx = sizeof(__m256) / sizeof(float);
 	
+	if (kernel_length < step_size_avx)
+	{
+		return ConvolutionSSE4MovePtrExtensionCPU(
+			width, height, p_extended_input, kernel_length, p_kernel, p_output);
+	}/*if */
+
 	steps_avx = kernel_length / step_size_avx;
 	remainder_avx = kernel_length % step_size_avx;
 	
@@ -50,20 +58,12 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 
 	extended_width = width + kernel_length - 1;
 
-	
-	if (kernel_length < step_size_avx)
-	{
-		return ConvolutionSSE4MovePtrExtensionCPU(
-			width, height, p_extended_input, kernel_length, p_kernel, p_output);
-	}/*if */
-
 
 	for (j = 0; j < height; j++) {
 
 		for (i = 0; i < width; i++) {
 
 			int y;
-			float *p_mov_kernel;
 			float sum;
 
 			int ii, jj;
@@ -82,7 +82,6 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 				for (ii = 0; ii < steps_avx; ii++) {
 
 					__m256 m256_kernel, m256_src;
-					__m256 m256_temp0;
 
 					float temp_sum;
 
@@ -91,19 +90,19 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 					m256_src = _mm256_loadu_ps(p_mov_input);
 
 					{
-						__m256 m256_temp1, m256_temp2, m256_temp3;
+						__m256 m256_temp0;
 						/*_mm_dp_ps mask :
 						upper four bits : whether the corespondent src float be added or not
 						lower four bits :  whether the corespondent dest position be stored or not
 						*/
-						m256_temp1 = _mm256_dp_ps(m256_kernel, m256_src, 0xf1);
+						m256_temp0 = _mm256_dp_ps(m256_kernel, m256_src, 0xf1);
 
 						{
 							__m128 m128_low, m128_high;
 							__m128 m128_sum;
 
-							m128_low = _mm256_castps256_ps128(m256_temp1);
-							m128_high = _mm256_extractf128_ps(m256_temp1, 1);
+							m128_low = _mm256_castps256_ps128(m256_temp0);
+							m128_high = _mm256_extractf128_ps(m256_temp0, 1);
 							m128_sum = _mm_add_ps(m128_low, m128_high);
 							temp_sum = _mm_cvtss_f32(m128_sum);
 						}
@@ -117,15 +116,15 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 
 				for (ii = 0; ii < steps_sse; ii++)
 				{
-					__m128 m_kernel, m_src;
-					__m128 m_temp0, m_temp1;
+					__m128 m128_kernel, m128_src;
+					__m128 m128_temp0;
 					float temp_sum;
 
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
+					m128_kernel = _mm_loadu_ps(p_mov_kernel);
+					m128_src = _mm_loadu_ps(p_mov_input);
 
-					m_temp1 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp1);
+					m128_temp0 = _mm_dp_ps(m128_kernel, m128_src, 0xf1);
+					temp_sum = _mm_cvtss_f32(m128_temp0);
 
 					sum += temp_sum;
 					p_mov_kernel += steps_size_sse;
@@ -191,6 +190,12 @@ int ConvolutionAVXShuMovePtrExtensionCPU(int width, int height,
 	}
 
 	step_size_avx = sizeof(__m256) / sizeof(float);
+	
+	if (kernel_length < step_size_avx)
+	{
+		return ConvolutionSSE4MovePtrExtensionCPU(
+			width, height, p_extended_input, kernel_length, p_kernel, p_output);
+	}/*if */
 
 	steps_avx = kernel_length / step_size_avx;
 	remainder_avx = kernel_length % step_size_avx;
@@ -202,19 +207,12 @@ int ConvolutionAVXShuMovePtrExtensionCPU(int width, int height,
 	extended_width = width + kernel_length - 1;
 
 
-	if (kernel_length < step_size_avx)
-	{
-		return ConvolutionSSE4MovePtrExtensionCPU(
-			width, height, p_extended_input, kernel_length, p_kernel, p_output);
-	}/*if */
-
 
 	for (j = 0; j < height; j++) {
 
 		for (i = 0; i < width; i++) {
 
 			int y;
-			float *p_mov_kernel;
 			float sum;
 
 			int ii, jj;
@@ -275,15 +273,15 @@ int ConvolutionAVXShuMovePtrExtensionCPU(int width, int height,
 
 				for (ii = 0; ii < steps_sse; ii++)
 				{
-					__m128 m_kernel, m_src;
-					__m128 m_temp0, m_temp1;
+					__m128 m128_kernel, m128_src;
+					__m128 m128_temp0;
 					float temp_sum;
 
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
+					m128_kernel = _mm_loadu_ps(p_mov_kernel);
+					m128_src = _mm_loadu_ps(p_mov_input);
 
-					m_temp1 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp1);
+					m128_temp0 = _mm_dp_ps(m128_kernel, m128_src, 0xf1);
+					temp_sum = _mm_cvtss_f32(m128_temp0);
 
 					sum += temp_sum;
 					p_mov_kernel += steps_size_sse;
@@ -350,6 +348,12 @@ int ConvolutionAVXHAddMovePtrExtensionCPU(int width, int height,
 
 	step_size_avx = sizeof(__m256) / sizeof(float);
 
+	if (kernel_length < step_size_avx)
+	{
+		return ConvolutionSSE4MovePtrExtensionCPU(
+			width, height, p_extended_input, kernel_length, p_kernel, p_output);
+	}/*if */
+
 	steps_avx = kernel_length / step_size_avx;
 	remainder_avx = kernel_length % step_size_avx;
 
@@ -360,19 +364,11 @@ int ConvolutionAVXHAddMovePtrExtensionCPU(int width, int height,
 	extended_width = width + kernel_length - 1;
 
 
-	if (kernel_length < step_size_avx)
-	{
-		return ConvolutionSSE4MovePtrExtensionCPU(
-			width, height, p_extended_input, kernel_length, p_kernel, p_output);
-	}/*if */
-
-
 	for (j = 0; j < height; j++) {
 
 		for (i = 0; i < width; i++) {
 
 			int y;
-			float *p_mov_kernel;
 			float sum;
 
 			int ii, jj;
@@ -426,15 +422,15 @@ int ConvolutionAVXHAddMovePtrExtensionCPU(int width, int height,
 
 				for (ii = 0; ii < steps_sse; ii++)
 				{
-					__m128 m_kernel, m_src;
-					__m128 m_temp0, m_temp1;
+					__m128 m128_kernel, m128_src;
+					__m128 m128_temp0;
 					float temp_sum;
 
-					m_kernel = _mm_loadu_ps(p_mov_kernel);
-					m_src = _mm_loadu_ps(p_mov_input);
+					m128_kernel = _mm_loadu_ps(p_mov_kernel);
+					m128_src = _mm_loadu_ps(p_mov_input);
 
-					m_temp1 = _mm_dp_ps(m_kernel, m_src, 0xf1);
-					temp_sum = _mm_cvtss_f32(m_temp1);
+					m128_temp0 = _mm_dp_ps(m128_kernel, m128_src, 0xf1);
+					temp_sum = _mm_cvtss_f32(m128_temp0);
 
 					sum += temp_sum;
 					p_mov_kernel += steps_size_sse;
@@ -463,5 +459,3 @@ int ConvolutionAVXHAddMovePtrExtensionCPU(int width, int height,
 	return 0;
 
 }/*ConvolutionAVXHAddMovePtrExtensionCPU*/
-
-

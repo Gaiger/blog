@@ -66,7 +66,7 @@ int ConvolutionSSE3HAddMovePtrExtensionCPU(int width, int height,
 				p_mov_input = p_extended_input + y*extended_width + i;
 				for (ii = 0; ii < steps; ii++) {
 
-					__m128 m_kernel, m_src, m_dst;
+					__m128 m_kernel, m_src;
 					__m128 m_temp0, m_temp1, m_temp2;
 					float temp_sum;
 					
