@@ -249,12 +249,20 @@ int main(int argc, char *argv[])
 		for (i = 0; i < kernel_length; i++) 
 			p_mov[i] = p_kernel_matrix[j*kernel_length + i];
 	}/*for j*/
-
+#if(1)
 #if(21 == KERNEL_LENGTH)
 	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_KERNEL_ALIGNMENT_EXTERNSION, ROUND);
 	ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(width, height,
 		p_extended_data, kernel_length, p_aligned_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_KERNEL_ALIGNMENT_EXTERNSION);
+#endif
+#endif
+
+#if(1)
+TIMER_LOOP_BEGIN(CPU_AVX_MOVPTR_SHUFFLE_UNROLL_KERNEL_ALIGNMENT_EXTERNSION, ROUND);
+	ConvolutionAVXHAddMovePtrUnrollKernelLengh21AlignmentExtensionCPU(width,
+		height, p_extended_data, kernel_length, p_aligned_kernel_matrix, p_output);
+TIMER_LOOP_END(CPU_AVX_MOVPTR_SHUFFLE_UNROLL_KERNEL_ALIGNMENT_EXTERNSION);
 #endif
 	_aligned_free(p_aligned_kernel_matrix);
 }
