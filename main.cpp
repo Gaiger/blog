@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
 	int kernel_length, kernel_radius;
 
-	float *p_input_data, *p_extended_data;
+	float *p_input_data, *p_extended_input_data;
 	float *p_output_serial;
 	float *p_output;
 	float *p_kernel_matrix;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 	p_kernel_matrix[kernel_length*kernel_radius + kernel_radius] = 1.0;
 #endif
 
-	p_extended_data = (float*)malloc(
+	p_extended_input_data = (float*)malloc(
 		extended_width*extended_height * sizeof(float));
 
 	p_output = (float*)malloc(
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 				|| j < kernel_radius || j >= (kernel_radius + height)
 				)
 			{
-				p_extended_data[i + extended_width*j] = 0;
+				p_extended_input_data[i + extended_width*j] = 0;
 			}
 			else
 			{
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 				jj = j - kernel_radius;
 				ii = i - kernel_radius;
 
-				p_extended_data[i + extended_width*j]
+				p_extended_input_data[i + extended_width*j]
 					= p_input_data[jj*width + ii];
 			}/*if */
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 #endif
 
 	TIMER_LOOP_BEGIN(CPU_SERIAL_EXTERNSION, ROUND);
-	ConvolutionSerialExtensionCPU(width, height, p_extended_data,
+	ConvolutionSerialExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SERIAL_EXTERNSION);
 
@@ -159,14 +159,14 @@ int main(int argc, char *argv[])
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_SSE_EXTERNSION, ROUND);
-	ConvolutionSSEExtensionCPU(width, height, p_extended_data,
+	ConvolutionSSEExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE_EXTERNSION);
 #endif
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_SSE_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionSSEMovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionSSEMovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE_MOVPTR_EXTERNSION);
 #endif
@@ -174,14 +174,14 @@ int main(int argc, char *argv[])
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_SSE3_HADD_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionSSE3HAddMovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionSSE3HAddMovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE3_HADD_MOVPTR_EXTERNSION);
 #endif
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_SSE3_SHUFFLE_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionSSE3ShuMovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionSSE3ShuMovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE3_SHUFFLE_MOVPTR_EXTERNSION);
 #endif
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionSSE4MovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionSSE4MovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE4_MOVPTR_EXTERNSION);
 #endif
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_AVX_DOT_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionAVXDotMovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionAVXDotMovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_AVX_DOT_MOVPTR_EXTERNSION);
 #endif
@@ -205,14 +205,14 @@ int main(int argc, char *argv[])
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_AVX_SHUFFLE_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionAVXShuMovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionAVXShuMovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_AVX_SHUFFLE_MOVPTR_EXTERNSION);
 #endif
 
 #if(1)
 	TIMER_LOOP_BEGIN(CPU_AVX_HADD_MOVPTR_EXTERNSION, ROUND);
-	ConvolutionAVXHAddMovePtrExtensionCPU(width, height, p_extended_data,
+	ConvolutionAVXHAddMovePtrExtensionCPU(width, height, p_extended_input_data,
 		kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_AVX_HADD_MOVPTR_EXTERNSION);
 #endif
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 #if(21 == KERNEL_LENGTH)
 	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION, ROUND);
 	ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(width, height,
-		p_extended_data, kernel_length, p_kernel_matrix, p_output);
+		p_extended_input_data, kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_EXTERNSION);
 #endif
 #endif
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 #if(21 == KERNEL_LENGTH)
 	TIMER_LOOP_BEGIN(CPU_SSE4_MOVPTR_UNROLL_KERNEL_ALIGNMENT_EXTERNSION, ROUND);
 	ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(width, height,
-		p_extended_data, kernel_length, p_aligned_kernel_matrix, p_output);
+		p_extended_input_data, kernel_length, p_aligned_kernel_matrix, p_output);
 	TIMER_LOOP_END(CPU_SSE4_MOVPTR_UNROLL_KERNEL_ALIGNMENT_EXTERNSION);
 #endif
 #endif
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 #if(1)
 TIMER_LOOP_BEGIN(CPU_AVX_MOVPTR_SHUFFLE_UNROLL_KERNEL_ALIGNMENT_EXTERNSION, ROUND);
 	ConvolutionAVXHAddMovePtrUnrollKernelLengh21AlignmentExtensionCPU(width,
-		height, p_extended_data, kernel_length, p_aligned_kernel_matrix, p_output);
+		height, p_extended_input_data, kernel_length, p_aligned_kernel_matrix, p_output);
 TIMER_LOOP_END(CPU_AVX_MOVPTR_SHUFFLE_UNROLL_KERNEL_ALIGNMENT_EXTERNSION);
 #endif
 	_aligned_free(p_aligned_kernel_matrix);
@@ -311,7 +311,7 @@ TIMER_LOOP_END(CPU_AVX_MOVPTR_SHUFFLE_UNROLL_KERNEL_ALIGNMENT_EXTERNSION);
 	SAFE_FREE(p_output_serial);
 	SAFE_FREE(p_kernel_matrix);
 	SAFE_FREE(p_input_data);
-	SAFE_FREE(p_extended_data);
+	SAFE_FREE(p_extended_input_data);
 
 	return 0;
 }/*main*/
