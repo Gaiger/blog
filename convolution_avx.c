@@ -21,7 +21,7 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 	int steps_avx;
 	int remainder_avx;
 
-	int steps_size_sse;
+	int step_size_sse;
 	int steps_sse;
 	int remainder_sse;
 
@@ -52,9 +52,9 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 	steps_avx = kernel_length / step_size_avx;
 	remainder_avx = kernel_length % step_size_avx;
 	
-	steps_size_sse = sizeof(__m128) / sizeof(float);
-	steps_sse = remainder_avx / steps_size_sse;
-	remainder_sse = remainder_avx % steps_size_sse;
+	step_size_sse = sizeof(__m128) / sizeof(float);
+	steps_sse = remainder_avx / step_size_sse;
+	remainder_sse = remainder_avx % step_size_sse;
 
 	extended_width = width + kernel_length - 1;
 
@@ -127,14 +127,14 @@ int ConvolutionAVXDotMovePtrExtensionCPU(int width, int height,
 					temp_sum = _mm_cvtss_f32(m128_temp0);
 
 					sum += temp_sum;
-					p_mov_kernel += steps_size_sse;
-					p_mov_input += steps_size_sse;
+					p_mov_kernel += step_size_sse;
+					p_mov_input += step_size_sse;
 				}/*(kernel_length%8) /4 > 0*/
 
 				{
 					int serial_begin;
 					serial_begin = steps_avx*step_size_avx
-						+ steps_size_sse * steps_sse;
+						+ step_size_sse * steps_sse;
 
 					for (ii = serial_begin; ii < kernel_length; ii++) {
 						sum += p_mov_kernel[0] * p_mov_input[0];
