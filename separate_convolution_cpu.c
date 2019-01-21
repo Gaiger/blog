@@ -634,7 +634,6 @@ int SeparateConvolutionRowAVX(int width, int height,
 	int remainder_avx;
 
 	int steps_sse, step_size_sse;
-	int remainder_sse;
 
 	if (0 == width || 0 == height)
 		return -1;
@@ -1038,5 +1037,5 @@ int SeparateConvolutionColumnAVX(int width, int height,
 	}/*local variable*/
 
 	return 0;
-}/* for SeparateConvolutionColumnSSE4*/
+}/* for SeparateConvolutionColumnAVX*/
 #endif
