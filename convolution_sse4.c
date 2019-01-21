@@ -171,7 +171,7 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(int width, int height,
 				p_mov_kernel = p_kernel + kernel_length*jj;
 				p_mov_input = p_extended_input + y*extended_width + i;
 				
-#define ONE_SSE4_ROUND()					\
+#define ONE_SSE4_STEP()					\
 				{						\
 					float temp_sum;			\
 											\
@@ -188,11 +188,11 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21ExtensionCPU(int width, int height,
 					p_mov_input += sizeof(__m128) / sizeof(float); \
 				}	
 
-				ONE_SSE4_ROUND();
-				ONE_SSE4_ROUND();
-				ONE_SSE4_ROUND();
-				ONE_SSE4_ROUND();
-				ONE_SSE4_ROUND();
+				ONE_SSE4_STEP();
+				ONE_SSE4_STEP();
+				ONE_SSE4_STEP();
+				ONE_SSE4_STEP();
+				ONE_SSE4_STEP();
 				{
 					sum += p_mov_kernel[0] * p_mov_input[0];
 				}/*for ii*/
@@ -275,7 +275,7 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(
 				p_mov_kernel = p_kernel + kernel_length_alignment16*jj;
 				p_mov_input = p_extended_input + y*extended_width + i;
 
-#define ONE_SSE4_KERNEL_ALIGN16_ROUND()			\
+#define ONE_SSE4_KERNEL_ALIGNED16_STEP()			\
 				{							\
 					float temp_sum;			\
 											\
@@ -292,11 +292,11 @@ int ConvolutionSSE4MovePtrUnrollKernelLengh21AlignmentExtensionCPU(
 					p_mov_input += sizeof(__m128) / sizeof(float); \
 				}
 
-				ONE_SSE4_KERNEL_ALIGN16_ROUND();
-				ONE_SSE4_KERNEL_ALIGN16_ROUND();
-				ONE_SSE4_KERNEL_ALIGN16_ROUND();
-				ONE_SSE4_KERNEL_ALIGN16_ROUND();
-				ONE_SSE4_KERNEL_ALIGN16_ROUND();
+				ONE_SSE4_KERNEL_ALIGNED16_STEP();
+				ONE_SSE4_KERNEL_ALIGNED16_STEP();
+				ONE_SSE4_KERNEL_ALIGNED16_STEP();
+				ONE_SSE4_KERNEL_ALIGNED16_STEP();
+				ONE_SSE4_KERNEL_ALIGNED16_STEP();
 
 				{
 					sum += p_mov_kernel[0] * p_mov_input[0];

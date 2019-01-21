@@ -537,7 +537,7 @@ int ConvolutionAVXHAddMovePtrUnrollKernelLengh21AlignmentExtensionCPU(int width,
 				p_mov_input = p_extended_input + y*extended_width + i;
 				
 				
-#define ONE_AVX_KERNEL_ALIGN16_ROUND() \
+#define ONE_AVX_KERNEL_ALIGNED16_STEP() \
 				{\
 					__m256 m256_kernel, m256_src; \
 					__m256 m256_temp0; \
@@ -578,8 +578,8 @@ int ConvolutionAVXHAddMovePtrUnrollKernelLengh21AlignmentExtensionCPU(int width,
 					p_mov_input += step_size_avx; \
 				}/*for ii AVX*/
 
-				ONE_AVX_KERNEL_ALIGN16_ROUND();
-				ONE_AVX_KERNEL_ALIGN16_ROUND();
+				ONE_AVX_KERNEL_ALIGNED16_STEP();
+				ONE_AVX_KERNEL_ALIGNED16_STEP();
 
 				{
 					__m128 m128_kernel, m128_src;
