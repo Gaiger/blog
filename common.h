@@ -2,7 +2,11 @@
 #define _COMMON_H_
 
 
-#define _KERNEL_ALIGNED16
+#define _SWAP_KERNEL_AND_WIDTH
+
+#ifndef _SWAP_KERNEL_AND_WIDTH
+	#define _KERNEL_ALIGNED16
+#endif
 
 #ifdef _DEBUG
 

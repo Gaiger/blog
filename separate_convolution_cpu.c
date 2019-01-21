@@ -7,6 +7,14 @@
 #include "common.h"
 
 
+#ifdef _KERNEL_ALIGNED16
+#define __MM128_LOAD_KERNEL(ADDR)			_mm_load_ps((ADDR))
+#define __MM256_LOAD_KERNEL(ADDR)			_mm256_load_ps((ADDR))
+#else
+#define __MM128_LOAD_KERNEL(ADDR)			_mm_loadu_ps((ADDR))
+#define __MM256_LOAD_KERNEL(ADDR)			_mm256_loadu_ps((ADDR))
+#endif
+
 static inline void *memset_sse2(void *ptr, int value, size_t num)
 {
 	__m128i m128i_value;
@@ -60,13 +68,7 @@ static inline void *memset_avx(void *ptr, int value, size_t num)
 #endif
 
 
-#ifdef _KERNEL_ALIGNED16
-	#define __MM128_LOAD_KERNEL(ADDR)			_mm_load_ps((ADDR))
-	#define __MM256_LOAD_KERNEL(ADDR)			_mm256_load_ps((ADDR))
-#else
-	#define __MM128_LOAD_KERNEL(ADDR)			_mm_loadu_ps((ADDR))
-	#define __MM256_LOAD_KERNEL(ADDR)			_mm256_loadu_ps((ADDR))
-#endif
+
 
 int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_input,
 	int kernel_length, float const *p_kernel_row,
@@ -124,10 +126,10 @@ int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_
 					+= product;
 				x += 1;
 
-			}/*for */
+			}/*for width*/
 
 			y_mul_input_width += extended_width;
-		}/*for i*/
+		}/*for kernel*/
 
 	}/*for j*/
 #else
@@ -154,12 +156,12 @@ int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_
 					* p_extended_input[y_mul_input_width + x];
 
 				y_mul_input_width += extended_width;
-			}/*for */
+			}/*for kernel*/
 
 			p_row_done_extended_output[j*extended_width + x] 
 				= sum;
 			x += 1;
-		}/*for i*/
+		}/*for width*/
 
 		memset(p_row_done_extended_output +
 			j*extended_width + (kernel_radius + width), 0, 
@@ -172,6 +174,73 @@ int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_
 
 }/*SeparateConvolutionRowSerial*/
 
+
+#ifdef _SWAP_KERNEL_AND_WIDTH
+
+int SeparateConvolutionColumnSerial(int width, int height,
+	float const *p_row_done_extended_input,
+	int kernel_length, float const *p_kernel_column,
+	float *p_output)
+{
+	int i, j;
+	int kernel_radius;
+	int extended_width;
+
+
+	if (0 == width || 0 == height)
+		return -1;
+
+	if (kernel_length > width || kernel_length > height)
+	{
+		return -2;
+	}/*if */
+
+
+	if (NULL == p_row_done_extended_input
+		|| NULL == p_kernel_column
+		|| NULL == p_output)
+	{
+		return -3;
+	}
+
+	kernel_radius = kernel_length / 2;
+	extended_width = width + 2 * kernel_radius;
+
+	memset(p_output, 0, width*height*sizeof(float));
+
+	{
+		int y_mul_input_width;
+		y_mul_input_width = 0;
+
+		for (j = 0; j < height; j++) {
+			int ii;
+			for (ii = 0; ii < kernel_length; ii++) {
+				
+				int x;
+				float kernel_element;
+
+				x = ii;
+				kernel_element = p_kernel_column[ii];
+
+				for (i = 0; i < width; i++) {
+
+					float product;
+
+					product = kernel_element
+						* p_row_done_extended_input[y_mul_input_width + x];
+					p_output[j*width + i] += product;
+					x += 1;
+				}/*for width*/
+			}/*kernel*/
+			
+			y_mul_input_width += extended_width;
+		}/*for j*/
+	}/*local variable*/
+
+	return 0;
+}/* for SeparateConvolutionColumnSerial*/
+
+#else
 
 int SeparateConvolutionColumnSerial(int width, int height,
 	float const *p_row_done_extended_input,
@@ -212,18 +281,20 @@ int SeparateConvolutionColumnSerial(int width, int height,
 				int x;
 				int ii;
 				float sum;
-				sum = 0;
 
 				x = i;
+				sum = 0;
+
 				for (ii = 0; ii < kernel_length; ii++) {
 
 					sum += p_kernel_column[ii]
 						* p_row_done_extended_input[y_mul_input_width + x];
 					x += 1;
-				}/*for */
+				}/*for kernel_length*/
 
 				p_output[j*width + i] = sum;
-			}/*for i*/
+			}/*for width*/
+
 			y_mul_input_width += extended_width;
 		}/*for j*/
 	}
@@ -231,6 +302,7 @@ int SeparateConvolutionColumnSerial(int width, int height,
 	return 0;
 }/* for SeparateConvolutionColumnSerial*/
 
+#endif
 
 int SeparateConvolutionRowSSE4(int width, int height, 
 	float const *p_extended_input,
@@ -317,23 +389,132 @@ int SeparateConvolutionRowSSE4(int width, int height,
 
 				p_mov_extended_input += step_size;
 				p_mov_output += step_size;
-			}/*for i*/
+			}/*for sse*/
 
 			for (i = steps*step_size; i < width; i++) {
 				p_mov_output[0] += 
 					p_mov_extended_input[0] * kernel_element;
 				p_mov_extended_input += 1;
 				p_mov_output += 1;
-			}/*remainder of 4*/
+			}/*remainder*/
 
 			y_mul_input_width += extended_width;
-		}/*for i*/
+		}/*for kernel*/
 
 	}/*for j*/
 
 	return 0;
 }/*SeparateConvolutionRowSSE4*/
 
+
+#ifdef _SWAP_KERNEL_AND_WIDTH
+
+int SeparateConvolutionColumnSSE4(int width, int height,
+	float const *p_row_done_extended_input,
+	int kernel_length, float const *p_kernel_column,
+	float *p_output)
+{
+
+	int i, j;
+	int kernel_radius;
+	int extended_width;
+
+	int step_size;
+	int steps;
+
+
+	if (0 == width || 0 == height)
+		return -1;
+
+	if (kernel_length > width || kernel_length > height)
+	{
+		return -2;
+	}/*if */
+
+
+	if (NULL == p_row_done_extended_input
+		|| NULL == p_kernel_column
+		|| NULL == p_output)
+	{
+		return -3;
+	}
+
+	step_size = sizeof(__m128) / sizeof(float);
+	steps = width / step_size;
+
+	if (0 == steps)
+	{
+		return SeparateConvolutionColumnSerial(width, height,
+			p_row_done_extended_input,
+			kernel_length, p_kernel_column, p_output);
+	}/*if */
+
+	kernel_radius = kernel_length / 2;
+	extended_width = width + 2 * kernel_radius;
+
+	memset_sse2(p_output, 0, width*height*sizeof(float));
+
+	{
+		int y_mul_input_width;
+		y_mul_input_width = 0;
+
+		for (j = 0; j < height; j++) {
+			int ii;
+			for (ii = 0; ii < kernel_length; ii++) {
+
+				float kernel_element;
+				__m128 m128_kernel_element;
+
+				float *p_mov_extended_input;
+				float *p_mov_output;
+				int x;
+
+				kernel_element = p_kernel_column[ii];
+				m128_kernel_element = _mm_set_ps1(kernel_element);
+
+				x = ii;
+				p_mov_extended_input =
+					(float*)p_row_done_extended_input + y_mul_input_width + x;
+				p_mov_output = (float*)p_output + j*width;
+
+
+				for (i = 0; i < steps; i++) {
+					__m128 m_temp0, m_temp1, m_temp2, m_temp3;
+
+					m_temp0 = _mm_loadu_ps(p_mov_extended_input);
+					m_temp1 = _mm_mul_ps(m_temp0, m128_kernel_element);
+
+					m_temp2 = _mm_loadu_ps(p_mov_output);
+					m_temp3 = _mm_add_ps(m_temp1, m_temp2);
+
+					_mm_storeu_ps(p_mov_output, m_temp3);
+
+					p_mov_extended_input += step_size;
+					p_mov_output += step_size;
+				}/*for sse*/
+
+				for (i = steps*step_size; i < steps; i++) {
+					float product;
+
+					product = kernel_element
+						* p_mov_extended_input[0];
+
+					p_mov_output[0] += product;
+					p_mov_extended_input += 1;
+					p_mov_output += 1;
+				}/*for remainder*/
+
+			}/*for kernel*/
+
+			y_mul_input_width += extended_width;
+		}/*for j*/
+
+	}/*local variable*/
+
+	return 0;
+}/*SeparateConvolutionColumnSSE4*/
+
+#else
 
 int SeparateConvolutionColumnSSE4(int width, int height,
 	float const *p_row_done_extended_input,
@@ -417,7 +598,7 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 
 					p_mov_kernel += step_size;
 					p_mov_row_done_extended_input += step_size;
-				}/*for steps*/
+				}/*for sse*/
 
 				for (ii = steps*step_size; ii < kernel_length; ii++) {
 					sum += p_mov_kernel[0] * p_mov_row_done_extended_input[0];
@@ -426,7 +607,7 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 				}/*for remainder*/
 
 				p_output[j*width + i] = sum;
-			}/*for i*/
+			}/*for width*/
 
 			y_mul_input_width += extended_width;
 		}/*for j*/
@@ -434,7 +615,9 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 	}/*local variable*/
 
 	return 0;
-}/* for SeparateConvolutionColumnSSE4*/
+}/*SeparateConvolutionColumnSSE4*/
+
+#endif
 
 
 int SeparateConvolutionRowAVX(int width, int height, 
@@ -531,7 +714,7 @@ int SeparateConvolutionRowAVX(int width, int height,
 
 				p_mov_extended_input += step_size_avx;
 				p_mov_output += step_size_avx;
-			}/*avx*/
+			}/*for avx*/
 
 			for (i = 0; i < steps_sse; i++) {
 				__m128 m128_temp0, m128_temp1, m128_temp2, m128_temp3;
@@ -546,7 +729,7 @@ int SeparateConvolutionRowAVX(int width, int height,
 
 				p_mov_extended_input += step_size_sse;
 				p_mov_output += step_size_sse;
-			}/*for i*/
+			}/*for sse*/
 
 		
 			i = steps_avx*step_size_avx
@@ -557,16 +740,152 @@ int SeparateConvolutionRowAVX(int width, int height,
 					p_mov_extended_input[0] * kernel_element;
 				p_mov_extended_input += 1;
 				p_mov_output += 1;
-			}/*remainder of 4*/
+			}/*remainder */
 
 			y_mul_input_width += extended_width;
-		}/*for i*/
+		}/*for kernel*/
 
 	}/*for j*/
 
 	return 0;
 }/*SeparateConvolutionRowAVX*/
 
+#ifdef _SWAP_KERNEL_AND_WIDTH
+
+int SeparateConvolutionColumnAVX(int width, int height,
+	float const *p_row_done_extended_input,
+	int kernel_length, float const *p_kernel_column,
+	float *p_output)
+{
+	int i, j;
+	int kernel_radius;
+	int extended_width;
+
+	int step_size_avx, steps_avx;
+	int remainder_avx;
+
+	int step_size_sse, steps_sse;
+	int remainder_sse;
+
+	if (0 == width || 0 == height)
+		return -1;
+
+	if (kernel_length > width || kernel_length > height)
+	{
+		return -2;
+	}/*if */
+
+
+	if (NULL == p_row_done_extended_input
+		|| NULL == p_kernel_column
+		|| NULL == p_output)
+	{
+		return -3;
+	}
+
+	step_size_avx = sizeof(__m256) / sizeof(float);
+	steps_avx = width / step_size_avx;
+	remainder_avx = width % step_size_avx;
+
+	if (0 == steps_avx)
+	{
+		return SeparateConvolutionColumnSSE4(width, height,
+			p_row_done_extended_input,
+			kernel_length, p_kernel_column, p_output);
+	}/*if */
+
+	step_size_sse = sizeof(__m128) / sizeof(float);
+	steps_sse = remainder_avx / step_size_sse;
+	remainder_sse = remainder_avx % step_size_sse;
+
+	kernel_radius = kernel_length / 2;
+	extended_width = width + 2 * kernel_radius;
+
+	memset_sse2(p_output, 0, width*height * sizeof(float));
+
+	{
+		int y_mul_input_width;
+		y_mul_input_width = 0;
+
+		for (j = 0; j < height; j++) {
+			int ii;
+
+			for (ii = 0; ii < kernel_length; ii++) {
+
+				float *p_mov_extended_input;
+				float *p_mov_output;
+
+				float kernel_element;
+				__m256 m256_kernel_element;
+				__m128 m128_kernel_element;
+
+				int x;
+
+				kernel_element = p_kernel_column[ii];
+
+				m256_kernel_element = _mm256_set1_ps(kernel_element);
+				m128_kernel_element = _mm_set_ps1(kernel_element);
+
+				x = ii;
+				p_mov_extended_input =
+					(float*)p_row_done_extended_input + y_mul_input_width + x;				
+				p_mov_output = (float*)p_output + j*width;
+
+				for (i = 0; i < steps_avx; i++) {
+
+					__m256 m256_temp0, m256_temp1, m256_temp2, m256_temp3;
+
+					m256_temp0 = _mm256_loadu_ps(p_mov_extended_input);
+					m256_temp1 = _mm256_mul_ps(m256_temp0, m256_kernel_element);
+
+					m256_temp2 = _mm256_loadu_ps(p_mov_output);
+					m256_temp3 = _mm256_add_ps(m256_temp1, m256_temp2);
+
+					_mm256_storeu_ps(p_mov_output, m256_temp3);
+
+					p_mov_extended_input += step_size_avx;
+					p_mov_output += step_size_avx;
+				}/*for avx*/
+
+				for (i = 0; i < steps_sse; i++) {
+					__m128 m128_temp0, m128_temp1, m128_temp2, m128_temp3;
+
+					m128_temp0 = _mm_loadu_ps(p_mov_extended_input);
+					m128_temp1 = _mm_mul_ps(m128_temp0, m128_kernel_element);
+
+					m128_temp2 = _mm_loadu_ps(p_mov_output);
+					m128_temp3 = _mm_add_ps(m128_temp1, m128_temp2);
+
+					_mm_storeu_ps(p_mov_output, m128_temp3);
+
+					p_mov_extended_input += step_size_sse;
+					p_mov_output += step_size_sse;
+				}/*for sse*/
+
+
+				i = steps_avx*step_size_avx
+					+ step_size_sse * steps_sse;
+
+				for (; i < width; i++) {
+					float product;
+
+					product = kernel_element
+						* p_mov_extended_input[0];
+
+					p_mov_output[0] += product;
+					p_mov_extended_input += 1;
+					p_mov_output += 1;
+				}/*remainder*/
+
+			}/*for kernel*/
+
+			y_mul_input_width += extended_width;
+		}/*for j*/
+	}
+	return 0;
+}/*SeparateConvolutionColumnAVX*/
+
+#else
 
 int SeparateConvolutionColumnAVX(int width, int height,
 	float const *p_row_done_extended_input,
@@ -603,7 +922,7 @@ int SeparateConvolutionColumnAVX(int width, int height,
 	step_size_avx = sizeof(__m256) / sizeof(float);
 	steps_avx = kernel_length / step_size_avx;
 	remainder_avx = kernel_length % step_size_avx;
-	
+
 	if (0 == steps_avx)
 	{
 		return SeparateConvolutionColumnSSE4(width, height,
@@ -611,12 +930,13 @@ int SeparateConvolutionColumnAVX(int width, int height,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
 
-	kernel_radius = kernel_length / 2;
-	extended_width = width + 2 * kernel_radius;
 
 	step_size_sse = sizeof(__m128) / sizeof(float);
 	steps_sse = remainder_avx / step_size_sse;
 	remainder_sse = remainder_avx % step_size_sse;
+
+	kernel_radius = kernel_length / 2;
+	extended_width = width + 2 * kernel_radius;
 
 	{
 		int y_mul_input_width;
@@ -673,7 +993,7 @@ int SeparateConvolutionColumnAVX(int width, int height,
 
 						m128_temp6 = _mm_add_ps(m128_temp4, m128_temp5);
 						temp_sum = _mm_cvtss_f32(m128_temp6);
-					}
+					}/*local variables*/
 
 					sum += temp_sum;
 
@@ -698,7 +1018,7 @@ int SeparateConvolutionColumnAVX(int width, int height,
 
 					p_mov_kernel += step_size_sse;
 					p_mov_row_done_extended_input += step_size_sse;
-				}/*for steps*/
+				}/*for sse*/
 
 				ii = steps_avx*step_size_avx
 					+ step_size_sse * steps_sse;
@@ -710,12 +1030,13 @@ int SeparateConvolutionColumnAVX(int width, int height,
 				}/*for remainder*/
 
 				p_output[j*width + i] = sum;
-			}/*for i*/
+			}/*width*/
 
 			y_mul_input_width += extended_width;
-		}/*for j*/
+		}/*kernel*/
 
 	}/*local variable*/
 
 	return 0;
 }/* for SeparateConvolutionColumnSSE4*/
+#endif
