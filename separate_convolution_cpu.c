@@ -674,4 +674,4 @@ int SeparateConvolutionColumnAVX(int width, int height,
 	}/*for j*/
 
 	return 0;
-}/*SeparateConvolutionColumnSSE4*/
+}/*SeparateConvolutionColumnAVX*/
