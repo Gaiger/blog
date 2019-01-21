@@ -77,9 +77,15 @@ int main(int argc, char *argv[])
 	extended_height = height + 2 * kernel_radius;
 	kernel_length = KERNEL_LENGTH;
 
+#ifdef _KERNEL_ALIGNED16
+	p_kernel_row = (float*)_aligned_malloc(kernel_length * sizeof(float), 
+		16);
+	p_kernel_column = (float*)_aligned_malloc(kernel_length * sizeof(float), 
+		16);
+#else
 	p_kernel_row = (float*)malloc(kernel_length * sizeof(float));
 	p_kernel_column = (float*)malloc(kernel_length * sizeof(float));
-
+#endif
 	{
 		float shift_value;
 		for (i = 0; i < kernel_length; i++)
@@ -89,17 +95,17 @@ int main(int argc, char *argv[])
 
 		for (i = 0; i < kernel_length; i++)
 			p_kernel_column[i] = (float)i + shift_value + 1;
+	
 	}/*local variable*/
 
 
 	p_kernel_matrix = (float*)malloc(kernel_length*kernel_length * sizeof(float));
-
+	
 	for (j = 0; j < kernel_length; j++) {
 		for (i = 0; i < kernel_length; i++) {
 			p_kernel_matrix[j*kernel_length + i]
 				= p_kernel_row[j] * p_kernel_column[i];
 		}/*i*/
-		//printf("\r\n");
 	}/*j*/
 
 	p_input = (float*)malloc(width*height * sizeof(float));
@@ -143,37 +149,37 @@ int main(int argc, char *argv[])
 	TIMER_LOOP_END(CONVOLUTION_AVX)
 #endif
 	p_separate_row_intermediate = (float*)malloc(
-		width*extended_height * sizeof(float));
+		extended_width*height * sizeof(float));
 
 	p_separate_output_cpu = (float*)malloc(
 		width*height * sizeof(float));
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SERIAL, ROUND)
 		SeparateConvolutionRowSerial(width, height, p_extended_input,
-			kernel_length, p_kernel_column, p_separate_row_intermediate);
+			kernel_length, p_kernel_row, p_separate_row_intermediate);
 
 	SeparateConvolutionColumnSerial(width, height, p_separate_row_intermediate,
-		kernel_length, p_kernel_row, p_separate_output_cpu);
+		kernel_length, p_kernel_column, p_separate_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SERIAL)
 #endif
 
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SSE4, ROUND)
-SeparateConvolutionRowSSE4(width, height, p_extended_input,
-	kernel_length, p_kernel_column, p_separate_row_intermediate);
+	SeparateConvolutionRowSSE4(width, height, p_extended_input,
+		kernel_length, p_kernel_row, p_separate_row_intermediate);
 
-SeparateConvolutionColumnSSE4(width, height, p_separate_row_intermediate,
-	kernel_length, p_kernel_row, p_separate_output_cpu);
+	SeparateConvolutionColumnSSE4(width, height, p_separate_row_intermediate,
+		kernel_length, p_kernel_column, p_separate_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SSE4)
 #endif
 
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_AVX, ROUND)
 	SeparateConvolutionRowAVX(width, height, p_extended_input,
-		kernel_length, p_kernel_column, p_separate_row_intermediate);
+		kernel_length, p_kernel_row, p_separate_row_intermediate);
 
 	SeparateConvolutionColumnAVX(width, height, p_separate_row_intermediate,
-	kernel_length, p_kernel_row, p_separate_output_cpu);
+		kernel_length, p_kernel_column, p_separate_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 #endif
 
@@ -217,7 +223,6 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 	
 
 
-
 	SAFE_FREE(p_separate_row_intermediate);
 	SAFE_FREE(p_separate_output_cpu);
 	SAFE_FREE(p_output);
@@ -226,8 +231,13 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 	SAFE_FREE(p_input);
 
 	SAFE_FREE(p_kernel_matrix);
+
+#ifdef _KERNEL_ALIGNED16
+	_aligned_free(p_kernel_row);
+	_aligned_free(p_kernel_column);
+#else
 	SAFE_FREE(p_kernel_row);
 	SAFE_FREE(p_kernel_column);
-	
+#endif	
 	return 0;
 }/*main*/

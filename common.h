@@ -2,14 +2,15 @@
 #define _COMMON_H_
 
 
+#define _KERNEL_ALIGNED16
 
 #ifdef _DEBUG
 
 	#define ROUND							(1)
 
-	#define WIDTH							(62)
+	#define WIDTH							(64)
 	#define HEIGHT							(64)
-	#define KERNEL_RADIUS					(5)
+	#define KERNEL_RADIUS					(10)
 #else
 	#define ROUND						(10)
 
