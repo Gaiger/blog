@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
 
 	float *p_input, *p_extended_input;
 	float *p_output;
-	float *p_separate_row_intermediate;
-	float *p_separate_output_cpu;
+	float *p_separable_row_intermediate;
+	float *p_separable_output_cpu;
 
 
 	printf("input = %d x %d\r\n", WIDTH, HEIGHT);
@@ -148,38 +148,38 @@ int main(int argc, char *argv[])
 			kernel_length, p_kernel_matrix, p_output);
 	TIMER_LOOP_END(CONVOLUTION_AVX)
 #endif
-	p_separate_row_intermediate = (float*)malloc(
+	p_separable_row_intermediate = (float*)malloc(
 		extended_width*height * sizeof(float));
 
-	p_separate_output_cpu = (float*)malloc(
+	p_separable_output_cpu = (float*)malloc(
 		width*height * sizeof(float));
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SERIAL, ROUND)
-		SeparateConvolutionRowSerial(width, height, p_extended_input,
-			kernel_length, p_kernel_row, p_separate_row_intermediate);
+		SeparableConvolutionRowSerial(width, height, p_extended_input,
+			kernel_length, p_kernel_row, p_separable_row_intermediate);
 
-	SeparateConvolutionColumnSerial(width, height, p_separate_row_intermediate,
-		kernel_length, p_kernel_column, p_separate_output_cpu);
+	SeparableConvolutionColumnSerial(width, height, p_separable_row_intermediate,
+		kernel_length, p_kernel_column, p_separable_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SERIAL)
 #endif
 
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SSE4, ROUND)
-	SeparateConvolutionRowSSE4(width, height, p_extended_input,
-		kernel_length, p_kernel_row, p_separate_row_intermediate);
+	SeparableConvolutionRowSSE4(width, height, p_extended_input,
+		kernel_length, p_kernel_row, p_separable_row_intermediate);
 
-	SeparateConvolutionColumnSSE4(width, height, p_separate_row_intermediate,
-		kernel_length, p_kernel_column, p_separate_output_cpu);
+	SeparableConvolutionColumnSSE4(width, height, p_separable_row_intermediate,
+		kernel_length, p_kernel_column, p_separable_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SSE4)
 #endif
 
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_AVX, ROUND)
-	SeparateConvolutionRowAVX(width, height, p_extended_input,
-		kernel_length, p_kernel_row, p_separate_row_intermediate);
+	SeparableConvolutionRowAVX(width, height, p_extended_input,
+		kernel_length, p_kernel_row, p_separable_row_intermediate);
 
-	SeparateConvolutionColumnAVX(width, height, p_separate_row_intermediate,
-		kernel_length, p_kernel_column, p_separate_output_cpu);
+	SeparableConvolutionColumnAVX(width, height, p_separable_row_intermediate,
+		kernel_length, p_kernel_column, p_separable_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 #endif
 
@@ -193,13 +193,13 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 			is_over_tolerance = 0;
 			if (0 == p_output[j*width + i])
 			{
-				if (0 != p_separate_output_cpu[j*width + i])
+				if (0 != p_separable_output_cpu[j*width + i])
 					is_over_tolerance = 1;
 			}
 			else
 			{
 				float tolerance;
-				tolerance = p_separate_output_cpu[j*width + i] - p_output[j*width + i];
+				tolerance = p_separable_output_cpu[j*width + i] - p_output[j*width + i];
 				tolerance /= p_output[j*width + i];
 				tolerance = (float)fabs(tolerance);
 				if (tolerance > 1.0e-6)
@@ -209,7 +209,7 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 			if (0 != is_over_tolerance)
 			{
 				printf("computs error : i = %d, j = %d"
-					", value = %.f %.f\r\n", i, j, p_separate_output_cpu[j*width + i]
+					", value = %.f %.f\r\n", i, j, p_separable_output_cpu[j*width + i]
 					, p_output[j*width + i]);
 				count++;
 			}
@@ -223,8 +223,8 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 	
 
 
-	SAFE_FREE(p_separate_row_intermediate);
-	SAFE_FREE(p_separate_output_cpu);
+	SAFE_FREE(p_separable_row_intermediate);
+	SAFE_FREE(p_separable_output_cpu);
 	SAFE_FREE(p_output);
 	
 	SAFE_FREE(p_extended_input);

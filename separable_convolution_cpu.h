@@ -6,31 +6,31 @@
 extern "C" {
 #endif
 
-	int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_input,
+	int SeparableConvolutionRowSerial(int width, int height, float const *p_extended_input,
 		int kernel_length, float const *p_kernel_row,
 		float *p_row_done_extended_output);
 
-	int SeparateConvolutionColumnSerial(int width, int height,
+	int SeparableConvolutionColumnSerial(int width, int height,
 		float const *p_row_done_extended_input,
 		int kernel_length, float const *p_kernel_column,
 		float *p_output);
 
 
-	int SeparateConvolutionRowSSE4(int width, int height, float const *p_extended_input,
+	int SeparableConvolutionRowSSE4(int width, int height, float const *p_extended_input,
 		int kernel_length, float const *p_kernel_row,
 		float *p_row_done_extended_output);
 
-	int SeparateConvolutionColumnSSE4(int width, int height,
+	int SeparableConvolutionColumnSSE4(int width, int height,
 		float const *p_row_done_extended_input,
 		int kernel_length, float const *p_kernel_column,
 		float *p_output);
 
 
-	int SeparateConvolutionRowAVX(int width, int height, float const *p_extended_input,
+	int SeparableConvolutionRowAVX(int width, int height, float const *p_extended_input,
 		int kernel_length, float const *p_kernel_row,
 		float *p_row_done_extended_output);
 	
-	int SeparateConvolutionColumnAVX(int width, int height,
+	int SeparableConvolutionColumnAVX(int width, int height,
 		float const *p_row_done_extended_input,
 		int kernel_length, float const *p_kernel_column,
 		float *p_output);

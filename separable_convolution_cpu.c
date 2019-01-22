@@ -71,7 +71,7 @@ static inline void *memset_avx(void *ptr, int value, size_t num)
 
 
 
-int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_input,
+int SeparableConvolutionRowSerial(int width, int height, float const *p_extended_input,
 	int kernel_length, float const *p_kernel_row,
 	float *p_row_done_extended_output)
 {
@@ -173,12 +173,12 @@ int SeparateConvolutionRowSerial(int width, int height, float const *p_extended_
 
 	return 0;
 
-}/*SeparateConvolutionRowSerial*/
+}/*SeparableConvolutionRowSerial*/
 
 
 #ifdef _SWAP_KERNEL_AND_WIDTH
 
-int SeparateConvolutionColumnSerial(int width, int height,
+int SeparableConvolutionColumnSerial(int width, int height,
 	float const *p_row_done_extended_input,
 	int kernel_length, float const *p_kernel_column,
 	float *p_output)
@@ -239,11 +239,11 @@ int SeparateConvolutionColumnSerial(int width, int height,
 	}/*local variable*/
 
 	return 0;
-}/* for SeparateConvolutionColumnSerial*/
+}/* for SeparableConvolutionColumnSerial*/
 
 #else
 
-int SeparateConvolutionColumnSerial(int width, int height,
+int SeparableConvolutionColumnSerial(int width, int height,
 	float const *p_row_done_extended_input,
 	int kernel_length, float const *p_kernel_column,
 	float *p_output)
@@ -301,11 +301,11 @@ int SeparateConvolutionColumnSerial(int width, int height,
 	}
 
 	return 0;
-}/* for SeparateConvolutionColumnSerial*/
+}/* for SeparableConvolutionColumnSerial*/
 
 #endif
 
-int SeparateConvolutionRowSSE4(int width, int height, 
+int SeparableConvolutionRowSSE4(int width, int height, 
 	float const *p_extended_input,
 	int kernel_length, float const *p_kernel_row,
 	float *p_row_done_extended_output)
@@ -337,7 +337,7 @@ int SeparateConvolutionRowSSE4(int width, int height,
 
 	if (0 == steps)
 	{
-		SeparateConvolutionRowSerial(width, height,
+		SeparableConvolutionRowSerial(width, height,
 			p_extended_input, kernel_length, p_kernel_row,
 			p_row_done_extended_output);
 	}/*if width < step_size*/
@@ -405,12 +405,12 @@ int SeparateConvolutionRowSSE4(int width, int height,
 	}/*for j*/
 
 	return 0;
-}/*SeparateConvolutionRowSSE4*/
+}/*SeparableConvolutionRowSSE4*/
 
 
 #ifdef _SWAP_KERNEL_AND_WIDTH
 
-int SeparateConvolutionColumnSSE4(int width, int height,
+int SeparableConvolutionColumnSSE4(int width, int height,
 	float const *p_row_done_extended_input,
 	int kernel_length, float const *p_kernel_column,
 	float *p_output)
@@ -445,7 +445,7 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 
 	if (0 == steps)
 	{
-		return SeparateConvolutionColumnSerial(width, height,
+		return SeparableConvolutionColumnSerial(width, height,
 			p_row_done_extended_input,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
@@ -513,11 +513,11 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 	}/*local variable*/
 
 	return 0;
-}/*SeparateConvolutionColumnSSE4*/
+}/*SeparableConvolutionColumnSSE4*/
 
 #else
 
-int SeparateConvolutionColumnSSE4(int width, int height,
+int SeparableConvolutionColumnSSE4(int width, int height,
 	float const *p_row_done_extended_input,
 	int kernel_length, float const *p_kernel_column,
 	float *p_output)
@@ -552,7 +552,7 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 
 	if (0 == steps)
 	{
-		return SeparateConvolutionColumnSerial(width, height, 
+		return SeparableConvolutionColumnSerial(width, height, 
 			p_row_done_extended_input,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
@@ -616,12 +616,12 @@ int SeparateConvolutionColumnSSE4(int width, int height,
 	}/*local variable*/
 
 	return 0;
-}/*SeparateConvolutionColumnSSE4*/
+}/*SeparableConvolutionColumnSSE4*/
 
 #endif
 
 
-int SeparateConvolutionRowAVX(int width, int height, 
+int SeparableConvolutionRowAVX(int width, int height, 
 	float const *p_extended_input,
 	int kernel_length, float const *p_kernel_row,
 	float *p_row_done_extended_output)
@@ -657,7 +657,7 @@ int SeparateConvolutionRowAVX(int width, int height,
 
 	if (0 == steps_avx)
 	{
-		SeparateConvolutionRowSSE4(width, height,
+		SeparableConvolutionRowSSE4(width, height,
 			p_extended_input, kernel_length, p_kernel_row,
 			p_row_done_extended_output);
 	}/*if width < step_size*/
@@ -748,11 +748,11 @@ int SeparateConvolutionRowAVX(int width, int height,
 	}/*for j*/
 
 	return 0;
-}/*SeparateConvolutionRowAVX*/
+}/*SeparableConvolutionRowAVX*/
 
 #ifdef _SWAP_KERNEL_AND_WIDTH
 
-int SeparateConvolutionColumnAVX(int width, int height,
+int SeparableConvolutionColumnAVX(int width, int height,
 	float const *p_row_done_extended_input,
 	int kernel_length, float const *p_kernel_column,
 	float *p_output)
@@ -789,7 +789,7 @@ int SeparateConvolutionColumnAVX(int width, int height,
 
 	if (0 == steps_avx)
 	{
-		return SeparateConvolutionColumnSSE4(width, height,
+		return SeparableConvolutionColumnSSE4(width, height,
 			p_row_done_extended_input,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
@@ -883,11 +883,11 @@ int SeparateConvolutionColumnAVX(int width, int height,
 		}/*for j*/
 	}
 	return 0;
-}/*SeparateConvolutionColumnAVX*/
+}/*SeparableConvolutionColumnAVX*/
 
 #else
 
-int SeparateConvolutionColumnAVX(int width, int height,
+int SeparableConvolutionColumnAVX(int width, int height,
 	float const *p_row_done_extended_input,
 	int kernel_length, float const *p_kernel_column,
 	float *p_output)
@@ -925,7 +925,7 @@ int SeparateConvolutionColumnAVX(int width, int height,
 
 	if (0 == steps_avx)
 	{
-		return SeparateConvolutionColumnSSE4(width, height,
+		return SeparableConvolutionColumnSSE4(width, height,
 			p_row_done_extended_input,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
@@ -1038,5 +1038,5 @@ int SeparateConvolutionColumnAVX(int width, int height,
 	}/*local variable*/
 
 	return 0;
-}/* for SeparateConvolutionColumnAVX*/
+}/* for SeparableConvolutionColumnAVX*/
 #endif
