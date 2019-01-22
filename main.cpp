@@ -5,7 +5,7 @@
 #include "common.h"
 
 #include "convolution_cpu.h"
-#include "separate_convolution_cpu.h"
+#include "separable_convolution_cpu.h"
 
 
 #ifdef _MSC_VER 

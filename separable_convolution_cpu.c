@@ -6,6 +6,7 @@
 
 #include "common.h"
 
+#include "separable_convolution_cpu.h"
 
 #ifdef _KERNEL_ALIGNED16
 #define __MM128_LOAD_KERNEL(ADDR)			_mm_load_ps((ADDR))

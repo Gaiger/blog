@@ -1,5 +1,5 @@
-#ifndef _SEPARATE_CONVOLUTION_CPU_H_
-#define _SEPARATE_CONVOLUTION_CPU_H_
+#ifndef _SEPARABLE_CONVOLUTION_CPU_H_
+#define _SEPARABLE_CONVOLUTION_CPU_H_
 
 
 #ifdef __cplusplus
@@ -39,4 +39,4 @@ extern "C" {
 #endif
 
 
-#endif /*_SEPARATE_CONVOLUTION_CPU_H_*/
+#endif /*_SEPARABLE_CONVOLUTION_CPU_H_*/
