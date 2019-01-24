@@ -377,6 +377,15 @@ int SeparableConvolutionRowSSE4(int width, int height,
 				(float*)p_row_done_extended_output + j*extended_width + x;
 
 			for (i = 0; i < steps; i++) {
+#ifdef _USE_FMA
+				__m128 m_temp0, m_temp1, m_temp2;
+				m_temp0 = _mm_loadu_ps(p_mov_extended_input);
+				m_temp1 = _mm_loadu_ps(p_mov_output);
+				m_temp2 = _mm_fmadd_ps(m_temp0, m128_kernel_element,
+					m_temp1);
+
+				_mm_storeu_ps(p_mov_output, m_temp2);
+#else
 				__m128 m_temp0, m_temp1, m_temp2, m_temp3;
 
 				m_temp0 = _mm_loadu_ps(p_mov_extended_input);
@@ -387,7 +396,7 @@ int SeparableConvolutionRowSSE4(int width, int height,
 				m_temp3 = _mm_add_ps(m_temp1, m_temp2);
 
 				_mm_storeu_ps(p_mov_output, m_temp3);
-
+#endif
 				p_mov_extended_input += step_size;
 				p_mov_output += step_size;
 			}/*for sse*/
@@ -480,6 +489,16 @@ int SeparableConvolutionColumnSSE4(int width, int height,
 
 
 				for (i = 0; i < steps; i++) {
+#ifdef _USE_FMA
+					__m128 m_temp0, m_temp1, m_temp2;
+
+					m_temp0 = _mm_loadu_ps(p_mov_extended_input);
+					m_temp1 = _mm_loadu_ps(p_mov_output);
+					m_temp2 =_mm_fmadd_ps(m_temp0, m128_kernel_element, 
+						m_temp1);
+
+					_mm_storeu_ps(p_mov_output, m_temp2);
+#else
 					__m128 m_temp0, m_temp1, m_temp2, m_temp3;
 
 					m_temp0 = _mm_loadu_ps(p_mov_extended_input);
@@ -489,7 +508,7 @@ int SeparableConvolutionColumnSSE4(int width, int height,
 					m_temp3 = _mm_add_ps(m_temp1, m_temp2);
 
 					_mm_storeu_ps(p_mov_output, m_temp3);
-
+#endif
 					p_mov_extended_input += step_size;
 					p_mov_output += step_size;
 				}/*for sse*/
@@ -702,7 +721,14 @@ int SeparableConvolutionRowAVX(int width, int height,
 				(float*)p_row_done_extended_output + j*extended_width + x;
 
 			for (i = 0; i < steps_avx; i++) {
-
+#ifdef _USE_FMA
+				__m256 m256_temp0, m256_temp1, m256_temp2;
+				m256_temp0 = _mm256_loadu_ps(p_mov_extended_input);
+				m256_temp1 = _mm256_loadu_ps(p_mov_output);
+				m256_temp2 = _mm256_fmadd_ps(m256_temp0, m256_kernel_element, 
+					m256_temp1);
+				_mm256_storeu_ps(p_mov_output, m256_temp2);
+#else
 				__m256 m256_temp0, m256_temp1, m256_temp2, m256_temp3;
 
 				m256_temp0 = _mm256_loadu_ps(p_mov_extended_input);
@@ -711,12 +737,22 @@ int SeparableConvolutionRowAVX(int width, int height,
 				m256_temp2 = _mm256_loadu_ps(p_mov_output);
 				m256_temp3 = _mm256_add_ps(m256_temp1, m256_temp2);
 				_mm256_storeu_ps(p_mov_output, m256_temp3);
-
+#endif
 				p_mov_extended_input += step_size_avx;
 				p_mov_output += step_size_avx;
 			}/*for avx*/
 
 			for (i = 0; i < steps_sse; i++) {
+#ifdef _USE_FMA
+				__m128 m128_temp0, m128_temp1, m128_temp2;
+
+				m128_temp0 = _mm_loadu_ps(p_mov_extended_input);
+				m128_temp1 = _mm_loadu_ps(p_mov_output);
+				m128_temp2 = _mm_fmadd_ps(m128_temp0, m128_kernel_element,
+					m128_temp1);
+
+				_mm_storeu_ps(p_mov_output, m128_temp2);
+#else
 				__m128 m128_temp0, m128_temp1, m128_temp2, m128_temp3;
 
 				m128_temp0 = _mm_loadu_ps(p_mov_extended_input);
@@ -726,7 +762,7 @@ int SeparableConvolutionRowAVX(int width, int height,
 				m128_temp3 = _mm_add_ps(m128_temp1, m128_temp2);
 
 				_mm_storeu_ps(p_mov_output, m128_temp3);
-
+#endif
 				p_mov_extended_input += step_size_sse;
 				p_mov_output += step_size_sse;
 			}/*for sse*/
@@ -832,7 +868,14 @@ int SeparableConvolutionColumnAVX(int width, int height,
 				p_mov_output = (float*)p_output + j*width;
 
 				for (i = 0; i < steps_avx; i++) {
-
+#ifdef _USE_FMA
+					__m256 m256_temp0, m256_temp1, m256_temp2;
+					m256_temp0 = _mm256_loadu_ps(p_mov_extended_input);
+					m256_temp1 = _mm256_loadu_ps(p_mov_output);
+					m256_temp2 = _mm256_fmadd_ps(m256_temp0,m256_kernel_element, 
+						m256_temp1);
+					_mm256_storeu_ps(p_mov_output, m256_temp2);
+#else
 					__m256 m256_temp0, m256_temp1, m256_temp2, m256_temp3;
 
 					m256_temp0 = _mm256_loadu_ps(p_mov_extended_input);
@@ -842,12 +885,22 @@ int SeparableConvolutionColumnAVX(int width, int height,
 					m256_temp3 = _mm256_add_ps(m256_temp1, m256_temp2);
 
 					_mm256_storeu_ps(p_mov_output, m256_temp3);
-
+#endif
 					p_mov_extended_input += step_size_avx;
 					p_mov_output += step_size_avx;
 				}/*for avx*/
 
 				for (i = 0; i < steps_sse; i++) {
+#ifdef _USE_FMA
+					__m128 m128_temp0, m128_temp1, m128_temp2;
+
+					m128_temp0 = _mm_loadu_ps(p_mov_extended_input);
+					m128_temp1 = _mm_loadu_ps(p_mov_output);
+					m128_temp2 = _mm_fmadd_ps(m128_temp0, m128_kernel_element,
+						m128_temp1);
+
+					_mm_storeu_ps(p_mov_output, m128_temp2);
+#else
 					__m128 m128_temp0, m128_temp1, m128_temp2, m128_temp3;
 
 					m128_temp0 = _mm_loadu_ps(p_mov_extended_input);
@@ -857,7 +910,7 @@ int SeparableConvolutionColumnAVX(int width, int height,
 					m128_temp3 = _mm_add_ps(m128_temp1, m128_temp2);
 
 					_mm_storeu_ps(p_mov_output, m128_temp3);
-
+#endif
 					p_mov_extended_input += step_size_sse;
 					p_mov_output += step_size_sse;
 				}/*for sse*/

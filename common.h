@@ -3,10 +3,12 @@
 
 
 #define _SWAP_KERNEL_AND_WIDTH
+//#define _USE_FMA
 
 #ifndef _SWAP_KERNEL_AND_WIDTH
 	#define _KERNEL_ALIGNED16
 #endif
+
 
 #ifdef _DEBUG
 
@@ -20,7 +22,7 @@
 
 	#define WIDTH						(1000)
 	#define HEIGHT						(1000)
-	#define KERNEL_RADIUS				(10)	
+	#define KERNEL_RADIUS				(15)	
 #endif
 
 #define KERNEL_LENGTH					(2 * KERNEL_RADIUS + 1)
