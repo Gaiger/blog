@@ -672,14 +672,14 @@ int SeparableConvolutionRowAVX(int width, int height,
 
 	step_size_avx = sizeof(__m256) / sizeof(float);
 	steps_avx = width / step_size_avx;
-	remainder_avx = width % steps_avx;
 
 	if (0 == steps_avx)
 	{
-		SeparableConvolutionRowSSE4(width, height,
+		return SeparableConvolutionRowSSE4(width, height,
 			p_extended_input, kernel_length, p_kernel_row,
 			p_row_done_extended_output);
 	}/*if width < step_size*/
+	remainder_avx = width % steps_avx;
 
 	step_size_sse = sizeof(__m128) / sizeof(float);
 	steps_sse = remainder_avx / step_size_sse;
@@ -821,7 +821,6 @@ int SeparableConvolutionColumnAVX(int width, int height,
 
 	step_size_avx = sizeof(__m256) / sizeof(float);
 	steps_avx = width / step_size_avx;
-	remainder_avx = width % step_size_avx;
 
 	if (0 == steps_avx)
 	{
@@ -829,6 +828,7 @@ int SeparableConvolutionColumnAVX(int width, int height,
 			p_row_done_extended_input,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
+	remainder_avx = width % step_size_avx;
 
 	step_size_sse = sizeof(__m128) / sizeof(float);
 	steps_sse = remainder_avx / step_size_sse;
@@ -974,7 +974,6 @@ int SeparableConvolutionColumnAVX(int width, int height,
 
 	step_size_avx = sizeof(__m256) / sizeof(float);
 	steps_avx = kernel_length / step_size_avx;
-	remainder_avx = kernel_length % step_size_avx;
 
 	if (0 == steps_avx)
 	{
@@ -982,7 +981,7 @@ int SeparableConvolutionColumnAVX(int width, int height,
 			p_row_done_extended_input,
 			kernel_length, p_kernel_column, p_output);
 	}/*if */
-
+	remainder_avx = kernel_length % step_size_avx;
 
 	step_size_sse = sizeof(__m128) / sizeof(float);
 	steps_sse = remainder_avx / step_size_sse;
