@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 	float *p_kernel_matrix;
 
 	float *p_input, *p_extended_input;
-	float *p_output;
+	float *p_definition_output;
 	float *p_separable_row_intermediate;
-	float *p_separable_output_cpu;
+	float *p_separable_output;
 
 
 	printf("input = %d x %d\r\n", WIDTH, HEIGHT);
@@ -140,18 +140,17 @@ int main(int argc, char *argv[])
 		}/*for j*/
 	}/*for i*/
 
-	p_output = (float*)malloc(
-		width*height * sizeof(float));
+	p_definition_output = (float*)malloc(width*height * sizeof(float));
 #if(1)
 	TIMER_LOOP_BEGIN(CONVOLUTION_AVX, ROUND)
 		ConvolutionAVX(width, height, p_extended_input,
-			kernel_length, p_kernel_matrix, p_output);
+			kernel_length, p_kernel_matrix, p_definition_output);
 	TIMER_LOOP_END(CONVOLUTION_AVX)
 #endif
 	p_separable_row_intermediate = (float*)malloc(
 		extended_width*height * sizeof(float));
 
-	p_separable_output_cpu = (float*)malloc(
+	p_separable_output = (float*)malloc(
 		width*height * sizeof(float));
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SERIAL, ROUND)
@@ -159,7 +158,7 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SERIAL, ROUND)
 			kernel_length, p_kernel_row, p_separable_row_intermediate);
 
 	SeparableConvolutionColumnSerial(width, height, p_separable_row_intermediate,
-		kernel_length, p_kernel_column, p_separable_output_cpu);
+		kernel_length, p_kernel_column, p_separable_output);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SERIAL)
 #endif
 
@@ -169,7 +168,7 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SSE4, ROUND)
 		kernel_length, p_kernel_row, p_separable_row_intermediate);
 
 	SeparableConvolutionColumnSSE4(width, height, p_separable_row_intermediate,
-		kernel_length, p_kernel_column, p_separable_output_cpu);
+		kernel_length, p_kernel_column, p_separable_output);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SSE4)
 #endif
 
@@ -179,7 +178,7 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_AVX, ROUND)
 		kernel_length, p_kernel_row, p_separable_row_intermediate);
 
 	SeparableConvolutionColumnAVX(width, height, p_separable_row_intermediate,
-		kernel_length, p_kernel_column, p_separable_output_cpu);
+		kernel_length, p_kernel_column, p_separable_output);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 #endif
 
@@ -191,16 +190,16 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 
 			int is_over_tolerance;
 			is_over_tolerance = 0;
-			if (0 == p_output[j*width + i])
+			if (0 == p_definition_output[j*width + i])
 			{
-				if (0 != p_separable_output_cpu[j*width + i])
+				if (0 != p_separable_output[j*width + i])
 					is_over_tolerance = 1;
 			}
 			else
 			{
 				float tolerance;
-				tolerance = p_separable_output_cpu[j*width + i] - p_output[j*width + i];
-				tolerance /= p_output[j*width + i];
+				tolerance = p_separable_output[j*width + i] - p_definition_output[j*width + i];
+				tolerance /= p_definition_output[j*width + i];
 				tolerance = (float)fabs(tolerance);
 				if (tolerance > 1.0e-6)
 					is_over_tolerance = 1;
@@ -209,8 +208,8 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 			if (0 != is_over_tolerance)
 			{
 				printf("computs error : i = %d, j = %d"
-					", value = %.f %.f\r\n", i, j, p_separable_output_cpu[j*width + i]
-					, p_output[j*width + i]);
+					", value = %.f %.f\r\n", i, j, p_separable_output[j*width + i]
+					, p_definition_output[j*width + i]);
 				count++;
 			}
 
@@ -224,8 +223,8 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 
 
 	SAFE_FREE(p_separable_row_intermediate);
-	SAFE_FREE(p_separable_output_cpu);
-	SAFE_FREE(p_output);
+	SAFE_FREE(p_separable_output);
+	SAFE_FREE(p_definition_output);
 	
 	SAFE_FREE(p_extended_input);
 	SAFE_FREE(p_input);
