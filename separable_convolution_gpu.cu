@@ -349,7 +349,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 
 	extern __shared__ float shared_mem[];
 	float *p_input_in_block;
-
+	int input_in_block_height;
 
 	(void)p_kernel_row_dev;
 
@@ -358,11 +358,9 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 
 	p_input_in_block = &shared_mem[0];
 
-#ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
-
-	int input_in_block_height;
-
 	input_in_block_height = blockDim.y + 2 * kernel_radius;
+
+#ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
 	for (; j < height; j += blockDim.y * gridDim.y) {
@@ -377,19 +375,16 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 			sum = 0;
 			x = kernel_radius + i;
 			jj = 0;
+
 			do {
-				if (threadIdx.y + jj*blockDim.y <
-					blockDim.y + 2 * kernel_radius)
-				{
-					p_input_in_block[threadIdx.x * input_in_block_height
-						+ jj*blockDim.y + threadIdx.y]
-						= p_extended_input_dev
-						[(j + jj*blockDim.y)*extended_width
-						+ kernel_radius + i];
-				}/*if */
+				p_input_in_block[threadIdx.x * input_in_block_height
+					+ jj*blockDim.y + threadIdx.y]
+					= p_extended_input_dev
+					[(j + jj*blockDim.y)*extended_width
+					+ kernel_radius + i];
 
 				jj++;
-			} while (jj * blockDim.y <  blockDim.y + 2 * kernel_radius);
+			} while (threadIdx.y + jj * blockDim.y <  input_in_block_height);
 
 			__syncthreads();
 
@@ -423,18 +418,13 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 
 			jj = 0;
 			do {
-				if (threadIdx.y + jj*blockDim.y <  
-					blockDim.y + 2 * kernel_radius)
-				{
-					p_input_in_block[(threadIdx.y + jj*blockDim.y)*blockDim.x
-						+ threadIdx.x] 
-						= p_extended_input_dev
-						[ (j + jj*blockDim.y)*extended_width
-						+ kernel_radius + i];
-				}/*if */
-				
+				p_input_in_block[(threadIdx.y + jj*blockDim.y)*blockDim.x
+					+ threadIdx.x] 
+					= p_extended_input_dev
+					[ (j + jj*blockDim.y)*extended_width
+					+ kernel_radius + i];				
 				jj++;
-			} while (jj * blockDim.y <  blockDim.y + 2 * kernel_radius);
+			} while (threadIdx.y + jj * blockDim.y <  input_in_block_height);
 		
 			__syncthreads();
 
@@ -491,16 +481,13 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 			ii = 0;
 
 			do {
-				if (threadIdx.x + ii*blockDim.x < input_in_block_width)
-				{
-					p_input_in_block[threadIdx.y*input_in_block_width
-						+ ii*blockDim.x + threadIdx.x] =
-						p_row_done_extended_input_dev[j*extended_width 
-						+ ii*blockDim.x + i];
-				}/*if */
-				
+				p_input_in_block[threadIdx.y*input_in_block_width
+					+ ii*blockDim.x + threadIdx.x] =
+					p_row_done_extended_input_dev[j*extended_width 
+					+ ii*blockDim.x + i];
+
 				ii++;
-			} while (ii* blockDim.x < input_in_block_width);
+			} while (threadIdx.x + ii* blockDim.x < input_in_block_width);
 
 			__syncthreads();
 
