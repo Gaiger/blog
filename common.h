@@ -5,6 +5,7 @@
 
 
 #define _HOST_PIN
+#define _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
 
 #ifdef _DEBUG
 	#define ROUND							(1)

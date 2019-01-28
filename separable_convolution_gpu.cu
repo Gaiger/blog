@@ -358,6 +358,55 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 
 	p_input_in_block = &shared_mem[0];
 
+#ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
+
+	int input_in_block_height;
+
+	input_in_block_height = blockDim.y + 2 * kernel_radius;
+
+	j = blockDim.y*blockIdx.y + threadIdx.y;
+	for (; j < height; j += blockDim.y * gridDim.y) {
+
+		i = blockDim.x*blockIdx.x + threadIdx.x;
+		for (; i < width; i += blockDim.x * gridDim.x) {
+
+			int jj;
+			int x;
+			float sum;
+
+			sum = 0;
+			x = kernel_radius + i;
+			jj = 0;
+			do {
+				if (threadIdx.y + jj*blockDim.y <
+					blockDim.y + 2 * kernel_radius)
+				{
+					p_input_in_block[threadIdx.x * input_in_block_height
+						+ jj*blockDim.y + threadIdx.y]
+						= p_extended_input_dev
+						[(j + jj*blockDim.y)*extended_width
+						+ kernel_radius + i];
+				}/*if */
+
+				jj++;
+			} while (jj * blockDim.y <  blockDim.y + 2 * kernel_radius);
+
+			__syncthreads();
+
+			for (jj = 0; jj < kernel_length; jj++) {
+				sum += kernel_const_mem[jj] * p_input_in_block[
+					threadIdx.x*input_in_block_height + jj + threadIdx.y];
+			}/*for kernel*/
+
+			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
+				= sum;
+
+			__syncthreads();
+		}/*for width*/
+
+	}/*for j*/
+
+#else
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
 	for (; j < height; j += blockDim.y * gridDim.y) {
@@ -377,7 +426,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 				if (threadIdx.y + jj*blockDim.y <  
 					blockDim.y + 2 * kernel_radius)
 				{
-					p_input_in_block[(threadIdx.y + jj*blockDim.y)*blockDim.x 
+					p_input_in_block[(threadIdx.y + jj*blockDim.y)*blockDim.x
 						+ threadIdx.x] 
 						= p_extended_input_dev
 						[ (j + jj*blockDim.y)*extended_width
@@ -402,6 +451,8 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 		}/*for width*/
 		
 	}/*for j*/
+
+#endif
 
 }/*SeparateConvolutionRowGPUKernelInConstSharedMemCU*/
 
