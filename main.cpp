@@ -409,7 +409,7 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM)
 					p_separable_output_gpu[j*width + i], 
 					p_separable_output_cpu[j*width + i]);
 				count++;
-				break;
+				
 			}
 
 		}/*for i*/
