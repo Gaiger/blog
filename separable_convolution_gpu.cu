@@ -790,7 +790,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	block_height = num_threads.y + 2 * kernel_radius;
 /*
 	padding
-	= WARP_SIZE*n - (block_size + num_threads - (WARP_SIZE - num_threads))
+	= WARP_SIZE*n - (block_size + num_threads + (WARP_SIZE - num_threads))
 */
 
 #ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
@@ -872,7 +872,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 	block_width = num_threads.x + 2 * kernel_radius;
 /*
 	padding 
-	= WARP_SIZE*n - (block_size + num_threads - (WARP_SIZE - num_threads))
+	= WARP_SIZE*n - (block_size + num_threads + (WARP_SIZE - num_threads))
 */
 
 	padding = WARP_SIZE*( (block_width + (WARP_SIZE - 1) )/ WARP_SIZE)
