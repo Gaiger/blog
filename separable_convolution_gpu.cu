@@ -587,13 +587,13 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 
 
 
-#define PADDING						(1)
+#define PADDING						(16)
 
 
 LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 	int width, int height, float const *p_extended_input_dev,
 	int kernel_length, float const *p_kernel_row_dev,
-	float *p_row_done_extended_output_dev)
+	float *p_row_done_extended_output_dev, const int padding)
 {
 	int i, j;
 	int kernel_radius;
@@ -613,7 +613,6 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 	block_height = blockDim.y + 2 * kernel_radius;
 	
-
 #ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
 	shared_mem_pitch = block_height + blockDim.y + PADDING;
 
@@ -657,7 +656,10 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 	}/*for j*/
 
 #else
-	shared_mem_pitch = blockDim.x + 2 * kernel_radius;
+	int block_width;
+	block_width = blockDim.x + 2 * kernel_radius;
+	shared_mem_pitch = block_width + blockDim.x;
+	shared_mem_pitch += padding;
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
 	for (; j < height; j += blockDim.y * gridDim.y) {
@@ -674,20 +676,20 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 			jj = 0;
 			do {
-				p_input_in_block[(threadIdx.y + jj*blockDim.y)*blockDim.x
+				p_input_in_block[(threadIdx.y + jj*blockDim.y)* shared_mem_pitch
 					+ threadIdx.x]
 					= p_extended_input_dev
 					[(j + jj*blockDim.y)*extended_width
 					+ kernel_radius + i];
 				jj++;
-			} while (threadIdx.y + jj * blockDim.y <  block_height);
+			} while (jj * blockDim.y <  block_height);
 
 			__syncthreads();
 
 
 			for (jj = 0; jj < kernel_length; jj++) {
 				sum += kernel_const_mem[jj] * p_input_in_block[
-					(threadIdx.y + jj)*blockDim.x + threadIdx.x];
+					(threadIdx.y + jj)*shared_mem_pitch + threadIdx.x];
 			}/*for kernel*/
 
 			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
@@ -763,6 +765,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 
 }/*SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU*/
 
+#define WARP_SIZE					(32)
 
 int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	dim3 num_blocks, dim3 num_threads,
@@ -774,6 +777,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	float *p_kernel_const_dev;
 	int shared_mem_size;
 	int kernel_radius;
+	int padding;
 
 	if (0 == width || 0 == height)
 		return -1;
@@ -789,15 +793,18 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 
 	shared_mem_size = sizeof(float)*
 		(block_height + num_threads.y + PADDING)*(num_threads.x);
+	padding = 0;
 #else
 	int block_width;
 	
 	block_width = num_threads.x + 2 * kernel_radius;
 
-	shared_mem_size = sizeof(float)*
-		(block_width + num_threads.x  + PADDING)*(num_threads.y);
-#endif
+	padding = WARP_SIZE*((block_width + (WARP_SIZE - 1)) / WARP_SIZE)
+		- block_width;
 
+	shared_mem_size = sizeof(float)*
+		(block_width + num_threads.x  + padding)*(num_threads.y*2);
+#endif	
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
@@ -810,7 +817,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_extended_input_dev, kernel_length,
-			NULL, p_row_done_extended_output_dev);
+			NULL, p_row_done_extended_output_dev, padding);
 
 	getLastCudaError("SeparateConvolutionRowGPUKernelInConstCU");
 	return 0;
@@ -841,14 +848,11 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 
 	block_width = num_threads.x + 2 * kernel_radius;
 
-#define WARP_SIZE					(32)
-
 	padding = WARP_SIZE*( (block_width + (WARP_SIZE - 1) )/ WARP_SIZE)
-		- block_width;
-
+		- block_width;	
 	shared_mem_size = sizeof(float) * 
-		(block_width + num_threads.x + padding)*(num_threads.y);
-
+		(block_width + num_threads.x + padding)*(num_threads.y);	
+	
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
