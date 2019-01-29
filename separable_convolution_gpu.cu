@@ -819,8 +819,8 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 
 		n = (block_height + (num_threads.y - 1)) / num_threads.y;
 		shared_mem_size = sizeof(float)
-			* (block_width + num_threads.x + padding) * (n * num_threads.y)
-			+ num_threads.x;
+			* ((block_width + num_threads.x + padding) * (n * num_threads.y)
+			+ num_threads.x);
 
 	}/*local variable*/
 #endif	
