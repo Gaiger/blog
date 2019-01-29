@@ -681,8 +681,9 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 					= p_extended_input_dev
 					[(j + jj*blockDim.y)*extended_width
 					+ kernel_radius + i];
+
 				jj++;
-			} while (jj * blockDim.y <  block_height);
+			} while (jj * blockDim.y < block_height);
 
 			__syncthreads();
 
@@ -777,7 +778,10 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	float *p_kernel_const_dev;
 	int shared_mem_size;
 	int kernel_radius;
+	
+	int block_height;
 	int padding;
+
 
 	if (0 == width || 0 == height)
 		return -1;
@@ -787,7 +791,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 
 	extended_width = width + kernel_length - 1;
 	kernel_radius = kernel_length / 2;
-
+	block_height = num_threads.y + 2 * kernel_radius;
 /*
 	padding
 	= WARP_SIZE*n - (block_size + num_threads - (WARP_SIZE - num_threads))
@@ -796,28 +800,28 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 #ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
 	/*unable to completely solve the bank conflict, 
 	only mitigate it*/
-	{
-		int block_height;
-		block_height = num_threads.y + 2 * kernel_radius;
 
-		padding = WARP_SIZE*((block_height + (WARP_SIZE - 1)) / WARP_SIZE)
-			- block_height;
-		padding += 1;
+	padding = WARP_SIZE*((block_height + (WARP_SIZE - 1)) / WARP_SIZE)
+		- block_height;
+	padding += 1;
 		
-		shared_mem_size = sizeof(float)*
-			(block_height + num_threads.y + padding)*(num_threads.x);
-	}/*local variable*/
+	shared_mem_size = sizeof(float)*
+		(block_height + num_threads.y + padding)*(num_threads.x);
+
 #else
 	{
 		int block_width;
+		int n;
 
 		block_width = num_threads.x + 2 * kernel_radius;
-
 		padding = WARP_SIZE*((block_width + (WARP_SIZE - 1)) / WARP_SIZE)
 			- block_width;
 
-		shared_mem_size = sizeof(float)*
-			(block_width + num_threads.x + padding)*(num_threads.y * 2);
+		n = (block_height + (num_threads.y - 1)) / num_threads.y;
+		shared_mem_size = sizeof(float)
+			* (block_width + num_threads.x + padding) * (n * num_threads.y)
+			+ num_threads.x;
+
 	}/*local variable*/
 #endif	
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
