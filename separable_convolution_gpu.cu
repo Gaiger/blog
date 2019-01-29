@@ -586,10 +586,6 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 }/*SeparableConvolutionColumnGPUKernelInConstSharedMem*/
 
 
-
-#define PADDING						(0)
-
-
 LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 	int width, int height, float const *p_extended_input_dev,
 	int kernel_length, float const *p_kernel_row_dev,
@@ -632,7 +628,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 			do {
 				p_input_in_block[threadIdx.x * shared_mem_pitch
-					+ jj*blockDim.y + threadIdx.y + PADDING]
+					+ jj*blockDim.y + threadIdx.y]
 					= p_extended_input_dev
 					[(j + jj*blockDim.y)*extended_width
 					+ kernel_radius + i];
@@ -644,7 +640,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 			for (jj = 0; jj < kernel_length; jj++) {
 				sum += kernel_const_mem[jj] * p_input_in_block[
-					threadIdx.x*shared_mem_pitch + jj + threadIdx.y + PADDING];
+					threadIdx.x*shared_mem_pitch + jj + threadIdx.y];
 			}/*for kernel*/
 
 			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
