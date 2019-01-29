@@ -822,6 +822,14 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 			* ((block_width + num_threads.x + padding) * (n * num_threads.y)
 			+ num_threads.x);
 
+		if (shared_mem_size > 48 * 1024)
+		{
+			return SeparableConvolutionRowGPUKernelInConstSharedMem(
+				num_blocks, num_threads,
+				width, height, p_extended_input_dev,
+				kernel_length, p_kernel_row_host,
+				p_row_done_extended_output_dev);
+		}
 	}/*local variable*/
 #endif	
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
