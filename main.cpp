@@ -99,7 +99,7 @@ int NumberOfThreadsCorrection(int width, int height, dim3 *p_num_threads)
 	
 	if (height > y_number_threads)
 	{
-		while (width != y_number_threads *(width / y_number_threads))
+		while (height != y_number_threads *(height / y_number_threads))
 		{
 			y_number_threads -= 1;
 			if (1 == y_number_threads)
@@ -120,11 +120,10 @@ int NumberOfThreadsCorrection(int width, int height, dim3 *p_num_threads)
 		}
 	}/*if */
 
-
-	p_num_threads->z = 1;
-
-	p_num_threads->x = p_num_threads->x;
-	p_num_threads->y = p_num_threads->y;
+	p_num_threads->x = x_number_threads;
+	p_num_threads->y = y_number_threads;
+	p_num_threads->z = 1;	
+	
 	
 	printf(" X threads = %d\r\n", p_num_threads->x);
 	printf(" Y threads = %d\r\n", p_num_threads->y);
@@ -349,37 +348,71 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
 	HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
 		width*height * sizeof(float),
 		cudaMemcpyDeviceToHost));
-TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST)
+	TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST)
 
-
-
-	//NumberOfThreadsCorrection(width, height, &num_threads);
+	{
+		dim3 num_blocks, num_threads;
+		num_blocks.x = NUM_BLOCKS; num_blocks.y = NUM_BLOCKS;
+		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
+		NumberOfThreadsCorrection(width, height, &num_threads);		
 
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM, ROUND)
 
-HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
-	extended_width*extended_height * sizeof(float),
-	cudaMemcpyHostToDevice));
+			HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
+				extended_width*extended_height * sizeof(float),
+				cudaMemcpyHostToDevice));
 
-	dim3 num_blocks, num_threads;
-	num_threads.x = X_NUM_THREADS; num_blocks.x = NUM_BLOCKS;
-	num_threads.y = Y_NUM_THREADS; num_blocks.y = NUM_BLOCKS;
-	SeparableConvolutionRowGPUKernelInConstSharedMem(num_blocks, num_threads, 
-		width, height,
-		p_extended_input_dev, kernel_length, p_kernel_row,
-		p_separable_row_intermediate_dev);
 
-	SeparableConvolutionColumnGPUKernelInConstSharedMem(num_blocks, num_threads, 
-		width, height, 
-		p_separable_row_intermediate_dev, kernel_length, p_kernel_column,
-		p_separable_output_dev);
+		SeparableConvolutionRowGPUKernelInConstSharedMem(num_blocks, num_threads,
+			width, height,
+			p_extended_input_dev, kernel_length, p_kernel_row,
+			p_separable_row_intermediate_dev);
 
-	HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
-		width*height * sizeof(float),
-		cudaMemcpyDeviceToHost));
+		SeparableConvolutionColumnGPUKernelInConstSharedMem(num_blocks, num_threads,
+			width, height,
+			p_separable_row_intermediate_dev, kernel_length, p_kernel_column,
+			p_separable_output_dev);
+
+		HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
+			width*height * sizeof(float),
+			cudaMemcpyDeviceToHost));
 
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM)
+	}/*local variable*/
 
+#if(1)
+	{
+		dim3 num_blocks, num_threads;
+		num_blocks.x = NUM_BLOCKS; num_blocks.y = NUM_BLOCKS;
+		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;		
+#ifndef _DEBUG
+		NumberOfThreadsCorrection(width, height, &num_threads);
+#endif		
+
+TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING, ROUND)
+
+		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
+			extended_width*extended_height * sizeof(float),
+			cudaMemcpyHostToDevice));
+
+
+		SeparableConvolutionRowGPUKernelInConstSharedMemPadding(num_blocks, num_threads,
+			width, height,
+			p_extended_input_dev, kernel_length, p_kernel_row,
+			p_separable_row_intermediate_dev);
+
+		SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(num_blocks, num_threads,
+			width, height,
+			p_separable_row_intermediate_dev, kernel_length, p_kernel_column,
+			p_separable_output_dev);
+
+		HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
+			width*height * sizeof(float),
+			cudaMemcpyDeviceToHost));
+
+TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
+	}/*local variable*/
+#endif
 #if(1)
 	int count = 0;
 	for (j = 0; j < height; j++) {
