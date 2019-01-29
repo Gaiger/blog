@@ -614,7 +614,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 	block_height = blockDim.y + 2 * kernel_radius;
 	
 #ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
-	shared_mem_pitch = block_height + padding;
+	shared_mem_pitch = block_height + blockDim.y + padding;
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
 	for (; j < height; j += blockDim.y * gridDim.y) {
@@ -638,7 +638,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 					+ kernel_radius + i];
 
 				jj++;
-			} while ( jj * blockDim.y <  block_height);
+			} while (jj * blockDim.y < block_height);
 
 			__syncthreads();
 
@@ -747,7 +747,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 					+ ii*blockDim.x + i];
 
 				ii++;
-			} while ( ii* blockDim.x < block_width);
+			} while (ii * blockDim.x < block_width);
 
 			__syncthreads();
 
