@@ -96,8 +96,10 @@ LOCAL __global__ void SeparateConvolutionColumnGPULinearMemoryCU(
 
 	int i, j;	
 	int extended_width;
+	int kernel_radius;
 
-	extended_width = width + kernel_length - 1;
+	kernel_radius = kernel_length / 2;
+	extended_width = width + 2 * kernel_radius;
 
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
@@ -358,7 +360,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 
 	p_input_in_block = &shared_mem[0];
 
-	block_height = blockDim.y + 2 * kernel_radius;
+	block_height = kernel_length + (blockDim.y - 1);
 
 #ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
 
@@ -453,7 +455,6 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 	float *p_output_dev)
 {
 	int i, j;
-	int kernel_radius;
 	int extended_width;
 
 	extern __shared__ float shared_mem[];
@@ -462,11 +463,11 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 
 	(void)p_kernel_column_dev;
 
-	kernel_radius = kernel_length / 2;
+	
 	extended_width = width + kernel_length - 1;
 
 	p_input_in_block = &shared_mem[0];
-	block_width = blockDim.x + 2 * kernel_radius;
+	block_width = kernel_length + (blockDim.x - 1);
 
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
@@ -514,8 +515,9 @@ int SeparableConvolutionRowGPUKernelInConstSharedMem(
 {
 	int extended_width;
 	float *p_kernel_const_dev;
-	int shared_mem_size;
 	int kernel_radius;
+	int shared_mem_size;
+	int block_height;
 
 	if (0 == width || 0 == height)
 		return -1;
@@ -523,11 +525,13 @@ int SeparableConvolutionRowGPUKernelInConstSharedMem(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	extended_width = width + kernel_length - 1;
 	kernel_radius = kernel_length / 2;
 
+	extended_width = width + 2* kernel_radius;
+	block_height = kernel_length + (num_threads.y - 1);
+
 	shared_mem_size = sizeof(float)*
-		(num_threads.y + 2 * kernel_radius)*(num_threads.x);
+		(block_height)*(num_threads.x);
 
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
@@ -556,7 +560,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 {
 	float *p_kernel_const_dev;
 	int shared_mem_size;
-	int kernel_radius;
+	int block_width;
 
 	if (0 == width || 0 == height)
 		return -1;
@@ -564,10 +568,9 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	kernel_radius = kernel_length / 2;
-
+	block_width = kernel_length + (num_threads.x - 1);
 	shared_mem_size = sizeof(float)*
-		(num_threads.x + 2 * kernel_radius)*(num_threads.y);
+		(block_width)*(num_threads.y);
 
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
@@ -607,7 +610,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 	p_input_in_block = &shared_mem[0];
 
-	block_height = blockDim.y + 2 * kernel_radius;
+	block_height = kernel_length + (blockDim.y - 1);
 	
 #ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
 
@@ -720,10 +723,10 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 	(void)p_kernel_column_dev;
 
 	kernel_radius = kernel_length / 2;
-	extended_width = width + kernel_length - 1;
+	extended_width = width + 2 * kernel_radius;
 
 	p_input_in_block = &shared_mem[0];
-	block_width = blockDim.x + 2 * kernel_radius;
+	block_width = kernel_length + (blockDim.x - 1);
 
 	shared_mem_pitch = block_width;
 	shared_mem_pitch += padding;
@@ -787,9 +790,10 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	extended_width = width + kernel_length - 1;
 	kernel_radius = kernel_length / 2;
-	block_height = num_threads.y + 2 * kernel_radius;
+	extended_width = width + 2 * kernel_radius;
+
+	block_height = kernel_length + (num_threads.y - 1);
 
 /*
 	padding
@@ -859,8 +863,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 		return -2;
 
 	kernel_radius = kernel_length / 2;
-
-	block_width = num_threads.x + 2 * kernel_radius;
+	block_width = kernel_length + (num_threads.x - 1);
 /*
 	padding 
 	= WARP_SIZE*n - (block_size + (WARP_SIZE - num_threads))
