@@ -73,8 +73,8 @@ LOCAL __global__ void SeparateConvolutionRowGPULinearMemoryCU(
 			
 			for (jj = 0; jj < kernel_length; jj++) {
 
-				sum += p_kernel_row_dev[jj]
-					* p_extended_input_dev[y_mul_input_width + x];
+				sum += LDG(p_kernel_row_dev[jj])
+					* LDG(p_extended_input_dev[y_mul_input_width + x]);
 
 				y_mul_input_width += extended_width;
 			}/*for kernel*/
@@ -118,8 +118,8 @@ LOCAL __global__ void SeparateConvolutionColumnGPULinearMemoryCU(
 
 			for (ii = 0; ii < kernel_length; ii++) {
 
-				sum += p_kernel_column_dev[ii]
-					* p_row_done_extended_input_dev[y_mul_input_width + x];
+				sum += LDG(p_kernel_column_dev[ii])
+					* LDG(p_row_done_extended_input_dev[y_mul_input_width + x]);
 				x += 1;
 			}/*for kernel_length*/
 
@@ -217,7 +217,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstCU(
 			for (jj = 0; jj < kernel_length; jj++) {
 
 				sum += kernel_const_mem[jj]
-					* p_extended_input_dev[y_mul_input_width + x];
+					* LDG(p_extended_input_dev[y_mul_input_width + x]);
 
 				y_mul_input_width += extended_width;
 			}/*for kernel*/
@@ -261,7 +261,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
 
 			for (ii = 0; ii < kernel_length; ii++) {
 				sum += kernel_const_mem[ii]
-					* p_row_done_extended_input_dev[y_mul_input_width + x];
+					* LDG(p_row_done_extended_input_dev[y_mul_input_width + x]);
 
 				x += 1;
 			}/*for kernel_length*/

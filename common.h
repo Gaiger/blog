@@ -5,7 +5,15 @@
 
 
 #define _HOST_PIN
-#define _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
+//#define _USE_READ_ONLY_CACHE
+//#define _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
+
+
+#ifdef _USE_READ_ONLY_CACHE
+	#define  LDG(VAR)				__ldg(&(VAR))
+#else
+	#define  LDG(VAR)				(VAR)
+#endif
 
 #ifdef _DEBUG
 	#define ROUND							(1)
