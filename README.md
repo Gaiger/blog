@@ -1,4 +1,7 @@
 # nRF51/nRF52 concurrently runs ble and esb
+
+detail explanation in this blog : https://gaiger-programming.blogspot.com/2018/11/nrf51nrf52-runs-ble-peripheral-and-esb.html
+
 In here, I demonstrate how to run nRF51822/nRF52832 as bluetooth low energy(BLE) peripheral and enhance shockburst(ESB) protocol at the same time. This code are based on nRF5X SDK 11 and nRF24LE1 with nRFgo SDK. 
 nRF5X SDK you could download from here : https://developer.nordicsemi.com/nRF5_SDK/
 
