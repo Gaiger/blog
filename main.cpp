@@ -354,7 +354,9 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
 		dim3 num_blocks, num_threads;
 		num_blocks.x = NUM_BLOCKS; num_blocks.y = NUM_BLOCKS;
 		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
-		NumberOfThreadsCorrection(width, height, &num_threads);		
+#ifndef _DEBUG
+		NumberOfThreadsCorrection(width, height, &num_threads);
+#endif
 
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM, ROUND)
 
