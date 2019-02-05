@@ -547,7 +547,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMem(
 		(width, height, p_extended_input_dev, kernel_length,
 			NULL, p_row_done_extended_output_dev);
 	
-	getLastCudaError("SeparateConvolutionRowGPUKernelInConstCU");
+	getLastCudaError("SeparableConvolutionRowGPUKernelInConstSharedMem");
 	return 0;
 }/*SeparableConvolutionRowGPUKernelInConstSharedMem*/
 
@@ -583,7 +583,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 		(width, height, p_row_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev);
 
-	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstCU");
+	getLastCudaError("SeparableConvolutionColumnGPUKernelInConstSharedMem");
 
 	return 0;
 }/*SeparableConvolutionColumnGPUKernelInConstSharedMem*/
@@ -838,7 +838,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 		(width, height, p_extended_input_dev, kernel_length,
 			NULL, p_row_done_extended_output_dev, padding);
 
-	getLastCudaError("SeparateConvolutionRowGPUKernelInConstCU");
+	getLastCudaError("SeparableConvolutionRowGPUKernelInConstSharedMemPadding");
 	return 0;
 }/*SeparableConvolutionRowGPUKernelInConstSharedMemPadding*/
 
@@ -889,7 +889,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 		(width, height, p_row_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev, padding);
 
-	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstCU");
+	getLastCudaError("SeparableConvolutionColumnGPUKernelInConstSharedMemPadding");
 
 	return 0;
 }/*SeparableConvolutionColumnGPUKernelInConstSharedMemPadding*/
