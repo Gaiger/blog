@@ -34,7 +34,6 @@
 	#define X_NUM_THREADS					(28)
 	#define Y_NUM_THREADS					(28)
 
-	#define NUM_BLOCKS						(4)
 #endif
 
 #define KERNEL_LENGTH					(2 * KERNEL_RADIUS + 1)

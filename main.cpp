@@ -109,6 +109,7 @@ int NumberOfThreadsCorrection(int width, int height, dim3 *p_num_threads)
 
 
 	x_number_threads = prop.maxThreadsDim[0] / y_number_threads;
+	//x_number_threads = 32;
 
 	if (width > x_number_threads)
 	{
@@ -309,8 +310,10 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM, ROUND)
 		kernel_length * sizeof(float),
 		cudaMemcpyHostToDevice));
 	dim3 num_blocks, num_threads;
-	num_threads.x = X_NUM_THREADS; num_blocks.x = NUM_BLOCKS;
-	num_threads.y = Y_NUM_THREADS; num_blocks.y = NUM_BLOCKS;
+	num_threads.x = X_NUM_THREADS;
+	num_threads.y = Y_NUM_THREADS;
+	num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
+	num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
 	SeparableConvolutionRowGPULinearMemory(num_blocks, num_threads, width, height,
 		p_extended_input_dev, kernel_length, p_kernel_row_dev,
@@ -334,8 +337,10 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
 		extended_width*extended_height * sizeof(float),
 		cudaMemcpyHostToDevice));
 	dim3 num_blocks, num_threads;
-	num_threads.x = X_NUM_THREADS; num_blocks.x = NUM_BLOCKS;
-	num_threads.y = Y_NUM_THREADS; num_blocks.y = NUM_BLOCKS;
+	num_threads.x = X_NUM_THREADS;
+	num_threads.y = Y_NUM_THREADS;
+	num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
+	num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
 	SeparableConvolutionRowGPUKernelInConst(num_blocks, num_threads, width, height,
 		p_extended_input_dev, kernel_length, p_kernel_row,
@@ -352,11 +357,12 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
 
 	{
 		dim3 num_blocks, num_threads;
-		num_blocks.x = NUM_BLOCKS; num_blocks.y = NUM_BLOCKS;
 		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
 #ifndef _DEBUG
 		NumberOfThreadsCorrection(width, height, &num_threads);
 #endif
+		num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
+		num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM, ROUND)
 
@@ -385,11 +391,12 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM)
 #if(1)
 	{
 		dim3 num_blocks, num_threads;
-		num_blocks.x = NUM_BLOCKS; num_blocks.y = NUM_BLOCKS;
-		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;		
+		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
 #ifndef _DEBUG
 		NumberOfThreadsCorrection(width, height, &num_threads);
-#endif		
+#endif
+		num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
+		num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING, ROUND)
 
