@@ -362,7 +362,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 
 	block_height = kernel_length + (blockDim.y - 1);
 
-#ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
+#ifdef _COLUMN_DATA_IN_CONSECUTIVE_SHARED_MEN
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
 	for (; j < height; j += blockDim.y * gridDim.y) {
@@ -612,7 +612,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 
 	block_height = kernel_length + (blockDim.y - 1);
 	
-#ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
+#ifdef _COLUMN_DATA_IN_CONSECUTIVE_SHARED_MEN
 
 	shared_mem_pitch = block_height;
 	shared_mem_pitch += padding;
@@ -799,7 +799,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 	padding
 	= WARP_SIZE*n - (block_size + num_threads + (WARP_SIZE - num_threads))
 */
-#ifdef _ROW_DATA_IN_CONSECUTIVE_SHARED_MEN
+#ifdef _COLUMN_DATA_IN_CONSECUTIVE_SHARED_MEN
 	/*unable to completely solve the bank conflict, 
 	only mitigate it*/
 
