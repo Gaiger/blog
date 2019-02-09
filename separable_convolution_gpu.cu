@@ -44,10 +44,10 @@ inline void __getLastCudaError(const char *errorMessage, const char *file,
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
 
-LOCAL __global__ void SeparateConvolutionRowGPULinearMemoryCU(
+LOCAL __global__ void SeparateConvolutionColumnGPULinearMemoryCU(
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_dev,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_dev,
+	float *p_column_done_extended_output_dev)
 {
 	int i, j;
 	int kernel_radius;
@@ -73,22 +73,22 @@ LOCAL __global__ void SeparateConvolutionRowGPULinearMemoryCU(
 			
 			for (jj = 0; jj < kernel_length; jj++) {
 
-				sum += LDG(p_kernel_row_dev[jj])
+				sum += LDG(p_kernel_column_dev[jj])
 					* LDG(p_extended_input_dev[y_mul_input_width + x]);
 
 				y_mul_input_width += extended_width;
 			}/*for kernel*/
 
-			p_row_done_extended_output_dev[j*extended_width + x]
+			p_column_done_extended_output_dev[j*extended_width + x]
 				= sum;
 		}/*for width*/
 
 	}/*for j*/
 
-}/*SeparateConvolutionRowGPULinearMemoryCU*/
+}/*SeparateConvolutionColumnGPULinearMemoryCU*/
 
 
-LOCAL __global__ void SeparateConvolutionColumnGPULinearMemoryCU(
+LOCAL __global__ void SeparateConvolutionRowGPULinearMemoryCU(
 	int width, int height, float const *p_row_done_extended_input_dev,
 	int kernel_length, float const *p_kernel_column_dev,
 	float *p_output_dev)
@@ -128,14 +128,14 @@ LOCAL __global__ void SeparateConvolutionColumnGPULinearMemoryCU(
 
 	}/*for j*/
 
-}/*SeparateConvolutionColumnGPULinearMemoryCU*/
+}/*SeparateConvolutionRowGPULinearMemoryCU*/
 
 
-int SeparableConvolutionRowGPULinearMemory(
+int SeparableConvolutionColumnGPULinearMemory(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_dev,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_dev,
+	float *p_column_done_extended_output_dev)
 {
 	int extended_width;
 
@@ -148,22 +148,22 @@ int SeparableConvolutionRowGPULinearMemory(
 	extended_width = width + kernel_length - 1;
 
 	
-	HANDLE_ERROR(cudaMemset(p_row_done_extended_output_dev, 0,
+	HANDLE_ERROR(cudaMemset(p_column_done_extended_output_dev, 0,
 		extended_width*height*sizeof(float)));
 
-	SeparateConvolutionRowGPULinearMemoryCU << <num_blocks, num_threads >> >
+	SeparateConvolutionColumnGPULinearMemoryCU << <num_blocks, num_threads >> >
 		(width, height, p_extended_input_dev, kernel_length,
-			p_kernel_row_dev, p_row_done_extended_output_dev);
+			p_kernel_column_dev, p_column_done_extended_output_dev);
 
-	getLastCudaError("SeparateConvolutionRowGPULinearMemoryCU");
+	getLastCudaError("SeparableConvolutionColumnGPULinearMemory");
 	return 0;
-}/*SeparateConvolutionRowGPULinearMemory*/
+}/*SeparableConvolutionColumnGPULinearMemory*/
 
 
-int SeparableConvolutionColumnGPULinearMemory(
+int SeparableConvolutionRowGPULinearMemory(
 	dim3 num_blocks, dim3 num_threads,
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_dev,
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_dev,
 	float *p_output_dev)
 {
 	if (0 == width || 0 == height)
@@ -172,13 +172,13 @@ int SeparableConvolutionColumnGPULinearMemory(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	SeparateConvolutionColumnGPULinearMemoryCU << <num_blocks, num_threads >> >
-		(width, height, p_row_done_extended_input_dev,
-			kernel_length, p_kernel_column_dev, p_output_dev);
+	SeparateConvolutionRowGPULinearMemoryCU << <num_blocks, num_threads >> >
+		(width, height, p_column_done_extended_input_dev,
+			kernel_length, p_kernel_row_dev, p_output_dev);
 
-	getLastCudaError("SeparateConvolutionColumnGPULinearMemoryCU");
+	getLastCudaError("SeparableConvolutionRowGPULinearMemory");
 	return 0;
-}/*SeparateConvolutionColumnGPULinearMemory*/
+}/*SeparableConvolutionRowGPULinearMemory*/
 
 
 
@@ -186,16 +186,16 @@ int SeparableConvolutionColumnGPULinearMemory(
 __constant__ float kernel_const_mem[1024];
 
 
-LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstCU(
+LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_dev,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_dev,
+	float *p_column_done_extended_output_dev)
 {
 	int i, j;
 	int kernel_radius;
 	int extended_width;
 
-	(void) p_kernel_row_dev;
+	(void)p_kernel_column_dev;
 
 	kernel_radius = kernel_length / 2;
 	extended_width = width + 2 * kernel_radius;
@@ -222,25 +222,25 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstCU(
 				y_mul_input_width += extended_width;
 			}/*for kernel*/
 
-			p_row_done_extended_output_dev[j*extended_width + x]
+			p_column_done_extended_output_dev[j*extended_width + x]
 				= sum;
 		}/*for width*/
 
 	}/*for j*/
 
-}/*SeparateConvolutionRowGPUKernelInConstCU*/
+}/*SeparateConvolutionColumnGPUKernelInConstCU*/
 
 
-LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_dev,
+LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstCU(
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_dev,
 	float *p_output_dev)
 {
 
 	int i, j;
 	int extended_width;
 
-	(void)p_kernel_column_dev;
+	(void)p_kernel_row_dev;
 
 	extended_width = width + kernel_length - 1;
 
@@ -261,7 +261,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
 
 			for (ii = 0; ii < kernel_length; ii++) {
 				sum += kernel_const_mem[ii]
-					* LDG(p_row_done_extended_input_dev[y_mul_input_width + x]);
+					* LDG(p_column_done_extended_input_dev[y_mul_input_width + x]);
 
 				x += 1;
 			}/*for kernel_length*/
@@ -271,14 +271,14 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
 
 	}/*for j*/
 
-}/*SeparateConvolutionColumnGPUKernelInConstCU*/
+}/*SeparateConvolutionRowGPUKernelInConstCU*/
 
 
-int SeparableConvolutionRowGPUKernelInConst(
+int SeparableConvolutionColumnGPUKernelInConst(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_host,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_host,
+	float *p_column_done_extended_output_dev)
 {
 	int extended_width;
 	float *p_kernel_const_dev;
@@ -294,25 +294,25 @@ int SeparableConvolutionRowGPUKernelInConst(
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_row_host,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_column_host,
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
-	HANDLE_ERROR(cudaMemset(p_row_done_extended_output_dev, 0,
+	HANDLE_ERROR(cudaMemset(p_column_done_extended_output_dev, 0,
 		extended_width*height * sizeof(float)));
 
-	SeparateConvolutionRowGPUKernelInConstCU << <num_blocks, num_threads >> >
+	SeparateConvolutionColumnGPUKernelInConstCU << <num_blocks, num_threads >> >
 		(width, height, p_extended_input_dev, kernel_length,
-			NULL, p_row_done_extended_output_dev);
+			NULL, p_column_done_extended_output_dev);
 
-	getLastCudaError("SeparateConvolutionRowGPUKernelInConstCU");
+	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstCU");
 	return 0;
-}/*SeparableConvolutionRowGPUKernelInConst*/
+}/*SeparableConvolutionColumnGPUKernelInConst*/
 
 
-int SeparableConvolutionColumnGPUKernelInConst(
+int SeparableConvolutionRowGPUKernelInConst(
 	dim3 num_blocks, dim3 num_threads,
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_host,
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_host,
 	float *p_output_dev)
 {
 	float *p_kernel_const_dev;
@@ -327,23 +327,23 @@ int SeparableConvolutionColumnGPUKernelInConst(
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_column_host,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_row_host,
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
-	SeparateConvolutionColumnGPUKernelInConstCU << <num_blocks, num_threads >> >
-		(width, height, p_row_done_extended_input_dev,
+	SeparateConvolutionRowGPUKernelInConstCU << <num_blocks, num_threads >> >
+		(width, height, p_column_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev);
 
-	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstCU");
+	getLastCudaError("SeparateConvolutionRowGPUKernelInConstCU");
 	return 0;
-}/*SeparableConvolutionColumnGPUKernelInConst*/
+}/*SeparableConvolutionRowGPUKernelInConst*/
 
 
 
-LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
+LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_dev,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_dev,
+	float *p_column_done_extended_output_dev)
 {
 	int i, j;
 	int kernel_radius;
@@ -353,7 +353,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 	float *p_input_in_block;
 	int block_height;
 
-	(void)p_kernel_row_dev;
+	(void)p_kernel_column_dev;
 
 	kernel_radius = kernel_length / 2;
 	extended_width = width + 2 * kernel_radius;
@@ -395,7 +395,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 					threadIdx.x*block_height + jj + threadIdx.y];
 			}/*for kernel*/
 
-			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
+			p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
 				= sum;
 
 			__syncthreads();
@@ -436,7 +436,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 					(threadIdx.y + jj)*blockDim.x + threadIdx.x];
 			}/*for kernel*/
 
-			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
+			p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
 				= sum;
 
 			__syncthreads();
@@ -446,12 +446,12 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 
 #endif
 
-}/*SeparateConvolutionRowGPUKernelInConstSharedMemCU*/
+}/*SeparateConvolutionColumnGPUKernelInConstSharedMemCU*/
 
 
-LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_dev,
+LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_dev,
 	float *p_output_dev)
 {
 	int i, j;
@@ -461,7 +461,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 	float *p_input_in_block;
 	int block_width;
 
-	(void)p_kernel_column_dev;
+	(void)p_kernel_row_dev;
 
 	
 	extended_width = width + kernel_length - 1;
@@ -484,7 +484,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 			do {
 				p_input_in_block[threadIdx.y*block_width
 					+ ii*blockDim.x + threadIdx.x] =
-					p_row_done_extended_input_dev[j*extended_width 
+					p_column_done_extended_input_dev[j*extended_width
 					+ ii*blockDim.x + i];
 
 				ii++;
@@ -504,14 +504,14 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 
 	}/*for j*/
 
-}/*SeparateConvolutionColumnGPUKernelInConstSharedMemCU*/
+}/*SeparateConvolutionRowGPUKernelInConstSharedMemCU*/
 
 
-int SeparableConvolutionRowGPUKernelInConstSharedMem(
+int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_host,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_host,
+	float *p_column_done_extended_output_dev)
 {
 	int extended_width;
 	float *p_kernel_const_dev;
@@ -536,26 +536,26 @@ int SeparableConvolutionRowGPUKernelInConstSharedMem(
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_row_host,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_column_host,
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
-	HANDLE_ERROR(cudaMemset(p_row_done_extended_output_dev, 0,
+	HANDLE_ERROR(cudaMemset(p_column_done_extended_output_dev, 0,
 		extended_width*height * sizeof(float)));
 
-	SeparateConvolutionRowGPUKernelInConstSharedMemCU 
+	SeparateConvolutionColumnGPUKernelInConstSharedMemCU 
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_extended_input_dev, kernel_length,
-			NULL, p_row_done_extended_output_dev);
+			NULL, p_column_done_extended_output_dev);
 	
-	getLastCudaError("SeparableConvolutionRowGPUKernelInConstSharedMem");
+	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstSharedMemCU");
 	return 0;
-}/*SeparableConvolutionRowGPUKernelInConstSharedMem*/
+}/*SeparableConvolutionColumnGPUKernelInConstSharedMem*/
 
 
-int SeparableConvolutionColumnGPUKernelInConstSharedMem(
+int SeparableConvolutionRowGPUKernelInConstSharedMem(
 	dim3 num_blocks, dim3 num_threads,
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_host,
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_host,
 	float *p_output_dev)
 {
 	float *p_kernel_const_dev;
@@ -575,24 +575,24 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_column_host,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_row_host,
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
-	SeparateConvolutionColumnGPUKernelInConstSharedMemCU 
+	SeparateConvolutionRowGPUKernelInConstSharedMemCU 
 		<< <num_blocks, num_threads, shared_mem_size >> >
-		(width, height, p_row_done_extended_input_dev,
+		(width, height, p_column_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev);
 
-	getLastCudaError("SeparableConvolutionColumnGPUKernelInConstSharedMem");
+	getLastCudaError("SeparateConvolutionRowGPUKernelInConstSharedMemCU");
 
 	return 0;
-}/*SeparableConvolutionColumnGPUKernelInConstSharedMem*/
+}/*SeparableConvolutionRowGPUKernelInConstSharedMem*/
 
 
-LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
+LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU(
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_dev,
-	float *p_row_done_extended_output_dev, const int padding)
+	int kernel_length, float const *p_kernel_column_dev,
+	float *p_column_done_extended_output_dev, const int padding)
 {
 	int i, j;
 	int kernel_radius;
@@ -603,7 +603,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 	int block_height;
 	int shared_mem_pitch;
 
-	(void)p_kernel_row_dev;
+	(void)p_kernel_column_dev;
 
 	kernel_radius = kernel_length / 2;
 	extended_width = width + 2 * kernel_radius;
@@ -648,7 +648,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 					threadIdx.x*shared_mem_pitch + jj + threadIdx.y];
 			}/*for kernel*/
 
-			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
+			p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
 				= sum;
 
 			__syncthreads();
@@ -693,7 +693,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 					(threadIdx.y + jj)*shared_mem_pitch + threadIdx.x];
 			}/*for kernel*/
 
-			p_row_done_extended_output_dev[j*extended_width + kernel_radius + i]
+			p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
 				= sum;
 
 			__syncthreads();
@@ -703,12 +703,12 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 #endif
 
-}/*SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU*/
+}/*SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU*/
 
 
-LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU(
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_dev,
+LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_dev,
 	float *p_output_dev, const int padding)
 {
 	int i, j;
@@ -720,7 +720,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 	int block_width;
 	int shared_mem_pitch;
 
-	(void)p_kernel_column_dev;
+	(void)p_kernel_row_dev;
 
 	kernel_radius = kernel_length / 2;
 	extended_width = width + 2 * kernel_radius;
@@ -745,7 +745,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 			do {
 				p_input_in_block[threadIdx.y*shared_mem_pitch
 					+ ii*blockDim.x + threadIdx.x] =
-					p_row_done_extended_input_dev[j*extended_width
+					p_column_done_extended_input_dev[j*extended_width
 					+ ii*blockDim.x + i];
 
 				ii++;
@@ -765,15 +765,15 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 
 	}/*for j*/
 
-}/*SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU*/
+}/*SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU*/
 
 #define WARP_SIZE					(32)
 
-int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
+int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_extended_input_dev,
-	int kernel_length, float const *p_kernel_row_host,
-	float *p_row_done_extended_output_dev)
+	int kernel_length, float const *p_kernel_column_host,
+	float *p_column_done_extended_output_dev)
 {
 	int extended_width;
 	float *p_kernel_const_dev;
@@ -827,26 +827,26 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_row_host,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_column_host,
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
-	HANDLE_ERROR(cudaMemset(p_row_done_extended_output_dev, 0,
+	HANDLE_ERROR(cudaMemset(p_column_done_extended_output_dev, 0,
 		extended_width*height * sizeof(float)));
 
-	SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU
+	SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_extended_input_dev, kernel_length,
-			NULL, p_row_done_extended_output_dev, padding);
+			NULL, p_column_done_extended_output_dev, padding);
 
-	getLastCudaError("SeparableConvolutionRowGPUKernelInConstSharedMemPadding");
+	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU");
 	return 0;
-}/*SeparableConvolutionRowGPUKernelInConstSharedMemPadding*/
+}/*SeparableConvolutionColumnGPUKernelInConstSharedMemPadding*/
 
 
-int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
+int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	dim3 num_blocks, dim3 num_threads,
-	int width, int height, float const *p_row_done_extended_input_dev,
-	int kernel_length, float const *p_kernel_column_host,
+	int width, int height, float const *p_column_done_extended_input_dev,
+	int kernel_length, float const *p_kernel_row_host,
 	float *p_output_dev)
 {
 	float *p_kernel_const_dev;
@@ -881,15 +881,15 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_column_host,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_const_dev, p_kernel_row_host,
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
-	SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingCU
+	SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU
 		<< <num_blocks, num_threads, shared_mem_size >> >
-		(width, height, p_row_done_extended_input_dev,
+		(width, height, p_column_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev, padding);
 
-	getLastCudaError("SeparableConvolutionColumnGPUKernelInConstSharedMemPadding");
+	getLastCudaError("SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU");
 
 	return 0;
 }/*SeparableConvolutionColumnGPUKernelInConstSharedMemPadding*/

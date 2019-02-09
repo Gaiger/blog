@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
 	float *p_input, *p_extended_input;
 	float *p_output;
-	float *p_separable_row_intermediate;
+	float *p_separable_column_intermediate;
 	float *p_separable_output_cpu;
 
 
@@ -161,24 +161,24 @@ int main(int argc, char *argv[])
 	kernel_length = KERNEL_LENGTH;
 
 #ifdef _HOST_PIN
-	HANDLE_ERROR(cudaMallocHost((void**)&p_kernel_row,
-		kernel_length * sizeof(float)));
 	HANDLE_ERROR(cudaMallocHost((void**)&p_kernel_column,
 		kernel_length * sizeof(float)));
+	HANDLE_ERROR(cudaMallocHost((void**)&p_kernel_row,
+		kernel_length * sizeof(float)));
 #else
-	p_kernel_row = (float*)malloc(kernel_length * sizeof(float));
 	p_kernel_column = (float*)malloc(kernel_length * sizeof(float));
+	p_kernel_row = (float*)malloc(kernel_length * sizeof(float));	
 #endif
 
 	{
 		float shift_value;
 		for (i = 0; i < kernel_length; i++)
-			p_kernel_row[i] = (float)i + 1;
+			p_kernel_column[i] = (float)i + 1;
 
-		shift_value = p_kernel_row[kernel_length - 1];
+		shift_value = p_kernel_column[kernel_length - 1];
 
 		for (i = 0; i < kernel_length; i++)
-			p_kernel_column[i] = (float)i + shift_value + 1;
+			p_kernel_row[i] = (float)i + shift_value + 1;
 
 	}/*local variable*/
 
@@ -222,27 +222,19 @@ int main(int argc, char *argv[])
 	p_output = (float*)malloc(
 		width*height * sizeof(float));
 
-	p_separable_row_intermediate = (float*)malloc(
+	p_separable_column_intermediate = (float*)malloc(
 		extended_width*height * sizeof(float));
 
 	p_separable_output_cpu = (float*)malloc(
 		width*height * sizeof(float));
-#if(0)
-TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_SERIAL, ROUND)
-		SeparableConvolutionRowSerial(width, height, p_extended_input,
-			kernel_length, p_kernel_row, p_separable_row_intermediate);
 
-	SeparableConvolutionColumnSerial(width, height, p_separable_row_intermediate,
-		kernel_length, p_kernel_column, p_separable_output_cpu);
-TIMER_LOOP_END(SEPAREATE_CONVOLUTION_SERIAL)
-#endif
 #if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_AVX, ROUND)
-	SeparableConvolutionRowAVX(width, height, p_extended_input,
-			kernel_length, p_kernel_row, p_separable_row_intermediate);
+	SeparableConvolutionColumnAVX(width, height, p_extended_input,
+			kernel_length, p_kernel_column, p_separable_column_intermediate);
 
-	SeparableConvolutionColumnAVX(width, height, p_separable_row_intermediate,
-		kernel_length, p_kernel_column, p_separable_output_cpu);
+	SeparableConvolutionRowAVX(width, height, p_separable_column_intermediate,
+		kernel_length, p_kernel_row, p_separable_output_cpu);
 TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 #endif
 
@@ -250,10 +242,10 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 	
 	float *p_separable_output_gpu;
 
-	float *p_kernel_row_dev, *p_kernel_column_dev;
+	float *p_kernel_column_dev, *p_kernel_row_dev;
 
 	float *p_extended_input_dev;
-	float *p_separable_row_intermediate_dev;
+	float *p_separable_column_intermediate_dev;
 	float *p_separable_output_dev;
 	
 #ifdef _HOST_PIN
@@ -264,17 +256,17 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_AVX)
 		width*height * sizeof(float));
 #endif
 
-	HANDLE_ERROR(cudaMalloc((void**)&p_kernel_row_dev,
+	HANDLE_ERROR(cudaMalloc((void**)&p_kernel_column_dev,
 		kernel_length * sizeof(float)));
 
-	HANDLE_ERROR(cudaMalloc((void**)&p_kernel_column_dev,
+	HANDLE_ERROR(cudaMalloc((void**)&p_kernel_row_dev,
 		kernel_length * sizeof(float)));
 
 
 	HANDLE_ERROR(cudaMalloc((void**)&p_extended_input_dev,
 		extended_width*extended_height * sizeof(float)));
 
-	HANDLE_ERROR(cudaMalloc((void**)&p_separable_row_intermediate_dev,
+	HANDLE_ERROR(cudaMalloc((void**)&p_separable_column_intermediate_dev,
 		extended_width*height * sizeof(float)));
 
 	HANDLE_ERROR(cudaMalloc((void**)&p_separable_output_dev,
@@ -285,10 +277,10 @@ TIMER_LOOP_BEGIN(CUDA_DUMMY, ROUND)
 		extended_width*extended_height * sizeof(float),
 		cudaMemcpyHostToDevice));
 
-	HANDLE_ERROR(cudaMemcpy(p_kernel_row_dev, p_kernel_row,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_column_dev, p_kernel_row,
 		kernel_length * sizeof(float),
 		cudaMemcpyHostToDevice));
-	HANDLE_ERROR(cudaMemcpy(p_kernel_column_dev, p_kernel_column,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_row_dev, p_kernel_column,
 		kernel_length * sizeof(float),
 		cudaMemcpyHostToDevice));
 
@@ -304,10 +296,10 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM, ROUND)
 	HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
 		extended_width*extended_height * sizeof(float),
 		cudaMemcpyHostToDevice));
-	HANDLE_ERROR(cudaMemcpy(p_kernel_row_dev, p_kernel_row,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_column_dev, p_kernel_column,
 		kernel_length * sizeof(float),
 		cudaMemcpyHostToDevice));
-	HANDLE_ERROR(cudaMemcpy(p_kernel_column_dev, p_kernel_column,
+	HANDLE_ERROR(cudaMemcpy(p_kernel_row_dev, p_kernel_row,
 		kernel_length * sizeof(float),
 		cudaMemcpyHostToDevice));
 	dim3 num_blocks, num_threads;
@@ -316,12 +308,12 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM, ROUND)
 	num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
 	num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
-	SeparableConvolutionRowGPULinearMemory(num_blocks, num_threads, width, height,
-		p_extended_input_dev, kernel_length, p_kernel_row_dev,
-		p_separable_row_intermediate_dev);
-
 	SeparableConvolutionColumnGPULinearMemory(num_blocks, num_threads, width, height,
-		p_separable_row_intermediate_dev, kernel_length, p_kernel_column_dev,
+		p_extended_input_dev, kernel_length, p_kernel_column_dev,
+		p_separable_column_intermediate_dev);
+
+	SeparableConvolutionRowGPULinearMemory(num_blocks, num_threads, width, height,
+		p_separable_column_intermediate_dev, kernel_length, p_kernel_row_dev,
 		p_separable_output_dev);
 
 	HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
@@ -332,30 +324,31 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM)
 
 
 #if(1)
-TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
+	TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
 
-	HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
-		extended_width*extended_height * sizeof(float),
-		cudaMemcpyHostToDevice));
+		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
+			extended_width*extended_height * sizeof(float),
+			cudaMemcpyHostToDevice));
+
 	dim3 num_blocks, num_threads;
-	num_threads.x = X_NUM_THREADS;
-	num_threads.y = Y_NUM_THREADS;
+	num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
 	num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
 	num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
-	SeparableConvolutionRowGPUKernelInConst(num_blocks, num_threads, width, height,
-		p_extended_input_dev, kernel_length, p_kernel_row,
-		p_separable_row_intermediate_dev);
-
 	SeparableConvolutionColumnGPUKernelInConst(num_blocks, num_threads, width, height,
-		p_separable_row_intermediate_dev, kernel_length, p_kernel_column,
+		p_extended_input_dev, kernel_length, p_kernel_column,
+		p_separable_column_intermediate_dev);
+
+	SeparableConvolutionRowGPUKernelInConst(num_blocks, num_threads, width, height,
+		p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
 		p_separable_output_dev);
 
 	HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
 		width*height * sizeof(float),
 		cudaMemcpyDeviceToHost));
-TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST)
+	TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST)
 #endif
+
 
 #if(1)
 	{
@@ -374,14 +367,14 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM, ROUND)
 				cudaMemcpyHostToDevice));
 
 
-		SeparableConvolutionRowGPUKernelInConstSharedMem(num_blocks, num_threads,
-			width, height,
-			p_extended_input_dev, kernel_length, p_kernel_row,
-			p_separable_row_intermediate_dev);
-
 		SeparableConvolutionColumnGPUKernelInConstSharedMem(num_blocks, num_threads,
 			width, height,
-			p_separable_row_intermediate_dev, kernel_length, p_kernel_column,
+			p_extended_input_dev, kernel_length, p_kernel_column,
+			p_separable_column_intermediate_dev);
+
+		SeparableConvolutionRowGPUKernelInConstSharedMem(num_blocks, num_threads,
+			width, height,
+			p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
 			p_separable_output_dev);
 
 		HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
@@ -409,14 +402,14 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING, 
 			cudaMemcpyHostToDevice));
 
 
-		SeparableConvolutionRowGPUKernelInConstSharedMemPadding(num_blocks, num_threads,
-			width, height,
-			p_extended_input_dev, kernel_length, p_kernel_row,
-			p_separable_row_intermediate_dev);
-
 		SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(num_blocks, num_threads,
 			width, height,
-			p_separable_row_intermediate_dev, kernel_length, p_kernel_column,
+			p_extended_input_dev, kernel_length, p_kernel_column,
+			p_separable_column_intermediate_dev);
+
+		SeparableConvolutionRowGPUKernelInConstSharedMemPadding(num_blocks, num_threads,
+			width, height,
+			p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
 			p_separable_output_dev);
 
 		HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
@@ -466,7 +459,7 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
 #endif
 
 	HANDLE_ERROR(cudaFree(p_separable_output_dev));
-	HANDLE_ERROR(cudaFree(p_separable_row_intermediate_dev));
+	HANDLE_ERROR(cudaFree(p_separable_column_intermediate_dev));
 	HANDLE_ERROR(cudaFree(p_extended_input_dev));
 
 	HANDLE_ERROR(cudaFree(p_kernel_row_dev));
@@ -478,7 +471,7 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
 	SAFE_FREE(p_separable_output_gpu);
 #endif
 
-	SAFE_FREE(p_separable_row_intermediate);
+	SAFE_FREE(p_separable_column_intermediate);
 	SAFE_FREE(p_separable_output_cpu);
 	SAFE_FREE(p_output);
 
