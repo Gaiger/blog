@@ -8,6 +8,8 @@
 
 #include "separable_convolution_cpu.h"
 
+#define _SWAP_KERNEL_AND_WIDTH
+
 #ifdef _KERNEL_ALIGNED16
 #define __MM128_LOAD_KERNEL(ADDR)			_mm_load_ps((ADDR))
 #define __MM256_LOAD_KERNEL(ADDR)			_mm256_load_ps((ADDR))
