@@ -183,7 +183,7 @@ int SeparableConvolutionRowGPULinearMemory(
 
 
 
-__constant__ float kernel_const_mem[1024];
+LOCAL __constant__ float kernel_const_mem[1024];
 
 
 LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
