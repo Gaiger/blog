@@ -16,11 +16,13 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="select_cuda_device.cu" />
+    <CudaCompile Include="separable_convolution31_gpu.cu" />
     <CudaCompile Include="separable_convolution_gpu.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="select_cuda_device.h" />
+    <ClInclude Include="separable_convolution31_gpu.h" />
     <ClInclude Include="separable_convolution_cpu.h" />
     <ClInclude Include="separable_convolution_gpu.h" />
   </ItemGroup>
