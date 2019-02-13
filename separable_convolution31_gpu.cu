@@ -341,7 +341,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding31(
 	}/*local variable*/
 
 	shared_mem_size = sizeof(float) 
-		* (block_width + padding) *(2*num_threads.y);
+		* (block_width + padding) *(num_threads.y);
 	
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
