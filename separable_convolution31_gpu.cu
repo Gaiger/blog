@@ -165,7 +165,6 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU
 	int block_width;
 	int shared_mem_pitch;
 
-	int shift;
 
 	(void)p_kernel_row_dev;
 
@@ -178,29 +177,35 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU
 	shared_mem_pitch = block_width;	
 	shared_mem_pitch += padding;
 
-	shift = shared_mem_pitch*blockDim.y;
 
-	j = blockDim.y*blockIdx.y + threadIdx.y;
-	i = 2*blockDim.x*blockIdx.x + threadIdx.x;	
+	j = 2 * blockDim.y*blockIdx.y + threadIdx.y;
+	i = 2 * blockDim.x*blockIdx.x + threadIdx.x;	
 	
 
 	int ii;
 	float sum;
 
 	sum = 0;
-	ii = 0;
-#if(1)
 	
+#if(1)
+	ii = 0;
 	do {
 		p_input_in_block[threadIdx.y*shared_mem_pitch
 			+ ii*blockDim.x + threadIdx.x] =
 			p_column_done_extended_input_dev[j*extended_width
-			+ ii*blockDim.x + i];
+			+ ii*blockDim.x + i];		
 
 		ii++;
 	} while (threadIdx.x + ii * blockDim.x < block_width);
 	
-
+	ii = 0;
+	do {
+		p_input_in_block[(threadIdx.y + blockDim.y)*shared_mem_pitch
+			+ ii*blockDim.x + threadIdx.x] =
+			p_column_done_extended_input_dev[(j + blockDim.y)*extended_width
+			+ ii*blockDim.x + i];
+		ii++;
+	} while (threadIdx.x + ii * blockDim.x < block_width);
 	
 #else
 #if(1)
@@ -242,6 +247,24 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU
 
 	p_output_dev[j*width + i + blockDim.x] = sum;
 
+	sum = 0;
+#pragma unroll KERNEL_LENGTH
+	for (ii = 0; ii < KERNEL_LENGTH; ii++) {
+		sum += kernel_const_mem[ii] * p_input_in_block[
+			(threadIdx.y + blockDim.y)*shared_mem_pitch + ii + threadIdx.x];
+	}/*for kernel_length*/
+
+	p_output_dev[(j + blockDim.y)*width + i] = sum;
+
+	sum = 0;
+#pragma unroll KERNEL_LENGTH
+	for (ii = 0; ii < KERNEL_LENGTH; ii++) {
+		sum += kernel_const_mem[ii] * p_input_in_block[
+			(threadIdx.y + blockDim.y)*shared_mem_pitch + ii + threadIdx.x + blockDim.x];
+	}/*for kernel_length*/
+
+	
+	p_output_dev[(j + blockDim.y)* width + i + blockDim.x] = sum;
 }/*SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU*/
 
 #define WARP_SIZE					(32)
@@ -341,7 +364,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding31(
 	}/*local variable*/
 
 	shared_mem_size = sizeof(float) 
-		* (block_width + padding) *(num_threads.y);
+		* (block_width + padding) *(2*num_threads.y);
 	
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
@@ -350,6 +373,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding31(
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
 	num_blocks.x /= 2;
+	num_blocks.y /= 2;
 
 	SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU
 		<< <num_blocks, num_threads, shared_mem_size >> >
