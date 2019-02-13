@@ -412,11 +412,9 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 		for (; i < width; i += blockDim.x * gridDim.x) {
 
 			int jj;
-			int x;
 			float sum;
 
 			sum = 0;
-			x = kernel_radius + i;
 
 			jj = 0;
 			do {
@@ -668,11 +666,9 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 		for (; i < width; i += blockDim.x * gridDim.x) {
 
 			int jj;
-			int x;
 			float sum;
 
 			sum = 0;
-			x = kernel_radius + i;
 
 			jj = 0;
 			do {
@@ -851,7 +847,6 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 {
 	float *p_kernel_const_dev;
 	int shared_mem_size;
-	int kernel_radius;
 
 	int block_width;	
 	int padding;
@@ -862,7 +857,6 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	kernel_radius = kernel_length / 2;
 	block_width = kernel_length + (num_threads.x - 1);
 /*
 	padding 
