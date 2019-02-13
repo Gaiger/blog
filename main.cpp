@@ -110,8 +110,8 @@ int NumberOfThreadsCorrection(int width, int height, dim3 *p_num_threads)
 	}/*uf */
 
 
-	x_number_threads = prop.maxThreadsDim[0] / y_number_threads;
-	//x_number_threads = 32;
+	//x_number_threads = prop.maxThreadsDim[0] / y_number_threads;
+	x_number_threads = 32;
 
 	if (width > x_number_threads)
 	{
