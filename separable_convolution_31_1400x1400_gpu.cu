@@ -46,6 +46,9 @@ inline void __getLastCudaError(const char *errorMessage, const char *file,
 
 LOCAL __constant__ float kernel_const_mem[1024];
 
+#define COLUMN_CP_STEPS						\
+	(KERNEL_LENGTH + 2*Y_NUM_THREADS - 1 + (Y_NUM_THREADS - 1))/(Y_NUM_THREADS)
+
 
 template<int jj> __device__ int CopyToSharedMemColumn(
 	int i, int j,
@@ -54,7 +57,7 @@ template<int jj> __device__ int CopyToSharedMemColumn(
 	float *p_input_in_block, float const *p_extended_input_dev)
 {
 	int jjj;
-	jjj = 5 - jj;
+	jjj = COLUMN_CP_STEPS - jj;
 
 	p_input_in_block[(threadIdx.y + jjj*blockDim.y)* shared_mem_pitch
 		+ threadIdx.x]
@@ -81,7 +84,7 @@ template<> __device__ int CopyToSharedMemColumn<1>(
 	float *p_input_in_block, float const *p_extended_input_dev)
 {
 	int jjj;
-	jjj = 5 - 1;
+	jjj = COLUMN_CP_STEPS - 1;
 	if (threadIdx.y + jjj * blockDim.y < block_height) {
 		p_input_in_block[(threadIdx.y + jjj*blockDim.y)* shared_mem_pitch
 			+ threadIdx.x]
@@ -121,7 +124,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 
 	p_input_in_block = &shared_mem[0];
 
-	block_height = kernel_length + (2 * blockDim.y - 1);
+	block_height = kernel_length + ( 2*blockDim.y - 1);
 
 	shared_mem_pitch = 2 * blockDim.x;
 	shared_mem_pitch += padding;
@@ -147,13 +150,13 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 			= p_extended_input_dev
 			[(j + jj*blockDim.y)*extended_width
 			+ kernel_radius + i + blockDim.x];
-
 		jj++;
 	} while (threadIdx.y + jj * blockDim.y < block_height);
+	
 #else
 #if(0)
-#pragma unroll 4
-	for (int jj = 0; jj < 4; jj++) {
+#pragma unroll (COLUMN_CP_STEPS - 1)
+	for (int jj = 0; jj < (COLUMN_CP_STEPS - 1) ; jj++) {
 			p_input_in_block[(threadIdx.y + jj*blockDim.y)* shared_mem_pitch
 				+ threadIdx.x]
 				= p_extended_input_dev
@@ -167,7 +170,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 				+ kernel_radius + i + blockDim.x];		
 	}/*for */
 
-	jj = 4;
+	jj = (COLUMN_CP_STEPS - 1);
 	if (threadIdx.y + jj * blockDim.y < block_height) {
 		p_input_in_block[(threadIdx.y + jj*blockDim.y)* shared_mem_pitch
 			+ threadIdx.x]
@@ -182,7 +185,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 			+ kernel_radius + i + blockDim.x];
 	}
 #else
-	CopyToSharedMemColumn<5>(i, j, block_height, extended_width, shared_mem_pitch,
+	CopyToSharedMemColumn<COLUMN_CP_STEPS>(i, j, block_height, extended_width, shared_mem_pitch,
 		kernel_radius, p_input_in_block, p_extended_input_dev);
 #endif
 #endif
@@ -198,6 +201,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 	p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
 		= sum;
 
+
 	sum = 0;
 #pragma unroll KERNEL_LENGTH
 	for (jj = 0; jj < KERNEL_LENGTH; jj++) {
@@ -207,6 +211,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 
 	p_column_done_extended_output_dev[j*extended_width + kernel_radius + i + blockDim.x]
 		= sum;
+
 
 	sum = 0;
 #pragma unroll KERNEL_LENGTH
@@ -219,7 +224,6 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 		= sum;
 
 
-
 	sum = 0;
 #pragma unroll KERNEL_LENGTH
 	for (jj = 0; jj < KERNEL_LENGTH; jj++) {
@@ -229,8 +233,11 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 
 	p_column_done_extended_output_dev[(j + blockDim.y)*extended_width + kernel_radius + i + blockDim.x]
 		= sum;
+
 }/*SeparateConvolutionColumnGPU_31_1400x1400CU*/
 
+#define ROW_CP_STEPS						\
+	(KERNEL_LENGTH + 2*X_NUM_THREADS - 1 + (X_NUM_THREADS - 1))/(X_NUM_THREADS)
 
 
 template<int ii> __device__ int CopyToSharedMemRow(
@@ -239,7 +246,12 @@ template<int ii> __device__ int CopyToSharedMemRow(
 	float *p_input_in_block, float const *p_column_done_extended_input_dev)
 {
 	int iii;
-	iii = 4 - ii;
+
+	iii = ROW_CP_STEPS - ii;
+
+	CopyToSharedMemRow<ii - 1>(i, j,
+		block_width, extended_width, shared_mem_pitch,
+		p_input_in_block, p_column_done_extended_input_dev);
 
 	p_input_in_block[threadIdx.y*shared_mem_pitch
 		+ iii*blockDim.x + threadIdx.x] =
@@ -251,10 +263,6 @@ template<int ii> __device__ int CopyToSharedMemRow(
 		p_column_done_extended_input_dev[(j + blockDim.y)*extended_width
 		+ iii*blockDim.x + i];
 
-
-	CopyToSharedMemRow<ii - 1>(i, j,
-		block_width, extended_width, shared_mem_pitch,
-		p_input_in_block, p_column_done_extended_input_dev);
 }/*CopyToSharedMemRow*/
 
 template<> __device__ int CopyToSharedMemRow<1>(
@@ -262,7 +270,8 @@ template<> __device__ int CopyToSharedMemRow<1>(
 	int block_width, int extended_width, int shared_mem_pitch,
 	float *p_input_in_block, float const *p_column_done_extended_input_dev)
 {
-	int iii = 4 - 1;
+	int iii = ROW_CP_STEPS - 1;
+
 	if (threadIdx.x + iii * blockDim.x < block_width) {
 		p_input_in_block[threadIdx.y*shared_mem_pitch
 			+ iii*blockDim.x + threadIdx.x] =
@@ -330,11 +339,14 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400CU(
 
 		ii++;
 	} while (threadIdx.x + ii * blockDim.x < block_width);
-
+	
 #else
+
+
 #if(1)
-#pragma unroll 3
-	for (int ii = 0; ii < 3; ii++) {
+
+#pragma unroll (ROW_CP_STEPS - 1)
+	for (int ii = 0; ii < (ROW_CP_STEPS - 1); ii++) {
 		if (threadIdx.x + ii * blockDim.x < block_width) {
 			p_input_in_block[threadIdx.y*shared_mem_pitch
 				+ ii*blockDim.x + threadIdx.x] =
@@ -348,7 +360,7 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400CU(
 		}
 	}/*for */
 
-	ii = 3;
+	ii = ROW_CP_STEPS - 1;
 	if (threadIdx.x + ii * blockDim.x < block_width) {
 		p_input_in_block[threadIdx.y*shared_mem_pitch
 			+ ii*blockDim.x + threadIdx.x] =
@@ -362,7 +374,7 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400CU(
 	}
 
 #else
-	CopyToSharedMemRow<4>(i, j, 
+	CopyToSharedMemRow<ROW_CP_STEPS>(i, j,
 		block_width, extended_width, shared_mem_pitch,
 		p_input_in_block, p_column_done_extended_input_dev);
 	
@@ -448,7 +460,7 @@ int SeparableConvolutionColumnGPU_31_1400x1400(
 */
 	padding = 0;
 	shared_mem_size = sizeof(float)
-		* (2 * num_threads.x + padding) *( block_height);	
+		* ( 2 * num_threads.x + padding) *( block_height);	
 
 	HANDLE_ERROR(cudaGetSymbolAddress((void **)&p_kernel_const_dev,
 		kernel_const_mem));
@@ -459,8 +471,8 @@ int SeparableConvolutionColumnGPU_31_1400x1400(
 	HANDLE_ERROR(cudaMemset(p_column_done_extended_output_dev, 0,
 		extended_width*height * sizeof(float)));
 
-	num_threads.x /= 2;
-	num_threads.y /= 2;
+	num_blocks.x /= 2;
+	num_blocks.y /= 2;
 	
 	SeparateConvolutionColumnGPU_31_1400x1400CU
 		<< <num_blocks, num_threads, shared_mem_size >> >
