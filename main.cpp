@@ -12,7 +12,7 @@
 #include "separable_convolution_cpu.h"
 #include "separable_convolution_gpu.h"
 
-#include "separable_convolution31_gpu.h"
+#include "separable_convolution_31_1400x1400_gpu.h"
 
 #ifdef _MSC_VER 
 
@@ -424,7 +424,9 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
 	}/*local variable*/
 #endif
 
-#if (31 == KERNEL_LENGTH)
+#if (31 == KERNEL_LENGTH \
+	&& 0 == (WIDTH % 1400) && 0 == (HEIGHT % 1400))
+
 	HANDLE_ERROR(cudaMemset(p_separable_output_dev, 0,
 		width*height * sizeof(float)));
 	{
@@ -436,19 +438,19 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
 		num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
 		num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
-TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING_31, ROUND)
+TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400, ROUND)
 
 		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
 				extended_width*extended_height * sizeof(float),
 				cudaMemcpyHostToDevice));
 
 
-		SeparableConvolutionColumnGPUKernelInConstSharedMemPadding31(num_blocks, num_threads,
+		SeparableConvolutionColumnGPU_31_1400x1400(num_blocks, num_threads,
 			width, height,
 			p_extended_input_dev, kernel_length, p_kernel_column,
 			p_separable_column_intermediate_dev);
 
-		SeparableConvolutionRowGPUKernelInConstSharedMemPadding31(num_blocks, num_threads,
+		SeparableConvolutionRowGPU_31_1400x1400(num_blocks, num_threads,
 			width, height,
 			p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
 			p_separable_output_dev);
@@ -457,7 +459,7 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING_3
 			width*height * sizeof(float),
 			cudaMemcpyDeviceToHost));
 
-TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING_31)
+TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400)
 	}/*local variable*/
 #endif
 

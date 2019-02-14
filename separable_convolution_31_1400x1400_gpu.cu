@@ -7,7 +7,7 @@
 #include "device_launch_parameters.h"
 
 
-#include "separable_convolution31_gpu.h"
+#include "separable_convolution_31_1400x1400_gpu.h"
 
 #define LOCAL					static 
 
@@ -100,7 +100,7 @@ template<> __device__ int CopyToSharedMemColumn<1>(
 }/*CopyToSharedMemRow<1>*/
 
 
-LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPadding31CU(
+LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400CU(
 	int width, int height, float const *p_extended_input_dev,
 	int kernel_length, float const *p_kernel_column_dev,
 	float *p_column_done_extended_output_dev, const int padding)
@@ -229,7 +229,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPadding3
 
 	p_column_done_extended_output_dev[(j + blockDim.y)*extended_width + kernel_radius + i + blockDim.x]
 		= sum;
-}/*SeparateConvolutionColumnGPUKernelInConstSharedMemPadding31CU*/
+}/*SeparateConvolutionColumnGPU_31_1400x1400CU*/
 
 
 
@@ -279,7 +279,7 @@ template<> __device__ int CopyToSharedMemRow<1>(
 }/*CopyToSharedMemRow<1>*/
 
 
-LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU(
+LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400CU(
 	int width, int height, float const *p_column_done_extended_input_dev,
 	int kernel_length, float const *p_kernel_row_dev,
 	float *p_output_dev, const int padding)
@@ -407,11 +407,11 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU
 
 	
 	p_output_dev[(j + blockDim.y)* width + i + blockDim.x] = sum;
-}/*SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU*/
+}/*SeparateConvolutionRowGPU_31_1400x1400CU*/
 
 #define WARP_SIZE					(32)
 
-int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding31(
+int SeparableConvolutionColumnGPU_31_1400x1400(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_extended_input_dev,
 	int kernel_length, float const *p_kernel_column_host,
@@ -462,17 +462,17 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding31(
 	num_threads.x /= 2;
 	num_threads.y /= 2;
 	
-	SeparateConvolutionColumnGPUKernelInConstSharedMemPadding31CU
+	SeparateConvolutionColumnGPU_31_1400x1400CU
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_extended_input_dev, kernel_length,
 			NULL, p_column_done_extended_output_dev, padding);
 
-	getLastCudaError("SeparateConvolutionColumnGPUKernelInConstSharedMemPadding31CU");
+	getLastCudaError("SeparateConvolutionColumnGPU_31_1400x1400CU");
 	return 0;
-}/*SeparableConvolutionColumnGPUKernelInConstSharedMemPadding*/
+}/*SeparableConvolutionColumnGPU_31_1400x1400*/
 
 
-int SeparableConvolutionRowGPUKernelInConstSharedMemPadding31(
+int SeparableConvolutionRowGPU_31_1400x1400(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_column_done_extended_input_dev,
 	int kernel_length, float const *p_kernel_row_host,
@@ -521,12 +521,12 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding31(
 	num_blocks.x /= 2;
 	num_blocks.y /= 2;
 
-	SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU
+	SeparateConvolutionRowGPU_31_1400x1400CU
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_column_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev, padding);
 
-	getLastCudaError("SeparateConvolutionRowGPUKernelInConstSharedMemPadding31CU");
+	getLastCudaError("SeparableConvolutionRowGPU_31_1400x1400");
 
 	return 0;
-}/*SeparableConvolutionRowGPUKernelInConstSharedMemPadding31*/
+}/*SeparableConvolutionRowGPU_31_1400x1400*/
