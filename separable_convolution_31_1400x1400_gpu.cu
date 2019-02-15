@@ -53,7 +53,7 @@ inline void __getLastCudaError(const char *errorMessage, const char *file,
 LOCAL __constant__ float kernel_const_mem[1024];
 
 
-LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollCU(
+LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollingCU(
 	int width, int height, float const *p_extended_input_dev,
 	int kernel_length, float const *p_kernel_column_dev,
 	float *p_column_done_extended_output_dev, const int padding)
@@ -129,10 +129,10 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollCU(
 	p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
 		= sum;
 
-}/*SeparateConvolutionColumnGPU_31_1400x1400_UnrollCU*/
+}/*SeparateConvolutionColumnGPU_31_1400x1400_UnrollingCU*/
 
 
-LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400_UnrollCU(
+LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400_UnrollingCU(
 	int width, int height, float const *p_column_done_extended_input_dev,
 	int kernel_length, float const *p_kernel_row_dev,
 	float *p_output_dev, const int padding)
@@ -207,11 +207,11 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400_UnrollCU(
 
 	p_output_dev[j*width + i] = sum;
 
-}/*SeparateConvolutionRowGPU_31_1400x1400_UnrollCU*/
+}/*SeparateConvolutionRowGPU_31_1400x1400_UnrollingCU*/
 
 #define WARP_SIZE					(32)
 
-int SeparableConvolutionColumnGPU_31_1400x1400_Unroll(
+int SeparableConvolutionColumnGPU_31_1400x1400_Unrolling(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_extended_input_dev,
 	int kernel_length, float const *p_kernel_column_host,
@@ -259,17 +259,17 @@ int SeparableConvolutionColumnGPU_31_1400x1400_Unroll(
 	HANDLE_ERROR(cudaMemset(p_column_done_extended_output_dev, 0,
 		extended_width*height * sizeof(float)));
 	
-	SeparateConvolutionColumnGPU_31_1400x1400_UnrollCU
+	SeparateConvolutionColumnGPU_31_1400x1400_UnrollingCU
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_extended_input_dev, kernel_length,
 			NULL, p_column_done_extended_output_dev, padding);
 
-	getLastCudaError("SeparateConvolutionColumnGPU_31_1400x1400_UnrollCU");
+	getLastCudaError("SeparateConvolutionColumnGPU_31_1400x1400_UnrollingCU");
 	return 0;
-}/*SeparableConvolutionColumnGPU_31_1400x1400_Unroll*/
+}/*SeparableConvolutionColumnGPU_31_1400x1400_Unrolling*/
 
 
-int SeparableConvolutionRowGPU_31_1400x1400_Unroll(
+int SeparableConvolutionRowGPU_31_1400x1400_Unrolling(
 	dim3 num_blocks, dim3 num_threads,
 	int width, int height, float const *p_column_done_extended_input_dev,
 	int kernel_length, float const *p_kernel_row_host,
@@ -316,12 +316,12 @@ int SeparableConvolutionRowGPU_31_1400x1400_Unroll(
 		kernel_length * sizeof(float), cudaMemcpyHostToDevice));
 
 
-	SeparateConvolutionRowGPU_31_1400x1400_UnrollCU
+	SeparateConvolutionRowGPU_31_1400x1400_UnrollingCU
 		<< <num_blocks, num_threads, shared_mem_size >> >
 		(width, height, p_column_done_extended_input_dev,
 			kernel_length, NULL, p_output_dev, padding);
 
-	getLastCudaError("SeparateConvolutionRowGPU_31_1400x1400_UnrollCU");
+	getLastCudaError("SeparateConvolutionRowGPU_31_1400x1400_UnrollingCU");
 
 	return 0;
-}/*SeparableConvolutionRowGPU_31_1400x1400_Unrolll*/
+}/*SeparableConvolutionRowGPU_31_1400x1400_Unrollling*/
