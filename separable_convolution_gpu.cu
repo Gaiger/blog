@@ -81,7 +81,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPULinearMemoryCU(
 
 			p_column_done_extended_output_dev[j*extended_width + x]
 				= sum;
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -124,7 +124,7 @@ LOCAL __global__ void SeparateConvolutionRowGPULinearMemoryCU(
 			}/*for kernel_length*/
 
 			p_output_dev[j*width + i] = sum;
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -224,7 +224,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstCU(
 
 			p_column_done_extended_output_dev[j*extended_width + x]
 				= sum;
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -267,7 +267,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstCU(
 			}/*for kernel_length*/
 
 			p_output_dev[j*width + i] = sum;
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -399,7 +399,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 				= sum;
 
 			__syncthreads();
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -438,7 +438,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 				= sum;
 
 			__syncthreads();
-		}/*for width*/
+		}/*for i*/
 		
 	}/*for j*/
 
@@ -498,7 +498,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 			
 			p_output_dev[j*width + i] = sum;
 			__syncthreads();
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -650,7 +650,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 				= sum;
 
 			__syncthreads();
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -693,7 +693,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 				= sum;
 
 			__syncthreads();
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
@@ -757,7 +757,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 
 			p_output_dev[j*width + i] = sum;
 			__syncthreads();
-		}/*for width*/
+		}/*for i*/
 
 	}/*for j*/
 
