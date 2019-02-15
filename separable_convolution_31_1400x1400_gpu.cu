@@ -398,6 +398,9 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollingExpandi
 	int block_height;
 	int shared_mem_pitch;
 
+	int jj;
+	float sum;
+
 	(void)p_kernel_column_dev;
 
 	kernel_radius = kernel_length / 2;
@@ -413,8 +416,6 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollingExpandi
 	j = 2 * blockDim.y*blockIdx.y + threadIdx.y;
 	i = 2 * blockDim.x*blockIdx.x + threadIdx.x;
 
-	int jj;
-	float sum;
 
 #if(1)
 #pragma unroll (COLUMN_CP_STEPS_EXPANDING - 1)
@@ -566,6 +567,8 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400_UnrollingExpandingC
 	int block_width;
 	int shared_mem_pitch;
 
+	int ii;
+	float sum;
 
 	(void)p_kernel_row_dev;
 
@@ -581,13 +584,6 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400_UnrollingExpandingC
 
 	j = 2 * blockDim.y*blockIdx.y + threadIdx.y;
 	i = 2 * blockDim.x*blockIdx.x + threadIdx.x;
-
-
-	int ii;
-	float sum;
-
-	sum = 0;
-
 
 #if(1)
 
