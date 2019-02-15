@@ -438,19 +438,19 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
 		num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
 		num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
-TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400, ROUND)
+TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLL, ROUND)
 
 		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
 				extended_width*extended_height * sizeof(float),
 				cudaMemcpyHostToDevice));
 
 
-		SeparableConvolutionColumnGPU_31_1400x1400(num_blocks, num_threads,
+		SeparableConvolutionColumnGPU_31_1400x1400_Unroll(num_blocks, num_threads,
 			width, height,
 			p_extended_input_dev, kernel_length, p_kernel_column,
 			p_separable_column_intermediate_dev);
 
-		SeparableConvolutionRowGPU_31_1400x1400(num_blocks, num_threads,
+		SeparableConvolutionRowGPU_31_1400x1400_Unroll(num_blocks, num_threads,
 			width, height,
 			p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
 			p_separable_output_dev);
@@ -459,7 +459,7 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400, ROUND)
 			width*height * sizeof(float),
 			cudaMemcpyDeviceToHost));
 
-TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400)
+TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLL)
 	}/*local variable*/
 #endif
 
