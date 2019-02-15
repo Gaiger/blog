@@ -813,7 +813,9 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 	
 #else
 /*
-	padding = num_threads.x + (WARP_SIZE - num_threads.x);
+	padding
+	= WARP_SIZE*n - (block_size + (WARP_SIZE - num_threads))
+	-> padding = num_threads.x + (WARP_SIZE - num_threads.x);
 */
 	padding = 0;
 	shared_mem_size = sizeof(float)
