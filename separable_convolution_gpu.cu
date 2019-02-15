@@ -360,7 +360,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemCU(
 
 	p_input_in_block = &shared_mem[0];
 
-	block_height = kernel_length + (blockDim.y - 1);
+	block_height = blockDim.y + (kernel_length - 1);
 
 #ifdef _COLUMN_DATA_IN_CONSECUTIVE_SHARED_MEN
 
@@ -465,7 +465,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemCU(
 	extended_width = width + kernel_length - 1;
 
 	p_input_in_block = &shared_mem[0];
-	block_width = kernel_length + (blockDim.x - 1);
+	block_width = blockDim.x + (kernel_length - 1);
 
 
 	j = blockDim.y*blockIdx.y + threadIdx.y;
@@ -526,7 +526,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMem(
 	kernel_radius = kernel_length / 2;
 
 	extended_width = width + 2* kernel_radius;
-	block_height = kernel_length + (num_threads.y - 1);
+	block_height = num_threads.y + (kernel_length - 1);
 
 	shared_mem_size = sizeof(float)*
 		(block_height)*(num_threads.x);
@@ -566,7 +566,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMem(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	block_width = kernel_length + (num_threads.x - 1);
+	block_width = num_threads.x + (kernel_length - 1);
 	shared_mem_size = sizeof(float)*
 		(block_width)*(num_threads.y);
 
@@ -608,7 +608,7 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 
 	p_input_in_block = &shared_mem[0];
 
-	block_height = kernel_length + (blockDim.y - 1);
+	block_height = blockDim.y + (kernel_length - 1);
 	
 #ifdef _COLUMN_DATA_IN_CONSECUTIVE_SHARED_MEN
 
@@ -722,7 +722,7 @@ LOCAL __global__ void SeparateConvolutionRowGPUKernelInConstSharedMemPaddingCU(
 	extended_width = width + 2 * kernel_radius;
 
 	p_input_in_block = &shared_mem[0];
-	block_width = kernel_length + (blockDim.x - 1);
+	block_width = blockDim.x + (kernel_length - 1);
 
 	shared_mem_pitch = block_width;
 	shared_mem_pitch += padding;
@@ -789,7 +789,7 @@ int SeparableConvolutionColumnGPUKernelInConstSharedMemPadding(
 	kernel_radius = kernel_length / 2;
 	extended_width = width + 2 * kernel_radius;
 
-	block_height = kernel_length + (num_threads.y - 1);
+	block_height = num_threads.y + (kernel_length - 1);
 
 /*
 	padding
@@ -857,7 +857,7 @@ int SeparableConvolutionRowGPUKernelInConstSharedMemPadding(
 	if (kernel_length > width || kernel_length > height)
 		return -2;
 
-	block_width = kernel_length + (num_threads.x - 1);
+	block_width = num_threads.x + (kernel_length - 1);
 /*
 	padding 
 	= WARP_SIZE*n - (block_size + (WARP_SIZE - num_threads))
