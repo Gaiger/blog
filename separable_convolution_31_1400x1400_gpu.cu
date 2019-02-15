@@ -453,7 +453,8 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollingExpandi
 
 	}/*if COLUMN_CP_STEPS - 1*/
 #else
-	CopyToSharedMemColumn<COLUMN_CP_STEPS_EXPANDING>(i, j, block_height, extended_width, shared_mem_pitch,
+	CopyToSharedMemColumn<COLUMN_CP_STEPS_EXPANDING>(i, j, 
+		block_height, extended_width, shared_mem_pitch,
 		kernel_radius, p_input_in_block, p_extended_input_dev);
 #endif
 
@@ -496,11 +497,12 @@ LOCAL __global__ void SeparateConvolutionColumnGPU_31_1400x1400_UnrollingExpandi
 #pragma unroll KERNEL_LENGTH
 	for (jj = 0; jj < KERNEL_LENGTH; jj++) {
 		sum += kernel_const_mem[jj] * p_input_in_block[
-			(threadIdx.y + jj + blockDim.y)*shared_mem_pitch + threadIdx.x + blockDim.x];
+			(threadIdx.y + jj + blockDim.y)*shared_mem_pitch 
+				+ threadIdx.x + blockDim.x];
 	}/*for kernel*/
 
-	p_column_done_extended_output_dev[(j + blockDim.y)*extended_width + kernel_radius 
-		+ i + blockDim.x] = sum;
+	p_column_done_extended_output_dev[(j + blockDim.y)*extended_width
+		+ kernel_radius + i + blockDim.x] = sum;
 
 }/*SeparateConvolutionColumnGPU_31_1400x1400_UnrollingExpandingCU*/
 
@@ -655,7 +657,8 @@ LOCAL __global__ void SeparateConvolutionRowGPU_31_1400x1400_UnrollingExpandingC
 #pragma unroll KERNEL_LENGTH
 	for (ii = 0; ii < KERNEL_LENGTH; ii++) {
 		sum += kernel_const_mem[ii] * p_input_in_block[
-			(threadIdx.y + blockDim.y)*shared_mem_pitch + ii + threadIdx.x + blockDim.y];
+			(threadIdx.y + blockDim.y)*shared_mem_pitch 
+				+ ii + threadIdx.x + blockDim.y];
 	}/*for kernel_length*/
 
 

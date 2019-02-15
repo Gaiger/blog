@@ -646,7 +646,8 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 					threadIdx.x*shared_mem_pitch + jj + threadIdx.y];
 			}/*for kernel*/
 
-			p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
+			p_column_done_extended_output_dev[j*extended_width 
+				+ kernel_radius + i]
 				= sum;
 
 			__syncthreads();
@@ -689,8 +690,8 @@ LOCAL __global__ void SeparateConvolutionColumnGPUKernelInConstSharedMemPaddingC
 					(threadIdx.y + jj)*shared_mem_pitch + threadIdx.x];
 			}/*for kernel*/
 
-			p_column_done_extended_output_dev[j*extended_width + kernel_radius + i]
-				= sum;
+			p_column_done_extended_output_dev[j*extended_width 
+				+ kernel_radius + i] = sum;
 
 			__syncthreads();
 		}/*for i*/

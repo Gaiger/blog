@@ -166,8 +166,8 @@ int SelectCudaDevice(void)
 			*prop.multiProcessorCount, prop.clockRate / 1000.0 / 1009.0);
 
 #define TWO_WAYS				(2)
-		printf("\tbus = %d bit, bandwidth = %3.1f GB/s\r\n", prop.memoryBusWidth,
-			TWO_WAYS*prop.memoryClockRate * 1000.0
+		printf("\tbus = %d bit, bandwidth = %3.1f GB/s\r\n", 
+			prop.memoryBusWidth, TWO_WAYS*prop.memoryClockRate * 1000.0
 			*prop.memoryBusWidth / 8 / 1024 / 1024 / 1024.0);
 		printf("\tL2 cache size = %d KB\r\n", prop.l2CacheSize / 1024);
 	}
