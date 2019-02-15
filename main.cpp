@@ -427,30 +427,29 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST_SHARED_MEM_PADDING)
 #if (31 == KERNEL_LENGTH \
 	&& 0 == (WIDTH % 1400) && 0 == (HEIGHT % 1400))
 
+#if(1)
 	HANDLE_ERROR(cudaMemset(p_separable_output_dev, 0,
 		width*height * sizeof(float)));
 	{
 		dim3 num_blocks, num_threads;
 		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
-#ifndef _DEBUG
-		NumberOfThreadsCorrection(width, height, &num_threads);
-#endif
+
 		num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
 		num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
 
-TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLL, ROUND)
+TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLLING, ROUND)
 
 		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
 				extended_width*extended_height * sizeof(float),
 				cudaMemcpyHostToDevice));
 
 
-		SeparableConvolutionColumnGPU_31_1400x1400_Unroll(num_blocks, num_threads,
+		SeparableConvolutionColumnGPU_31_1400x1400_Unrolling(num_blocks, num_threads,
 			width, height,
 			p_extended_input_dev, kernel_length, p_kernel_column,
 			p_separable_column_intermediate_dev);
 
-		SeparableConvolutionRowGPU_31_1400x1400_Unroll(num_blocks, num_threads,
+		SeparableConvolutionRowGPU_31_1400x1400_Unrolling(num_blocks, num_threads,
 			width, height,
 			p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
 			p_separable_output_dev);
@@ -459,9 +458,49 @@ TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLL, ROUND)
 			width*height * sizeof(float),
 			cudaMemcpyDeviceToHost));
 
-TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLL)
+TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLLING)
 	}/*local variable*/
 #endif
+
+#if(1)
+	HANDLE_ERROR(cudaMemset(p_separable_output_dev, 0,
+		width*height * sizeof(float)));
+	{
+		dim3 num_blocks, num_threads;
+		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
+
+		num_blocks.x = (width + (num_threads.x - 1)) / num_threads.x;
+		num_blocks.y = (height + (num_threads.y - 1)) / num_threads.y;
+
+TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLLING_EXPANDING, ROUND)
+
+		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
+				extended_width*extended_height * sizeof(float),
+				cudaMemcpyHostToDevice));
+
+
+		SeparableConvolutionColumnGPU_31_1400x1400_UnrollingExpanding(
+			num_blocks, num_threads,
+			width, height,
+			p_extended_input_dev, kernel_length, p_kernel_column,
+			p_separable_column_intermediate_dev);
+
+		SeparableConvolutionRowGPU_31_1400x1400_UnrollingExpanding(
+			num_blocks, num_threads,
+			width, height,
+			p_separable_column_intermediate_dev, kernel_length, p_kernel_row,
+			p_separable_output_dev);
+
+		HANDLE_ERROR(cudaMemcpy(p_separable_output_gpu, p_separable_output_dev,
+			width*height * sizeof(float),
+			cudaMemcpyDeviceToHost));
+
+TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_31_1400x1400_UNROLLING_EXPANDING)
+	}/*local variable*/
+#endif
+
+#endif /*(31 == KERNEL_LENGTH \
+	&& 0 == (WIDTH % 1400) && 0 == (HEIGHT % 1400)) */
 
 #if(1)
 	int count = 0;
