@@ -1,0 +1,412 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="File-List" href="Release_Notes_files/filelist.xml">
+<link rel="Edit-Time-Data" href="Release_Notes_files/editdata.mso"><!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+
+
+
+<title>Release Notes for STM8L10x Standard Peripherals Drivers</title><!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>STMicroelectronics</o:Author>
+  <o:LastAuthor>jaziric</o:LastAuthor>
+  <o:Revision>41</o:Revision>
+  <o:TotalTime>195</o:TotalTime>
+  <o:Created>2009-02-27T19:26:00Z</o:Created>
+  <o:LastSaved>2009-06-19T16:40:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>476</o:Words>
+  <o:Characters>2714</o:Characters>
+  <o:Company>STMicroelectronics</o:Company>
+  <o:Lines>22</o:Lines>
+  <o:Paragraphs>6</o:Paragraphs>
+  <o:CharactersWithSpaces>3184</o:CharactersWithSpaces>
+  <o:Version>11.8132</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>110</w:Zoom>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]--><style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:1627421319 -2147483648 8 0 66047 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h1
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:24.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h2
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	font-weight:bold;
+	font-style:italic;}
+h3
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+@page Section1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:36.0pt;
+	mso-footer-margin:36.0pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:9796538;
+	mso-list-template-ids:-578660166;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:-;
+	mso-level-tab-stop:90.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Tahoma;
+	mso-bidi-font-family:"Times New Roman";}
+@list l0:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1
+	{mso-list-id:100951386;
+	mso-list-template-ids:-409928590;}
+@list l1:level1
+	{mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level2
+	{mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2
+	{mso-list-id:850606961;
+	mso-list-template-ids:1018443040;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l2:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l2:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l2:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style><!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="8194"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]--></head>
+<body style="" link="blue" vlink="blue">
+
+<div class="Section1">
+
+<p class="MsoNormal"><span style="font-family: Arial;"><br>
+</span><a href="../../../DOC/Others/FWLib/CHM_Generator/Library_html/index.html"></a><span style="font-family: Arial;"><o:p></o:p></span></p>
+
+<div align="center">
+
+<table class="MsoNormalTable" style="width: 675pt;" border="0" cellpadding="0" cellspacing="0" width="900">
+ <tbody><tr style="">
+  <td style="padding: 0cm;" valign="top">
+  <table class="MsoNormalTable" style="width: 675pt;" border="0" cellpadding="0" cellspacing="0" width="900">
+   <tbody><tr style="">
+    <td style="padding: 1.5pt;">
+    <h1 style="margin-bottom: 18pt; text-align: center;" align="center"><span style="font-size: 20pt; font-family: Verdana; color: rgb(51, 102, 255);">Release Notes
+    for STM8L10x Standard Peripheral Drivers</span><span style="font-size: 20pt; font-family: Verdana;"><o:p></o:p></span></h1>
+    <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 10pt; font-family: Arial; color: black;">Copyright © 2014
+    STMicroelectronics</span><span style="color: black;"><u1:p></u1:p><o:p></o:p></span></p>
+    <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 10pt; font-family: Arial; color: black;"><img alt="" id="_x0000_i1025" src="../../_htmresc/st_logo.png" style="border: 0px solid ; width: 86px; height: 65px;"></span><span style="font-size: 10pt;"><o:p></o:p></span></p>
+    </td>
+   </tr>
+  </tbody></table>
+  <p class="MsoNormal"><span style="font-family: Arial; display: none;"><o:p>&nbsp;</o:p></span></p>
+  <table class="MsoNormalTable" style="width: 675pt;" border="0" cellpadding="0" width="900">
+   <tbody><tr style="">
+    <td style="padding: 0cm;" valign="top">
+    <h2 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial;"><span style="font-size: 12pt; color: white;">Contents<o:p></o:p></span></h2>
+    <ol style="margin-top: 0cm;" start="1" type="1">
+     <li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><span style="font-size: 10pt; font-family: Verdana;"><a href="#History">Update History</a><o:p></o:p></span></li>
+     <li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><span style="font-size: 10pt; font-family: Verdana;"><a href="#License">License</a><o:p></o:p></span></li>
+    </ol>
+    <h2 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial;"><a name="History"></a><span style="font-size: 12pt; color: white;">Update History<o:p></o:p></span></h2>
+    
+    <h3 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; margin-right: 558.05pt; width: 200px;"><span style="font-size: 10pt; font-family: Arial; color: white;">V1.2.1 / &nbsp;30-September-2014<o:p></o:p></span></h3>
+    <ul style="margin-top: 0cm;" type="square"><li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><u><span style="font-size: 10pt; font-family: Verdana;">Main changes<o:p></o:p></span></u></li></ul>
+    <p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 86.95pt; text-indent: -9pt;"><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></p>
+    <ul style="list-style-type: disc;"><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x_flash.c/.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;">Update timeout variable declaration&nbsp;</span><span style="font-size: 10pt; font-family: Verdana;">on 16 bit instead of 32 bit </span><span style="font-size: 10pt; font-family: Verdana;">in </span><span style="font-size: 10pt; font-family: Verdana;">the FLASH_WaitForLastOperation() function</span><span style="font-size: 10pt; font-family: Verdana;"> </span><span style="font-size: 10pt; font-family: Verdana;">to avoid&nbsp;__ramfunc issue with IAR.</span></li></ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x_rst.c/.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;"></span>Update the RST_GetFlagStatus() function implementation to return the state SET/RESET.&nbsp;</span></li></ul></ul><h3 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; margin-right: 558.05pt; width: 200px;"><span style="font-size: 10pt; font-family: Arial; color: white;">V1.2.0 / &nbsp;01-June-2012<o:p></o:p></span></h3>
+    <ul style="margin-top: 0cm;" type="square"><li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><u><span style="font-size: 10pt; font-family: Verdana;">Main changes<o:p></o:p></span></u></li></ul>
+    <p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 86.95pt; text-indent: -9pt;"><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></p>
+    <ul style="list-style-type: disc;"><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;">Remove SWIM structure declaration</span></li></ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x_i2c.c/.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;"></span>Update I2C driver with&nbsp;more functional description and add new functions:</span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_Flag_TypeDef definition</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update IS_I2C_CLEAR_FLAG_OK macro definition</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_Event_TypeDef definition and naming</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_ITPendingBit_TypeDef definition</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_GetITStatus() function to check on the interrupt configuration bits</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add defines for REGISTER_Mask, REGISTER_SR1_Index, REGISTER_SR2_Index, FLAG_Mask and ITEN_Mask</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_ClearFlag() function to clear only the flags that are cleared by writing 0</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add IS_I2C_CLEAR_ITPENDINGBIT_OK macro</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_ClearITPendingBit() function to clear only the flags that are cleared by writing 0</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_GetFlagStatus() function</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add new function I2C_GetLastEvent()</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Update I2C_CheckEvent() function<br></span></li></ul></ul></ul><h3 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; margin-right: 558.05pt; width: 200px;"><span style="font-size: 10pt; font-family: Arial; color: white;">V1.1.2 / &nbsp;30-May-2011<o:p></o:p></span></h3>
+    <ul style="margin-top: 0cm;" type="square">
+     <li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><u><span style="font-size: 10pt; font-family: Verdana;">Main changes<o:p></o:p></span></u></li>
+
+    </ul>
+    <p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 86.95pt; text-indent: -9pt;"><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></p>
+    <ul style="list-style-type: disc;"><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;">Add IAR compiler definition and support</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add CONST, EEPROM and MEMCPY definition for the supported toolchains</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add RAM_EXECUTION define to handle&nbsp;</span><span style="font-size: 10pt; font-family: Verdana;">function execution from 
+RAM</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add interrupts macro definitions for IAR compiler</span><span style="font-size: 10pt; font-family: Verdana;"></span></li><li><span style="font-size: 10pt; font-family: Verdana;">Add "INTERRUPT_HANDLER" macro&nbsp;to manage&nbsp;interrupt vector declarations for all supported toochains</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Remove AWU_CSR_MR bit definition</span></li></ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x_awu.c/.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;"></span>Update AWU_LSICalibrationConfig() function by </span><span style="font-size: 10pt; font-family: Verdana;">removing AWU_CSR_MR bit&nbsp;call</span></li><li><span style="font-size: 10pt; font-family: Verdana;">Remove&nbsp;</span><span style="font-size: 10pt; font-family: Verdana;">AWU_ReInitCounter() function</span></li></ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x_beep.c</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;"></span>Update BEEP_LSICalibrationConfig() function by </span><span style="font-size: 10pt; font-family: Verdana;">removing AWU_CSR_MR bit&nbsp;call</span></li></ul><li><span style="font-size: 10pt; font-family: Verdana;"><span style="text-decoration: underline;">stm8l10x_flash.c/.h</span></span></li><ul><li><span style="font-size: 10pt; font-family: Verdana;">Update Flash driver to support IAR and Raisonance Compilers</span></li><li class="MsoNormal"><span style="font-size: 10pt; font-family: Verdana;">Add 
+detailed description of&nbsp;execution from RAM using functions provided by this 
+driver and with the different supported toolchains. For more information, refer 
+to stm8l10x_flash.h and&nbsp;</span><span style="font-size: 10pt; font-family: Verdana;">stm8l10x_flash</span><span style="font-size: 10pt; font-family: Verdana;">.c files.</span></li></ul></ul><h3 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; margin-right: 558.05pt; width: 200px;"><span style="font-size: 10pt; font-family: Arial; color: white;">V1.1.1 / &nbsp;15-September-2010<o:p></o:p></span></h3>
+    <ul style="margin-top: 0cm;" type="square"><li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><u><span style="font-size: 10pt; font-family: Verdana;">Main changes<o:p></o:p></span></u></li></ul>
+    <p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 86.95pt; text-indent: -9pt;"><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></p>
+    <ul style="list-style-type: circle;"><li><span style="font-size: 10pt; font-family: Verdana;">stm8l10x.h and stm8l10x_gpio.h modified for&nbsp;</span><span style="font-size: 10pt; font-family: Verdana; color: black;">compliancy with
+    IAR compiler. Needed for the STM8 TouchSensing firmware examples.</span></li></ul><p class="MsoNormal">&nbsp; &nbsp; &nbsp; &nbsp; </p><h3 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; margin-right: 558.05pt;"><span style="font-size: 10pt; font-family: Arial; color: white;">V1.1.0 / 14-September-2009<o:p></o:p></span></h3>
+    <ul style="margin-top: 0cm;" type="square"><li class="MsoNormal" style="color: black; margin-top: 4.5pt; margin-bottom: 4.5pt;"><span style="font-size: 10pt; font-family: Verdana; text-decoration: underline;">Main changes</span></li></ul>
+    <ul style="list-style-type: circle;"><li class="MsoNormal" style="font-family: Verdana;"><span style="font-size: 10pt;">stm8l10x_tim2.h:&nbsp;</span><span style="font-size: 10pt; color: black;">Change "TIM2_SelectTI1XORInput" function name to&nbsp;"TIM2_SelectHallSensor"</span></li><li class="MsoNormal" style="font-family: Verdana;"><span style="font-size: 10pt; color: black;"></span><span style="font-size: 10pt;">stm8l10x_tim3.h:&nbsp;</span><span style="font-size: 10pt; color: black;">Change "TIM3_SelectTI1XORInput" function name to&nbsp;"TIM3_SelectHallSensor"</span></li><li><span class="MsoNormal" style="font-size: 10pt; font-family: Verdana;">stm8l10x_exti.h: </span><span class="MsoNormal" style="font-size: 10pt; color: black; font-family: Verdana;">Change "EXTI_Sensitivity_TypeDef" enumeration name to&nbsp;"EXTI_Trigger_TypeDef"</span><span style="font-family: Verdana;">
+    </span><span style="font-size: 10pt; font-family: Tahoma; color: black;"><span style=""><span style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-size-adjust: none; font-stretch: normal;"><span style="font-family: Verdana;">&nbsp;</span><span style="font-family: monospace;">&nbsp;</span>&nbsp;&nbsp;</span></span></span></li></ul>
+    <p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 86.95pt; text-indent: -9pt;"><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></p><span style="font-size: 10pt; font-family: Verdana; color: black;"></span> &nbsp; &nbsp; &nbsp; &nbsp;<br><span style="font-size: 10pt; font-family: Verdana;"></span><span style="font-size: 10pt; font-family: Verdana;"></span><p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 122.95pt; text-indent: -18pt;"><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></p><h2 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial;"><a name="License"></a><span style="font-size: 12pt; color: white;">License<o:p></o:p></span></h2><p class="MsoNormal" style="margin-right: 4cm; line-height: normal; text-align: left;"><span style="font-size: 10pt; color: black;">Licensed under MCD-ST Liberty SW License Agreement V2, (the "License").
+You may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+
+
+</span></p>
+<p class="MsoNormal" style="line-height: normal; text-align: center;"><span style="font-size: 10pt;">
+<a href="http://www.st.com/software_license_agreement_liberty_v2"> http://www.st.com/software_license_agreement_liberty_v2</a></span></p>
+<p class="MsoNormal" style="margin-right: 4cm; line-height: normal; text-align: left;"><span style="font-size: 10pt; color: black;">Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</span></p><p class="MsoNormal"><b><span style="font-size: 10pt; font-family: Verdana; color: black;"><o:p></o:p></span></b></p>
+    <p class="MsoNormal"><span style="color: black;"><o:p>&nbsp;</o:p></span></p>
+    <div class="MsoNormal" style="text-align: center;" align="center"><span style="color: black;">
+    <hr align="center" size="2" width="100%">
+    </span></div>
+    <p class="MsoNormal" style="margin: 4.5pt 0cm 4.5pt 18pt; text-align: center;" align="center"><span style="font-size: 10pt; font-family: Verdana; color: black;"></span><span style="font-size: 10pt; font-family: Arial;">For complete documentation
+        on STM8L10x 8-bit microcontrollers platform visit <span style="color: blue;"><a href="http://www.st.com/internet/mcu/subclass/1381.jsp" target="_blank">STM8L
+        family web site</a></span></span><u><span style="font-size: 10pt; font-family: Verdana; color: black;"><br>
+    </span></u><u><span style="font-size: 10pt; font-family: Verdana; color: blue;"><a href="http://www.st.com/stm32" target="_blank"></a></span></u><span style="color: black;"><o:p></o:p></span></p>
+    </td>
+   </tr>
+   <tr style="">
+    <td style="padding: 0cm;" valign="top">
+    <h2 style="background: rgb(51, 102, 255) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial;"><span style="font-size: 12pt; color: white;"><o:p>&nbsp;</o:p></span></h2>
+    </td>
+   </tr>
+  </tbody></table>
+  <p class="MsoNormal"><span style="font-size: 10pt;"><o:p></o:p></span></p>
+  </td>
+ </tr>
+</tbody></table>
+
+</div>
+
+<p class="MsoNormal"><o:p>&nbsp;</o:p></p>
+
+</div>
+
+</body></html>
