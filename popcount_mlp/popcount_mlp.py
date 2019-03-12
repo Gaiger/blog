@@ -106,28 +106,26 @@ class NeuralNetwork(object):
 
     def Backward(self, y):
                 
-        loss = self.cross_entropy(y)         
-        out_error = y - self.out                                                  
-        self.z3_error = out_error
+        loss = self.cross_entropy(y)
+        out_error = self.out - y
         
-        self.z2_error = self.W2.T.dot(self.z3_error)
+        z3_error = out_error
+        z2_error = self.W2.T.dot(z3_error)
+        z1_error = z2_error * self.deRelu(self.z2)
+        				   
+        z3_W_delta = z3_error.dot(self.z2.T)
+        z3_b_delta = z3_error
         
-        self.z1_error = self.z2_error * self.deRelu(self.z2)                        
-           
-                       
-        self.z3_W_delta = self.z3_error.dot(self.z2.T)       
-        self.z3_b_delta = self.z3_error
+        z1_W_delta = z1_error.dot(self.x.T)
+        z1_b_delta = z1_error
         
-        self.z1_W_delta = self.z1_error.dot(self.x.T)       
-        self.z1_b_delta = self.z1_error
+        lr = 5e-3
+        self.W2 -= z3_W_delta * lr 
+        self.W1 -= z1_W_delta * lr
         
-        lr = 2e-2                                       
-        self.W2 += self.z3_W_delta * lr 
-        self.W1 += self.z1_W_delta * lr
-        
-        self.b2 += self.z3_b_delta * lr
-        self.b1 += self.z1_b_delta * lr
-        
+        self.b2 -= z3_b_delta * lr
+        self.b1 -= z1_b_delta * lr
+
         return loss  
     
 if __name__ == "__main__":
@@ -181,7 +179,17 @@ if __name__ == "__main__":
         if(error_rate <= 0.1):
             break;
             
-    loss = loss[0:-1:int(num_sample/2)]
+    step = int(num_sample)            
+    loss = loss[0:-1:step]
     
-    plt.plot( range(0, len(loss)), np.log10(loss))
-    plt.show()
+    fig, ax = plt.subplots()
+    
+    x = np.linspace(0, len(loss), len(loss), )
+    ax.set_xlabel("traning time")   
+    ax.set_ylabel("log(loss)")
+    
+    ax.plot(step * x, np.log10(loss), lw = 2)
+    ax.legend(frameon=False)
+    
+    ax.grid(True)
+  
