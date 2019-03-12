@@ -141,7 +141,7 @@ if __name__ == "__main__":
     nn = NeuralNetwork(num_bit, num_neurons)    
     
     loss = []
-    
+    error_rate = []
     for epoch in range(max_epoch):
         err_count = 0
         for i in range(np.size(x, 0)):
@@ -167,29 +167,37 @@ if __name__ == "__main__":
             if(int(y) != jj): 
                 err_count += 1
                 
-            loss.append( nn.Backward(yy))
+            loss.append( nn.Backward(yy))        
             
-        error_rate = 100.0*err_count/np.size(x, 0)                     
+        error_rate.append((100.0 * err_count) / np.size(x, 0))
+        
         print("epoch = %d, error rate = %3.1f%%, loss = %6.5f" \
-              % (epoch, error_rate, loss[-1] ))
+              % (epoch, error_rate[-1], loss[-1] ))
         
         if(abs(loss[-1] - loss[-2]) <= 1e-4 and loss[-1] <= 1e-4):
             break
         
-        if(error_rate <= 0.1):
+        if(error_rate[-1] <= 0.1):
             break;
             
-    step = int(num_sample)            
+    step = int(num_sample/2)            
     loss = loss[0:-1:step]
     
-    fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(8, 6))
     
-    x = np.linspace(0, len(loss), len(loss), )
-    ax.set_xlabel("traning time")   
-    ax.set_ylabel("log(loss)")
+    x1 = np.linspace(0, len(loss), len(loss) )     
+     
+    ax1 = plt.subplot(2, 1, 1)     
+
+    ax1.semilogy( x1 * step, loss, lw = 2)   
+    ax1.legend(["log(loss)"])
+    ax1.grid(True)
+
+    ax2 = plt.subplot(2, 1, 2)     
+    ax2.set_xlabel("traning time")   
+    x2 = np.linspace(0, len(error_rate), len(error_rate) )        
+    ax2.plot( x2 *num_sample, error_rate , lw = 2, color='magenta')   
+    ax2.legend(["error rate(%)"])
+    ax2.grid(True) 
+
     
-    ax.plot(step * x, np.log10(loss), lw = 2)
-    ax.legend(frameon=False)
-    
-    ax.grid(True)
-  
