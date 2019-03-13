@@ -58,6 +58,7 @@ def BitToMaxNumber(bits):
 
 
 class NeuralNetwork(object):
+
     def __init__(self, bitNumber, num_neurons):
         self.bitNumber = bitNumber
         self.num_neurons = num_neurons
@@ -68,29 +69,26 @@ class NeuralNetwork(object):
         
         self.W2 = np.random.uniform(-1, 1, (self.outputNumber, num_neurons))            
         self.b2 = np.random.uniform(-1, 1, (self.outputNumber, 1))
-       
-        
-        
+                      
     def Softmax(self, val):
         exps = np.exp(val - np.max(val))
         return exps / np.sum(exps, axis=0)
-    
+
     def ReLU(self, val):
         return (val > 0) * val
-    
+
     def deRelu(self, z):
-        return (z > 0) * 1        
-   
-    
+        return (z > 0) * 1           
+
     def cross_entropy(self, y) :
         #return -np.sum( y * np.log(self.out))
         for i in range(y.size):
             if (0 != y[i]):
                 return -np.log(self.out[i])
         pass
-            
+
     def Forward(self, x):
-                  
+        
         self.x = x
         
         self.z1 = np.dot( self.W1, self.x)
@@ -127,6 +125,8 @@ class NeuralNetwork(object):
         self.b1 -= z1_b_delta * lr
 
         return loss  
+##  class NeuralNetwork  
+    
     
 if __name__ == "__main__":
     
