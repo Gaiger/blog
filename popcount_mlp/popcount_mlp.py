@@ -139,6 +139,7 @@ if __name__ == "__main__":
     
     
     print("bit number = %d, max value = %d"%(num_bit, max_value))
+    print("num_training_sample = %d"%num_training_sample)
     
     x = np.random.randint(0, high = max_value, 
                           size = (num_training_sample, 1))
@@ -208,7 +209,7 @@ if __name__ == "__main__":
     x2 = np.linspace(0, len(error_rate), len(error_rate) )        
     ax2.plot( x2,
              error_rate , lw = 2, color='magenta')   
-    ax2.legend(["error rate(%)"])
+    ax2.legend(["training data error rate(%)"])
     ax2.grid(True) 
 
 
@@ -231,6 +232,7 @@ if __name__ == "__main__":
         if(int(y) != jj): 
             err_count += 1
             
-    print("error rate in test = %f %%" % (100*err_count/num_test_sample))
+    print("prediction error rate in test = %f %%" 
+          % (100*err_count/num_test_sample))
             
                      
