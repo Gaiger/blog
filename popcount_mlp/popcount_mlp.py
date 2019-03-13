@@ -43,7 +43,6 @@ def Popcount(value, num_bit):
      return count
 
 
- 
 def BitToMaxNumber(bits):
 
     maxNumber = 0
@@ -134,9 +133,11 @@ if __name__ == "__main__":
     num_neurons = 64
     max_epoch = 1000
     
-    num_training_sample = 100
+    num_training_sample = 100 * num_bit
+    max_value = BitToMaxNumber(num_bit)    
     
-    max_value = BitToMaxNumber(num_bit)
+    
+    
     print("bit number = %d, max value = %d"%(num_bit, max_value))
     
     x = np.random.randint(0, high = max_value, 
@@ -171,38 +172,65 @@ if __name__ == "__main__":
             if(int(y) != jj): 
                 err_count += 1
                 
-            loss.append( nn.Backward(yy))        
+            loss.append( nn.Backward(yy))                    
             
         error_rate.append((100.0 * err_count) / np.size(x, 0))
         
-        print("epoch = %d, error rate = %3.1f%%, loss = %6.5f" \
+        print("epoch = %d, error rate = %4.3f%%, loss = %6.5f" \
               % (epoch, error_rate[-1], loss[-1] ))
         
         if(abs(loss[-1] - loss[-2]) <= 1e-4 and loss[-1] <= 1e-4):
             break
         
-        if(error_rate[-1] <= 0.1):
+        if(error_rate[-1] <= 0.2):
             break;
             
-    step = int(num_training_sample / 2)            
+    step = int(num_training_sample)            
     loss = loss[0:-1:step]
     
     fig = plt.figure(figsize=(8, 6))
+    title_str = str.format("number of bit = %d, neurons = %d \n"
+                           "traing samples = %d"
+                           %(num_bit, num_neurons, 
+                             num_training_sample))
+    fig.suptitle(title_str, fontsize = 14)
     
     x1 = np.linspace(0, len(loss), len(loss) )     
      
     ax1 = plt.subplot(2, 1, 1)     
 
-    ax1.semilogy( x1 * step, loss, lw = 2)   
+    ax1.semilogy( x1, loss, lw = 2)   
     ax1.legend(["log(loss)"])
     ax1.grid(True)
 
     ax2 = plt.subplot(2, 1, 2)     
-    ax2.set_xlabel("traning time")   
+    ax2.set_xlabel("epoch")   
     x2 = np.linspace(0, len(error_rate), len(error_rate) )        
-    ax2.plot( x2 * num_training_sample,
+    ax2.plot( x2,
              error_rate , lw = 2, color='magenta')   
     ax2.legend(["error rate(%)"])
     ax2.grid(True) 
 
+
     
+    num_test_sample = 100
+    
+    err_count = 0
+    
+    for i in range(num_test_sample):
+        x = np.random.randint(0, high = max_value)
+        y = Popcount(x, num_bit)        
+        x_array = ConvertToBitArray(x, num_bit)
+
+        out_array = nn.Forward(x_array)
+        
+        jj = 0
+        for j in range(out_array.size):
+            if(out_array[j] > out_array[jj]):
+                jj = j      
+        if(int(y) != jj): 
+            err_count += 1
+            
+    print("error rate in test = %f %%" % (100*err_count/num_test_sample))
+            
+                     
