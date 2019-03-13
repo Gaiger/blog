@@ -129,22 +129,22 @@ class NeuralNetwork(object):
     
 if __name__ == "__main__":
     
-    num_bit = 8
+    num_bits = 8
     num_neurons = 64
     max_epoch = 1000
     
-    num_training_sample = 100 * num_bit
-    max_value = BitToMaxNumber(num_bit)    
+    num_training_samples = 100 * num_bits
+    max_value = BitToMaxNumber(num_bits)    
     
     
     
-    print("bit number = %d, max value = %d"%(num_bit, max_value))
-    print("num_training_sample = %d"%num_training_sample)
+    print("bit number = %d, max value = %d"%(num_bits, max_value))
+    print("num_training_samples = %d"%num_training_samples)
     
     x = np.random.randint(0, high = max_value, 
-                          size = (num_training_sample, 1))
+                          size = (num_training_samples, 1))
     
-    nn = NeuralNetwork(num_bit, num_neurons)    
+    nn = NeuralNetwork(num_bits, num_neurons)    
     
     loss = []
     error_rate = []
@@ -152,8 +152,8 @@ if __name__ == "__main__":
         err_count = 0
         for i in range(np.size(x, 0)):
             
-            y = Popcount(x[i], num_bit)        
-            x_array = ConvertToBitArray(x[i], num_bit)
+            y = Popcount(x[i], num_bits)        
+            x_array = ConvertToBitArray(x[i], num_bits)
             
             #print("value = %d, popcount = %d "%( x_array[i], y))   
             out_array = nn.Forward(x_array)    
@@ -167,7 +167,7 @@ if __name__ == "__main__":
             #np.set_printoptions(suppress = True)
             #print("\npredicte = \n%s" % np.reshape(out_array, (bitNumber + 1, 1)) )
            
-            yy = np.zeros((num_bit + 1, 1))
+            yy = np.zeros((num_bits + 1, 1))
             yy[int(y)] = 1.0
             
             if(int(y) != jj): 
@@ -177,23 +177,23 @@ if __name__ == "__main__":
             
         error_rate.append((100.0 * err_count) / np.size(x, 0))
         
-        print("epoch = %d, error rate = %4.3f%%, loss = %6.5f" \
-              % (epoch, error_rate[-1], loss[-1] ))
+        print("epoch = %d, training error rate = %4.3f%%, loss = %6.5f" 
+              % (epoch, error_rate[-1], loss[-1]) )
         
         if(abs(loss[-1] - loss[-2]) <= 1e-4 and loss[-1] <= 1e-4):
             break
         
         if(error_rate[-1] <= 0.2):
-            break;
+            break;   
             
-    step = int(num_training_sample)            
+    step = int(num_training_samples)            
     loss = loss[0:-1:step]
     
     fig = plt.figure(figsize=(8, 6))
-    title_str = str.format("number of bit = %d, neurons = %d \n"
+    title_str = str.format("number of bits = %d, neurons = %d \n"
                            "traing samples = %d"
-                           %(num_bit, num_neurons, 
-                             num_training_sample))
+                           %(num_bits, num_neurons, 
+                             num_training_samples))
     fig.suptitle(title_str, fontsize = 14)
     
     x1 = np.linspace(0, len(loss), len(loss) )     
@@ -220,8 +220,8 @@ if __name__ == "__main__":
     
     for i in range(num_test_sample):
         x = np.random.randint(0, high = max_value)
-        y = Popcount(x, num_bit)        
-        x_array = ConvertToBitArray(x, num_bit)
+        y = Popcount(x, num_bits)        
+        x_array = ConvertToBitArray(x, num_bits)
 
         out_array = nn.Forward(x_array)
         
