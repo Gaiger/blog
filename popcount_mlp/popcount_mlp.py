@@ -130,14 +130,18 @@ class NeuralNetwork(object):
     
 if __name__ == "__main__":
     
-    max_epoch = 1000
-    num_sample = 100
     num_bit = 8
     num_neurons = 64
+    max_epoch = 1000
+    
+    num_training_sample = 100
     
     max_value = BitToMaxNumber(num_bit)
     print("bit number = %d, max value = %d"%(num_bit, max_value))
-    x = np.random.randint(0, high = max_value, size = (num_sample, 1))
+    
+    x = np.random.randint(0, high = max_value, 
+                          size = (num_training_sample, 1))
+    
     nn = NeuralNetwork(num_bit, num_neurons)    
     
     loss = []
@@ -180,7 +184,7 @@ if __name__ == "__main__":
         if(error_rate[-1] <= 0.1):
             break;
             
-    step = int(num_sample/2)            
+    step = int(num_training_sample / 2)            
     loss = loss[0:-1:step]
     
     fig = plt.figure(figsize=(8, 6))
@@ -196,7 +200,8 @@ if __name__ == "__main__":
     ax2 = plt.subplot(2, 1, 2)     
     ax2.set_xlabel("traning time")   
     x2 = np.linspace(0, len(error_rate), len(error_rate) )        
-    ax2.plot( x2 *num_sample, error_rate , lw = 2, color='magenta')   
+    ax2.plot( x2 * num_training_sample,
+             error_rate , lw = 2, color='magenta')   
     ax2.legend(["error rate(%)"])
     ax2.grid(True) 
 
