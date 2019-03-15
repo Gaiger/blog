@@ -27,7 +27,7 @@ def ConvertToBitArray(value, num_bit):
     return bit_array
 
 
-def Popcount(value, num_bit):
+def Popcount(value):
     
      val = copy.deepcopy(value)
       
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         err_count = 0
         for i in range(np.size(x, 0)):
             
-            y = Popcount(x[i], num_bits)        
+            y = Popcount(x[i])        
             x_array = ConvertToBitArray(x[i], num_bits)
             
             #print("value = %d, popcount = %d "%( x_array[i], y))   
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     
     for i in range(num_test_sample):
         x = np.random.randint(0, high = max_value)
-        y = Popcount(x, num_bits)        
+        y = Popcount(x)        
         x_array = ConvertToBitArray(x, num_bits)
 
         out_array = nn.Forward(x_array)
