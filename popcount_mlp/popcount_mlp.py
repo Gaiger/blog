@@ -191,7 +191,7 @@ if __name__ == "__main__":
     
     fig = plt.figure(figsize=(8, 6))
     title_str = str.format("number of bits = %d, neurons = %d \n"
-                           "traing samples = %d"
+                           "training samples = %d"
                            %(num_bits, num_neurons, 
                              num_training_samples))
     fig.suptitle(title_str, fontsize = 14)
