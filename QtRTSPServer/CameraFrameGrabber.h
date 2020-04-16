@@ -28,7 +28,8 @@ public:
 	virtual bool present(const QVideoFrame &frame) Q_DECL_OVERRIDE;
 
 	virtual QList<QVideoFrame::PixelFormat>
-		supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const Q_DECL_OVERRIDE;
+		supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const
+	Q_DECL_OVERRIDE;
 
 private slots:
 	void ChangeCameraSetting(QCamera::State state);

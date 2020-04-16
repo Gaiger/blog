@@ -79,13 +79,13 @@ CameraFrameGrabber::~CameraFrameGrabber(void)
 
 bool CameraFrameGrabber::present(const QVideoFrame &frame)
 {
+	//qDebug() << "grabbed pixelFormat is " << cloneFrame.pixelFormat();
 	QVideoFrame cloneFrame(frame);
 
 	cloneFrame.map(QAbstractVideoBuffer::ReadOnly);
 
-	//qDebug() << "grabbed pixelFormat is " << cloneFrame.pixelFormat();
-
 	QImage grabbed_image;
+
 	if(QVideoFrame::Format_YUYV == cloneFrame.pixelFormat())
 	{
 		QByteArray temp;
@@ -94,15 +94,19 @@ bool CameraFrameGrabber::present(const QVideoFrame &frame)
 		YUYVtoRGB(cloneFrame.width(), cloneFrame.height(),
 				  cloneFrame.bits(), (unsigned char*)temp.data());
 
-
-		grabbed_image =  QImage((uchar*)temp.data(), cloneFrame.width(), cloneFrame.height(),
-								cloneFrame.width() * 3, QImage::Format_RGB888).copy();
+		grabbed_image =  QImage((unsigned char*)temp.data(),
+								cloneFrame.width(),
+								cloneFrame.height(),
+								cloneFrame.width() * 3,
+								QImage::Format_RGB888).copy();
 	}
 #if(0)
 	else if(QVideoFrame::Format_RGB32 == cloneFrame.pixelFormat())
 	{
-		grabbed_image = QImage(cloneFrame.bits(), cloneFrame.width(), cloneFrame.height(),
-									  cloneFrame.width() * 4, QImage::Format_RGB32).copy();
+		grabbed_image = QImage(cloneFrame.bits(), cloneFrame.width(),
+							   cloneFrame.height(),
+							   cloneFrame.width() * 4,
+							   QImage::Format_RGB32).copy();
 	}
 #endif
 	cloneFrame.unmap();
@@ -115,16 +119,17 @@ bool CameraFrameGrabber::present(const QVideoFrame &frame)
 /**********************************************************************/
 
 QList<QVideoFrame::PixelFormat>
-	CameraFrameGrabber::supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const
+	CameraFrameGrabber::supportedPixelFormats(
+		QAbstractVideoBuffer::HandleType type) const
 {
 	if (type != QAbstractVideoBuffer::NoHandle)
-				return QList<QVideoFrame::PixelFormat>();
+		return QList<QVideoFrame::PixelFormat>();
 
 	QList<QVideoFrame::PixelFormat> pixel_fmt;
-#if(0)
-	pixel_fmt.append(QVideoFrame::Format_RGB24);
-	pixel_fmt.append(QVideoFrame::Format_RGB32);
-#endif
+
+	//pixel_fmt.append(QVideoFrame::Format_RGB24);
+	//pixel_fmt.append(QVideoFrame::Format_RGB32);
+
 	pixel_fmt.append(QVideoFrame::Format_YUYV);
 
 	return pixel_fmt;
