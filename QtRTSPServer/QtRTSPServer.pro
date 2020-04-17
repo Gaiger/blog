@@ -16,14 +16,34 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+
+X264_PATH = $$PWD/libs/x264
+
+INCLUDEPATH = $$X264_PATH/include
+
+LIBS += $$X264_PATH/lib/libx264.dll.a
+
+x264dll.files += $$X264_PATH/bin/libx264-157.dll
+x264dll.path = $$PWD
+
+!exists($$PWD/libx264-157.dll) : INSTALLS = x264dll
+
+
 SOURCES += \
     CameraFrameGrabber.cpp \
+    H264NalFactory.cpp \
+    X264Encoder.cpp \
     main.cpp \
-    ImageWidget.cpp
+    ImageWidget.cpp \
+    rgb2yuv.c
 
 HEADERS += \
     CameraFrameGrabber.h \
-    ImageWidget.h
+    H264Encoder.h \
+    H264NalFactory.h \
+    ImageWidget.h \
+    X264Encoder.h \
+    rgb2yuv.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
