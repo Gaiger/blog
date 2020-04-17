@@ -29,6 +29,14 @@ x264dll.path = $$PWD
 !exists($$PWD/libx264-157.dll) : INSTALLS = x264dll
 
 
+LIVE555_PATH = $$PWD/../libs/LIVE555
+
+INCLUDEPATH += $$LIVE555_PATH/BasicUsageEnvironment/include
+INCLUDEPATH += $$LIVE555_PATH/groupsock/include
+INCLUDEPATH += $$LIVE555_PATH/liveMedia/include
+INCLUDEPATH += $$LIVE555_PATH/UsageEnvironment/include
+
+
 win32 {
     CONFIG(debug, debug|release) {
         BUILD_MODE = Debug
@@ -37,17 +45,19 @@ win32 {
     }
 }
 
-LIVE555_PATH = $$PWD/../libs/LIVE555
 
 LIBS += $$LIVE555_PATH/BasicUsageEnvironment/$$BUILD_MODE/BasicUsageEnvironment.lib
 LIBS += $$LIVE555_PATH/UsageEnvironment/$$BUILD_MODE/UsageEnvironment.lib
 LIBS += $$LIVE555_PATH/groupsock/$$BUILD_MODE/groupsock.lib
 LIBS += $$LIVE555_PATH/liveMedia/$$BUILD_MODE/liveMedia.lib
 
+LIBS += Ws2_32.lib
+
 
 SOURCES += \
     CameraFrameGrabber.cpp \
     H264NalFactory.cpp \
+    H264NalSource.cpp \
     X264Encoder.cpp \
     main.cpp \
     ImageWidget.cpp \
@@ -57,6 +67,7 @@ HEADERS += \
     CameraFrameGrabber.h \
     H264Encoder.h \
     H264NalFactory.h \
+    H264NalSource.h \
     ImageWidget.h \
     X264Encoder.h \
     rgb2yuv.h
