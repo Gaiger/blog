@@ -16,7 +16,7 @@ class H264NalFactory : public QObject
 {
 	Q_OBJECT
 public:
-	H264NalFactory(QObject *parent = nullptr);
+	H264NalFactory(QObject *p_frame_grabber);
 	~H264NalFactory(void) Q_DECL_OVERRIDE;
 
 public:

@@ -22,25 +22,14 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 
 	CameraFrameGrabber frame_grabber;
-	ImageWidget w;
 
-	QObject::connect(&frame_grabber, SIGNAL(ResolutionChanged(QSize)),
-					 &w, SLOT(ChangeResolution(QSize)));
+	ImageWidget w(&frame_grabber);
+	H264NalFactory nal_factory(&frame_grabber);
 
-	QObject::connect(&frame_grabber, SIGNAL(FrameUpdated(QImage)),
-					 &w, SLOT(UpdateFrame(QImage)));
-
-	H264NalFactory nal_factory;
-
-	QObject::connect(&frame_grabber, SIGNAL(ResolutionChanged(QSize)),
-					 &nal_factory, SLOT(SetResolution(QSize)));
-	QObject::connect(&frame_grabber, SIGNAL(FrameUpdated(QImage)),
-						 &nal_factory, SLOT(Encode(QImage)));
 
 	frame_grabber.Start();
 	nal_factory.SetEnabled(true);
 	w.show();
-
 
 	return a.exec();
 }

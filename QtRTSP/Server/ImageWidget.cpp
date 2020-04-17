@@ -2,9 +2,16 @@
 
 #include <QPainter>
 
-ImageWidget::ImageWidget(QWidget *parent)
+ImageWidget::ImageWidget(QObject *p_frame_grabber,
+						 QWidget *parent)
 	: QWidget(parent)
 {
+	QObject::connect(p_frame_grabber, SIGNAL(ResolutionChanged(QSize)),
+					 this, SLOT(ChangeResolution(QSize)));
+
+	QObject::connect(p_frame_grabber, SIGNAL(FrameUpdated(QImage)),
+					 this, SLOT(UpdateFrame(QImage)));
+
 	QWidget::resize(320, 240);
 	QWidget::setFixedSize(QWidget::size());
 }

@@ -4,13 +4,16 @@
 #include "H264NalFactory.h"
 
 
-H264NalFactory::H264NalFactory(QObject *parent)
-	: QObject(parent),
+H264NalFactory::H264NalFactory(QObject *p_frame_grabber)
+	: QObject(nullptr),
 	m_resolution(QSize(0, 0)),
 	m_is_enabled(false),
 	m_p_h264_encoder(nullptr)
 {
-
+	QObject::connect(p_frame_grabber, SIGNAL(ResolutionChanged(QSize)),
+					 this, SLOT(SetResolution(QSize)));
+	QObject::connect(p_frame_grabber, SIGNAL(FrameUpdated(QImage)),
+						 this, SLOT(Encode(QImage)));
 }
 
 /**********************************************************************/

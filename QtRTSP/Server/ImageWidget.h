@@ -8,7 +8,7 @@ class ImageWidget : public QWidget
 	Q_OBJECT
 
 public:
-	ImageWidget(QWidget *parent = nullptr);
+	ImageWidget(QObject *p_frame_grabber, QWidget *parent = nullptr);
 	~ImageWidget(void) Q_DECL_OVERRIDE;
 
 public slots:
