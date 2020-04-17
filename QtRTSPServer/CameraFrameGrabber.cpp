@@ -126,10 +126,10 @@ QList<QVideoFrame::PixelFormat>
 		return QList<QVideoFrame::PixelFormat>();
 
 	QList<QVideoFrame::PixelFormat> pixel_fmt;
-
-	//pixel_fmt.append(QVideoFrame::Format_RGB24);
-	//pixel_fmt.append(QVideoFrame::Format_RGB32);
-
+#if(0)
+	pixel_fmt.append(QVideoFrame::Format_RGB24);
+	pixel_fmt.append(QVideoFrame::Format_RGB32);
+#endif
 	pixel_fmt.append(QVideoFrame::Format_YUYV);
 
 	return pixel_fmt;
