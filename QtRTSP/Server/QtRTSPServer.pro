@@ -29,6 +29,22 @@ x264dll.path = $$PWD
 !exists($$PWD/libx264-157.dll) : INSTALLS = x264dll
 
 
+win32 {
+    CONFIG(debug, debug|release) {
+        BUILD_MODE = Debug
+    } else {
+        BUILD_MODE = Release
+    }
+}
+
+LIVE555_PATH = $$PWD/../libs/LIVE555
+
+LIBS += $$LIVE555_PATH/BasicUsageEnvironment/$$BUILD_MODE/BasicUsageEnvironment.lib
+LIBS += $$LIVE555_PATH/UsageEnvironment/$$BUILD_MODE/UsageEnvironment.lib
+LIBS += $$LIVE555_PATH/groupsock/$$BUILD_MODE/groupsock.lib
+LIBS += $$LIVE555_PATH/liveMedia/$$BUILD_MODE/liveMedia.lib
+
+
 SOURCES += \
     CameraFrameGrabber.cpp \
     H264NalFactory.cpp \
