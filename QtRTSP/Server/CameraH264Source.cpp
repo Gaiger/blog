@@ -2,7 +2,7 @@
 #include "CameraH264Source.h"
 
 
-#define ONE_FRAME_BUFFER_SIZE			(512 * 1024)
+#define ONE_FRAME_BUFFER_SIZE			(256 * 1024)
 
 CameraH264Source *CameraH264Source::createNew(UsageEnvironment& ref_env,
 										unsigned client_session_id,
@@ -57,13 +57,16 @@ unsigned int CameraH264Source::maxFrameSize(void) const
 void CameraH264Source::DeliverFrame(void)
 {
 	unsigned int h264_data_length;
-
+	//printf("\n%s\r\n", __FUNCTION__);
 
 	h264_data_length = (unsigned int)m_p_h264_nal_factory->GetH264Nal(
 				m_p_frame_buffer, ONE_FRAME_BUFFER_SIZE);
 
 	if(0 == h264_data_length)
 	{
+		FramedSource::fFrameSize = 0;
+		FramedSource::fNumTruncatedBytes = 0;
+
 		FramedSource::afterGetting(this);
 		return ;
 	}
@@ -92,9 +95,9 @@ void CameraH264Source::DeliverFrame(void)
 	if (h264_data_length > FramedSource::fMaxSize)
 	{
 		FramedSource::fFrameSize = FramedSource::fMaxSize;
-		FramedSource::fNumTruncatedBytes = h264_data_length - FramedSource::fMaxSize;
+		FramedSource::fNumTruncatedBytes =
+				h264_data_length - FramedSource::fMaxSize;
 	}/*if */
-
 
 	gettimeofday(&(FramedSource::fPresentationTime), nullptr);
 
