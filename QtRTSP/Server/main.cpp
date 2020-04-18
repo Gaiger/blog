@@ -8,7 +8,7 @@
 
 #include "ImageWidget.h"
 #include "CameraFrameGrabber.h"
-#include "H264NalFactory.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -24,11 +24,11 @@ int main(int argc, char *argv[])
 	CameraFrameGrabber frame_grabber;
 
 	ImageWidget w(&frame_grabber);
-	H264NalFactory nal_factory(&frame_grabber);
+	//H264NalFactory nal_factory(&frame_grabber);
 
 
 	frame_grabber.Start();
-	nal_factory.SetEnabled(true);
+	//nal_factory.SetEnabled(true);
 	w.show();
 
 	return a.exec();

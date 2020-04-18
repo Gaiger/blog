@@ -5,6 +5,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
+DEFINES += NO_OPENSSL
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -56,8 +58,10 @@ LIBS += Ws2_32.lib
 
 SOURCES += \
     CameraFrameGrabber.cpp \
+    CameraH264Source.cpp \
+    CameraRTSPServer.cpp \
+    H264MediaSubsession.cpp \
     H264NalFactory.cpp \
-    H264NalSource.cpp \
     X264Encoder.cpp \
     main.cpp \
     ImageWidget.cpp \
@@ -65,9 +69,11 @@ SOURCES += \
 
 HEADERS += \
     CameraFrameGrabber.h \
+    CameraH264Source.h \
+    CameraRTSPServer.h \
     H264Encoder.h \
+    H264MediaSubsession.h \
     H264NalFactory.h \
-    H264NalSource.h \
     ImageWidget.h \
     X264Encoder.h \
     rgb2yuv.h

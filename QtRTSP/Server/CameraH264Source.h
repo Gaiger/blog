@@ -1,20 +1,20 @@
-﻿#ifndef H264NALSOURCE_H
-#define H264NALSOURCE_H
+﻿#ifndef CameraH264Source_H
+#define CameraH264Source_H
 
 #include "FramedSource.hh"
 #include "H264NalFactory.h"
 
-class H264NalSource : public FramedSource
+class CameraH264Source : public FramedSource
 {
 public:
-	static H264NalSource *createNew(UsageEnvironment &ref_env,
+	static CameraH264Source *createNew(UsageEnvironment &ref_env,
 									unsigned client_session_id,
 									void *p_h264_nal_factory);
 
 protected:
-	H264NalSource(UsageEnvironment &ref_env,
+	CameraH264Source(UsageEnvironment &ref_env,
 				  H264NalFactory *m_p_h264_nal_factory);
-	~H264NalSource(void);
+	~CameraH264Source(void);
 
 public:
 	virtual void doGetNextFrame();
@@ -34,4 +34,4 @@ private:
 	unsigned char *m_p_frame_buffer;
 };
 
-#endif // H264NALSOURCE_H
+#endif // CameraH264Source_H

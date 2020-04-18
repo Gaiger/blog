@@ -1,21 +1,21 @@
 ﻿#include <GroupsockHelper.hh> // for "gettimeofday()"
-#include "H264NalSource.h"
+#include "CameraH264Source.h"
 
 
 #define ONE_FRAME_BUFFER_SIZE			(512 * 1024)
 
-H264NalSource *H264NalSource::createNew(UsageEnvironment& ref_env,
+CameraH264Source *CameraH264Source::createNew(UsageEnvironment& ref_env,
 										unsigned client_session_id,
 										void *p_nal_factory)
 {
 	(void)client_session_id;
 
-	return new H264NalSource(ref_env, (H264NalFactory*)p_nal_factory);
+	return new CameraH264Source(ref_env, (H264NalFactory*)p_nal_factory);
 }
 
 /**********************************************************************/
 
-H264NalSource::H264NalSource(UsageEnvironment &ref_env,
+CameraH264Source::CameraH264Source(UsageEnvironment &ref_env,
 							 H264NalFactory *p_nal_factory)
 	:FramedSource(ref_env),
 	m_p_h264_nal_factory(p_nal_factory), m_p_frame_buffer(nullptr)
@@ -30,7 +30,7 @@ H264NalSource::H264NalSource(UsageEnvironment &ref_env,
 
 /**********************************************************************/
 
-H264NalSource::~H264NalSource(void)
+CameraH264Source::~CameraH264Source(void)
 {
 	printf("\n%s\r\n", __FUNCTION__);
 
@@ -40,21 +40,21 @@ H264NalSource::~H264NalSource(void)
 
 /**********************************************************************/
 
-void H264NalSource::doGetNextFrame()
+void CameraH264Source::doGetNextFrame()
 {
 	DeliverFrame();
 }
 
 /**********************************************************************/
 
-unsigned int H264NalSource::maxFrameSize(void) const
+unsigned int CameraH264Source::maxFrameSize(void) const
 {
 	return ONE_FRAME_BUFFER_SIZE;
 }
 
 /**********************************************************************/
 
-void H264NalSource::DeliverFrame(void)
+void CameraH264Source::DeliverFrame(void)
 {
 	unsigned int h264_data_length;
 
