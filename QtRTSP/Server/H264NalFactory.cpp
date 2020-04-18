@@ -81,7 +81,7 @@ int H264NalFactory::GetH264Nal(unsigned char *p_data, int buffer_size)
 	m_semaphore.tryAcquire(1, MAX_WAIT_TIME_IN_MS);
 
 	if(0 == m_nal_queue.size())
-			return 0;
+		return 0;
 
 	QByteArray nal;
 	nal = m_nal_queue.dequeue();
