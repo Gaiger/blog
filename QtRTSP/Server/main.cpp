@@ -1,14 +1,18 @@
 ﻿
 #include <QtGlobal>
-#ifdef Q_OS_WIN
-#include <windows.h>
-#endif
+
 
 #include <QApplication>
 
-#include "ImageWidget.h"
+
 #include "CameraFrameGrabber.h"
 
+#include "ImageWidget.h"
+#include "CameraRTSPServer.h"
+
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -24,11 +28,11 @@ int main(int argc, char *argv[])
 	CameraFrameGrabber frame_grabber;
 
 	ImageWidget w(&frame_grabber);
-	//H264NalFactory nal_factory(&frame_grabber);
+	CameraRTSPServer rtsp_server(&frame_grabber, 8554);
 
 
 	frame_grabber.Start();
-	//nal_factory.SetEnabled(true);
+	rtsp_server.start();
 	w.show();
 
 	return a.exec();
