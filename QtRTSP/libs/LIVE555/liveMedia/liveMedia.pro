@@ -93,6 +93,7 @@ SOURCES += \
     JPEGVideoRTPSource.cpp \
     JPEGVideoSource.cpp \
     Locale.cpp \
+    MIKEY.cpp \
     MP3ADU.cpp \
     MP3ADURTPSink.cpp \
     MP3ADURTPSource.cpp \
@@ -182,6 +183,7 @@ SOURCES += \
     RawVideoRTPSink.cpp \
     RawVideoRTPSource.cpp \
     SIPClient.cpp \
+    SRTPCryptographicContext.cpp \
     ServerMediaSession.cpp \
     SimpleRTPSink.cpp \
     SimpleRTPSource.cpp \
@@ -288,6 +290,7 @@ HEADERS += \
     include/JPEGVideoRTPSource.hh \
     include/JPEGVideoSource.hh \
     include/Locale.hh \
+    include/MIKEY.hh \
     include/MP3ADU.hh \
     include/MP3ADURTPSink.hh \
     include/MP3ADURTPSource.hh \
@@ -359,6 +362,7 @@ HEADERS += \
     include/RawVideoRTPSink.hh \
     include/RawVideoRTPSource.hh \
     include/SIPClient.hh \
+    include/SRTPCryptographicContext.hh \
     include/ServerMediaSession.hh \
     include/SimpleRTPSink.hh \
     include/SimpleRTPSource.hh \
