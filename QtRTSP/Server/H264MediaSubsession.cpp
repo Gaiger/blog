@@ -65,8 +65,8 @@ void H264MediaSubsession::checkForAuxSDPLine1(void)
 	}
 	else
 	{
-		//int uSecsDelay = 100000;
-		int uSecsDelay = 200*1000;
+
+		int uSecsDelay = 200 * 1000;
 		nextTask() = envir().taskScheduler().scheduleDelayedTask(uSecsDelay, (TaskFunc*)checkForAuxSDPLine, this);
 	}
 }
@@ -95,14 +95,12 @@ char const* H264MediaSubsession::getAuxSDPLine(RTPSink* rtp_sink, FramedSource *
 FramedSource* H264MediaSubsession::createNewStreamSource(unsigned client_session_id,
 														 unsigned &ref_estimate_bitrate)
 {
-	// Based on encoder configuration i kept it 90000
-	//estBitRate = 90*1024;
-	ref_estimate_bitrate = 2*1024*1024;
+	ref_estimate_bitrate = 2 * 1024 * 1024;
+
 	CameraH264Source *p_source;
-	p_source = CameraH264Source::createNew(envir(), client_session_id, m_p_grabber);
-	// are you trying to keep the reference of the source somewhere? you shouldn't.
-	// Live555 will create and delete this class object many times. if you store it somewhere
-	// you will get memory access violation. instead you should configure you source to always read from your data source
+	p_source = CameraH264Source::createNew(envir(),
+		client_session_id, m_p_grabber);
+
 	return H264VideoStreamDiscreteFramer::createNew(envir(), p_source);
 }
 
