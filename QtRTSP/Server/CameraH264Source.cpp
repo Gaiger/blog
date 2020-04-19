@@ -1,4 +1,4 @@
-﻿#include <GroupsockHelper.hh> // for "gettimeofday()"
+#include <GroupsockHelper.hh> // for "gettimeofday()"
 #include "CameraH264Source.h"
 
 
@@ -56,17 +56,16 @@ unsigned int CameraH264Source::maxFrameSize(void) const
 
 void CameraH264Source::DeliverFrame(void)
 {
+	FramedSource::fFrameSize = 0;
+	FramedSource::fNumTruncatedBytes = 0;
+
 	unsigned int h264_data_length;
-	//printf("\n%s\r\n", __FUNCTION__);
 
 	h264_data_length = (unsigned int)m_p_h264_nal_factory->GetH264Nal(
 				m_p_frame_buffer, ONE_FRAME_BUFFER_SIZE);
 
 	if(0 == h264_data_length)
 	{
-		FramedSource::fFrameSize = 0;
-		FramedSource::fNumTruncatedBytes = 0;
-
 		FramedSource::afterGetting(this);
 		return ;
 	}
@@ -102,7 +101,7 @@ void CameraH264Source::DeliverFrame(void)
 	gettimeofday(&(FramedSource::fPresentationTime), nullptr);
 
 	memmove(FramedSource::fTo, m_p_frame_buffer + trancate,
-			FramedSource::fFrameSize - trancate);
+		FramedSource::fFrameSize - trancate);
 
 	FramedSource::afterGetting(this);
 }

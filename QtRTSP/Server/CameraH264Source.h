@@ -1,4 +1,4 @@
-﻿#ifndef CameraH264Source_H
+#ifndef CameraH264Source_H
 #define CameraH264Source_H
 
 #include "FramedSource.hh"
@@ -8,12 +8,12 @@ class CameraH264Source : public FramedSource
 {
 public:
 	static CameraH264Source *createNew(UsageEnvironment &ref_env,
-									unsigned client_session_id,
-									void *p_h264_nal_factory);
+			unsigned client_session_id,
+			void *p_h264_nal_factory);
 
 protected:
 	CameraH264Source(UsageEnvironment &ref_env,
-				  H264NalFactory *m_p_h264_nal_factory);
+			 H264NalFactory *m_p_h264_nal_factory);
 	~CameraH264Source(void);
 
 public:
