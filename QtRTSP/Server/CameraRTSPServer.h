@@ -1,4 +1,4 @@
-﻿#ifndef CAMERARTSPSERVER_H
+#ifndef CAMERARTSPSERVER_H
 #define CAMERARTSPSERVER_H
 
 #include <QThread>
@@ -15,7 +15,7 @@ class CameraRTSPServer : public QThread
 	Q_OBJECT
 public:
 	explicit CameraRTSPServer(QObject *p_grabber,
-							  unsigned short port = 554);
+							  unsigned short port = 8554);
 
 	~CameraRTSPServer(void) Q_DECL_OVERRIDE;
 

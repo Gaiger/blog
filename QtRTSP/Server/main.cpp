@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	CameraFrameGrabber frame_grabber;
 
 	ImageWidget w(&frame_grabber);
-	CameraRTSPServer rtsp_server(&frame_grabber, 8554);
+	CameraRTSPServer rtsp_server(&frame_grabber);
 
 
 	frame_grabber.Start();
