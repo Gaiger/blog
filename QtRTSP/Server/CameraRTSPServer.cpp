@@ -38,6 +38,10 @@ void CameraRTSPServer::Stop(void)
 	qDebug() << Q_FUNC_INFO;
 	m_is_to_stop_scheduler = 1;
 
+	if(nullptr != m_p_rtsp_server)
+		Medium::close(m_p_rtsp_server);
+	m_p_rtsp_server = nullptr;
+	
 	while(true == QThread::isRunning())
 		QThread::wait(50);
 }
@@ -127,12 +131,10 @@ void CameraRTSPServer::DestroyLive555Objects(void)
 			m_p_rtsp_server->removeServerMediaSession(
 						m_p_server_media_session);
 	}
-
 	m_p_server_media_session = nullptr;
 
 	if(nullptr != m_p_rtsp_server)
 		Medium::close(m_p_rtsp_server);
-
 	m_p_rtsp_server = nullptr;
 
 	m_p_env->reclaim();
