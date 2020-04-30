@@ -6,7 +6,7 @@
 
 H264NalFactory::H264NalFactory(QObject *p_frame_grabber)
 	: QObject(nullptr),
-	m_resolution(QSize(0, 0)),
+	m_resolution(QSize(-1, -1)),
 	m_is_enabled(false),
 	m_p_h264_encoder(nullptr)
 {
@@ -105,7 +105,7 @@ void H264NalFactory::SetEnabled(bool is_enabled)
 	if(0 != m_semaphore.available())
 		m_semaphore.acquire(m_semaphore.available());
 
-	if(QSize(0, 0) == m_resolution)
+	if(QSize(-1, -1) == m_resolution)
 	{
 		m_is_enabled = false;
 		return ;
