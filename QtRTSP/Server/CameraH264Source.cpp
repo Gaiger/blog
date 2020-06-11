@@ -67,7 +67,7 @@ void CameraH264Source::DeliverFrame(void)
 	if(0 >= h264_data_length)
 		return ;
 
-	//printf("h264_data_length = %d\r\n", h264_data_length);
+
 	int trancate;
 	trancate = 0;
 
@@ -88,7 +88,7 @@ void CameraH264Source::DeliverFrame(void)
 	FramedSource::fFrameSize = h264_data_length;
 	FramedSource::fNumTruncatedBytes = 0;
 
-	if (h264_data_length > FramedSource::fMaxSize)
+	if(h264_data_length > FramedSource::fMaxSize)
 	{
 		FramedSource::fFrameSize = FramedSource::fMaxSize;
 		FramedSource::fNumTruncatedBytes =
