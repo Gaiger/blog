@@ -49,7 +49,6 @@ void H264NalFactory::SetResolution(QSize resolution)
 	m_p_h264_encoder = new X264Encoder();
 	m_resolution = resolution;
 
-	//m_p_h264_encoder->Init(resolution.width(), resolution.height());
 }
 
 /**********************************************************************/
