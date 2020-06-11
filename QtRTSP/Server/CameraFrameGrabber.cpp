@@ -197,15 +197,17 @@ void CameraFrameGrabber::ChangeCameraSetting(QCamera::State state)
 
 	qDebug() << m_p_camera->supportedViewfinderResolutions();
 
-	if(m_p_camera->supportedViewfinderResolutions().contains(QSize(640, 480)))
+	QSize preferred_resolution;
+	preferred_resolution = QSize(320, 240);
+
+	if(m_p_camera->supportedViewfinderResolutions().contains(preferred_resolution))
 	{
-		viewfinderSettings.setResolution(QSize(640, 480));
+		viewfinderSettings.setResolution(preferred_resolution);
 	}
 
 	qDebug() << m_p_camera->supportedViewfinderPixelFormats();
 	viewfinderSettings.setPixelFormat(QVideoFrame::Format_YUYV);
 
-	//viewfinderSettings.setResolution(640, 480);
 	//viewfinderSettings.setMaximumFrameRate(30.0);
 	//viewfinderSettings.setMinimumFrameRate(30.0);
 
