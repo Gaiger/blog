@@ -36,12 +36,12 @@ CameraRTSPServer::~CameraRTSPServer(void)
 void CameraRTSPServer::Stop(void)
 {
 	qDebug() << Q_FUNC_INFO;
+
+	if(false == QThread::isRunning())
+			return ;
+
 	m_is_to_stop_scheduler = 1;
 
-	if(nullptr != m_p_rtsp_server)
-		Medium::close(m_p_rtsp_server);
-	m_p_rtsp_server = nullptr;
-	
 	while(true == QThread::isRunning())
 		QThread::wait(50);
 }
