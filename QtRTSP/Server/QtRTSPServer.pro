@@ -68,7 +68,7 @@ SOURCES += \
     ImageWidget.cpp \
     H264Encoder/H264NalFactory.cpp \
     H264Encoder/X264Encoder.cpp \
-    H264Encoder/rgb2yuv.c \
+    H264Encoder/RGBtoYUV.c \
     main.cpp
 
 HEADERS += \
@@ -80,7 +80,7 @@ HEADERS += \
     H264Encoder/H264NalFactory.h \
     H264Encoder/H264Encoder.h \
     H264Encoder/X264Encoder.h \
-    H264Encoder/rgb2yuv.h
+    H264Encoder/RGBtoYUV.h
 
 INCLUDEPATH += H264Encoder
 

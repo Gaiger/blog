@@ -1,5 +1,5 @@
 ﻿
-#include "rgb2yuv.h"
+#include "RGBtoYUV.h"
 #include "X264Encoder.h"
 
 
@@ -8,7 +8,6 @@ X264Encoder::X264Encoder(void):
 	m_width(0), m_height(0)
 {
 	memset(&m_pic_in, 0, sizeof(x264_picture_t));
-	init_lookup_table();
 }
 
 /**********************************************************************/
@@ -98,7 +97,10 @@ QQueue<int> X264Encoder::Encode(unsigned char *p_frame_data, QQueue<QByteArray> 
 	if(nullptr == m_x264_handle)
 		return h264_nal_size_queue;
 
-	rgb24_to_yuv420(m_width, m_height, p_frame_data, m_pic_in.img.plane[0], 0);
+	//rgb24_to_yuv420(m_width, m_height, p_frame_data, m_pic_in.img.plane[0], 0);
+	RGBtoYV12(p_frame_data, m_width, m_height, m_pic_in.img.plane[0],
+			m_pic_in.img.plane[0] + m_width * m_height,
+			m_pic_in.img.plane[0] + m_width * m_height* 5/4);
 	x264_nal_t *p_nal;
 	int i_nal;
 
