@@ -59,28 +59,30 @@ PRE_TARGETDEPS += $$LIVE555_PATH/liveMedia/$$BUILD_MODE/liveMedia.lib
 LIBS += Ws2_32.lib
 
 
+
 SOURCES += \
     CameraFrameGrabber.cpp \
     CameraH264Source.cpp \
     CameraRTSPServer.cpp \
     H264MediaSubsession.cpp \
-    H264NalFactory.cpp \
-    X264Encoder.cpp \
-    main.cpp \
     ImageWidget.cpp \
-    rgb2yuv.c
+    H264Encoder/H264NalFactory.cpp \
+    H264Encoder/X264Encoder.cpp \
+    H264Encoder/rgb2yuv.c \
+    main.cpp
 
 HEADERS += \
     CameraFrameGrabber.h \
     CameraH264Source.h \
     CameraRTSPServer.h \
-    H264Encoder.h \
     H264MediaSubsession.h \
-    H264NalFactory.h \
     ImageWidget.h \
-    X264Encoder.h \
-    rgb2yuv.h
+    H264Encoder/H264NalFactory.h \
+    H264Encoder/H264Encoder.h \
+    H264Encoder/X264Encoder.h \
+    H264Encoder/rgb2yuv.h
 
+INCLUDEPATH += H264Encoder
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
