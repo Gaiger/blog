@@ -4,6 +4,10 @@
 #include "CameraFrameGrabber.h"
 
 
+/*from
+	https://stackoverflow.com/questions/9098881/convert-from-yuv-to-rgb-in-c-android-ndk
+*/
+
 void YUYVtoRGB(int width, int height, unsigned char *yuyv_image, unsigned char *rgb_image)
 {
 	int y;
