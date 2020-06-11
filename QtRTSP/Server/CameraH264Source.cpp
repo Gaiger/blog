@@ -64,11 +64,8 @@ void CameraH264Source::DeliverFrame(void)
 	h264_data_length = (unsigned int)m_p_h264_nal_factory->GetH264Nal(
 				m_p_frame_buffer, ONE_FRAME_BUFFER_SIZE);
 
-	if(0 == h264_data_length)
-	{
-		FramedSource::afterGetting(this);
+	if(0 >= h264_data_length)
 		return ;
-	}
 
 	//printf("h264_data_length = %d\r\n", h264_data_length);
 	int trancate;
