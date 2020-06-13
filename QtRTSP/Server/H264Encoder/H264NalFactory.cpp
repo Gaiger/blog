@@ -1,5 +1,7 @@
-﻿
+﻿#include <QDebug>
+
 #include "X264Encoder.h"
+#include "IntelHDGraphicsH264Encoder.h"
 
 #include "H264NalFactory.h"
 
@@ -46,7 +48,19 @@ void H264NalFactory::SetResolution(QSize resolution)
 
 	m_nal_queue.clear();
 
-	m_p_h264_encoder = new X264Encoder();
+#if(1)
+	if( true == IntelHDGraphicsH264Encoder::IsHardwareSupport(resolution))
+	{
+		m_p_h264_encoder = new IntelHDGraphicsH264Encoder();
+		qDebug() << "Encoder :: Intel QSV";
+	}
+	else
+#endif
+	{
+		m_p_h264_encoder = new X264Encoder();
+		qDebug() << "Encoder :: X264";
+	}
+
 	m_resolution = resolution;
 
 }

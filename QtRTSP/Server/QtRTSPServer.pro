@@ -59,11 +59,19 @@ PRE_TARGETDEPS += $$LIVE555_PATH/liveMedia/$$BUILD_MODE/liveMedia.lib
 LIBS += Ws2_32.lib
 
 
+INTEL_MEDIA_SDK_PATH =  $$PWD/../libs/"Intel(R) Media SDK 2019 R1"
+
+INCLUDEPATH += $$INTEL_MEDIA_SDK_PATH/include
+LIBS += $$INTEL_MEDIA_SDK_PATH/lib/x64/libmfx_vs2015.lib
+
+LIBS += Advapi32.lib
+
 
 SOURCES += \
     CameraFrameGrabber.cpp \
     CameraH264Source.cpp \
     CameraRTSPServer.cpp \
+    H264Encoder/IntelHDGraphicsH264Encoder.cpp \
     H264MediaSubsession.cpp \
     ImageWidget.cpp \
     H264Encoder/H264NalFactory.cpp \
@@ -75,6 +83,7 @@ HEADERS += \
     CameraFrameGrabber.h \
     CameraH264Source.h \
     CameraRTSPServer.h \
+    H264Encoder/IntelHDGraphicsH264Encoder.h \
     H264MediaSubsession.h \
     ImageWidget.h \
     H264Encoder/H264NalFactory.h \
