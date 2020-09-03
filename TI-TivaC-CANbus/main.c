@@ -26,18 +26,16 @@
 #include "utils/uartstdio.h"
 
 
-/*
+#define CANBUS_BITRATE								(1 * 1000 * 1000)
 
-https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf?ts=1597807520128&ref_url=https%253A%252F%252Fwww.google.com%252F
+#if(1)
+	#define SEND_MESSAGE_ID							(0x0A0)
+	#define RECEIVE_MESSAGE_ID						(0x0B0)
+#else
+	#define SEND_MESSAGE_ID							(0x0B0)
+	#define RECEIVE_MESSAGE_ID						(0x0A0)
+#endif
 
-Two user switches are provided for input and control of the TM4C1294NCPDTI software. The switches
-are connected to GPIO pins PJ0 and PJ1.
-
-Four user LEDs are provided on the board. D1 and D2 are connected to GPIOs PN1 and PN0. These
-LEDs are dedicated for use by the software application. D3 and D4 are connected to GPIOs PF4 and
-PF0, which can be controlled by user’s software or the integrated Ethernet module of the microcontroller.
-
-*/
 
 #define MILLI_SEC_PER_SEC							(1000)
 
@@ -183,7 +181,8 @@ int main(void)
 	configure_uart();
 	printf("TIVA C start @%dMHz...", g_ui32SysClock/1000/1000);
 
-	printf("CANBUS \r\n");
+	printf("CANBUS bitrate = %ukHz, snd id = 0x%03X, rcv id = 0x%03X\r\n", CANBUS_BITRATE/1000, 
+	SEND_MESSAGE_ID, RECEIVE_MESSAGE_ID);
 
 
 	IntMasterEnable();
@@ -228,7 +227,6 @@ int main(void)
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN1);
 		CANInit(CAN1_BASE);
 
-#define CANBUS_BITRATE								(500 * 1000)
 		CANBitRateSet(CAN1_BASE, g_ui32SysClock, CANBUS_BITRATE);
 		CANIntRegister(CAN1_BASE, canbus1_interrupt_handler);
 		CANIntEnable(CAN1_BASE, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
@@ -238,14 +236,6 @@ int main(void)
 	}
 
 
-#if(1)
-	#define SEND_MESSAGE_ID							(0x0A0)
-	#define RECEIVE_MESSAGE_ID						(0x0B0)
-#else
-	#define SEND_MESSAGE_ID							(0x0B0)
-	#define RECEIVE_MESSAGE_ID						(0x0A0)
-#endif
-	
 #define MAX_DATA_FRAME_SIZE							(8)
 	{
 		
