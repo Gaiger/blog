@@ -102,35 +102,41 @@ unsigned int g_received_canbus_message_count = 0;
 unsigned int g_is_canbus_received = 0;
 
 
-#define SEND_MESSAGE_OBJ					(2)
-#define RECEIVE_MESSAGE_OBJ					(1)
+#define SEND_MESSAGE_OBJ							(2)
+#define RECEIVE_MESSAGE_OBJ							(1)
 
 void canbus1_interrupt_handler(void)
 {
 	uint32_t interrupt_cause;
 
 	interrupt_cause = CANIntStatus(CAN1_BASE, CAN_INT_STS_CAUSE);
-#if(1)
+
 	if(CAN_INT_INTID_STATUS == interrupt_cause)
 	{
 		g_controller_status = CANStatusGet(CAN1_BASE, CAN_STS_CONTROL);
-		if(CAN_STATUS_TXOK == g_controller_status)
+
+		switch(g_controller_status)
 		{
-			interrupt_cause = SEND_MESSAGE_OBJ;
+			case CAN_STATUS_TXOK:
+				interrupt_cause = SEND_MESSAGE_OBJ;
+			break;
+
+			case CAN_STATUS_RXOK:
+				interrupt_cause = RECEIVE_MESSAGE_OBJ;
+			break;
+
+			default:
+			break;
 		}
-		
-		if(CAN_STATUS_RXOK == g_controller_status)
-		{
-			interrupt_cause = RECEIVE_MESSAGE_OBJ;
-		}
-		
+
 		g_controller_status &= ~CAN_STATUS_TXOK;
 		g_controller_status &= ~CAN_STATUS_RXOK;
 		
 		if(CAN_STATUS_LEC_NONE != g_controller_status)
 			g_is_canbus_error_occurred = 1;
 	}
-	
+
+
 	if(0 == g_is_canbus_error_occurred)
 	{
 		switch(interrupt_cause)
@@ -146,38 +152,8 @@ void canbus1_interrupt_handler(void)
 			CANIntClear(CAN1_BASE, RECEIVE_MESSAGE_OBJ);
 			break;
 		}
-
 	}
-	
-#else
 
-	if(CAN_INT_INTID_STATUS == interrupt_cause)
-	{
-		g_controller_status = CANStatusGet(CAN1_BASE, CAN_STS_CONTROL);
-
-		if(CAN_STATUS_TXOK == g_controller_status)
-		{
-			g_sent_canbus_message_count++;
-			g_is_canbus_sent = 1;
-			CANIntClear(CAN1_BASE, SEND_MESSAGE_OBJ);
-		}
-		
-		if(CAN_STATUS_RXOK == g_controller_status)
-		{
-			g_received_canbus_message_count++;
-			g_is_canbus_received = 1;
-			CANIntClear(CAN1_BASE, RECEIVE_MESSAGE_OBJ);
-		}
-		
-		g_controller_status &= ~CAN_STATUS_TXOK;
-		g_controller_status &= ~CAN_STATUS_RXOK;
-		
-		
-		if(CAN_STATUS_LEC_NONE != g_controller_status)
-			g_is_canbus_error_occurred = 1;
-	}
-#endif
-	
 }
 
 /**********************************************************************/
@@ -214,18 +190,9 @@ int main(void)
 
 	{
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_WDOG0);
-	
-		//
-		// Set the period of the watchdog timer to 2 second.
-		//
+
 		WatchdogReloadSet(WATCHDOG0_BASE, 2 * g_ui32SysClock);
-		//
-		// Enable reset generation from the watchdog timer.
-		//
 		WatchdogResetEnable(WATCHDOG0_BASE);
-		//
-		// Enable the watchdog timer.
-		//
 		IntEnable(INT_WATCHDOG);
 
 		WatchdogEnable(WATCHDOG0_BASE);
@@ -234,7 +201,7 @@ int main(void)
 
 	{
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
-		
+
 		TimerConfigure(TIMER0_BASE, TIMER_CFG_SPLIT_PAIR|TIMER_CFG_A_PERIODIC|TIMER_CFG_B_PERIODIC);
 
 		TimerPrescaleSet(TIMER0_BASE, TIMER_A, g_ui32SysClock/1000/1000 - 1);
@@ -246,28 +213,27 @@ int main(void)
 	}
 
 
-
 	{
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
 		GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_1|GPIO_PIN_0);
 	}
 
 
-	{	
+	{
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
 		GPIOPinConfigure(GPIO_PB0_CAN1RX);
 		GPIOPinConfigure(GPIO_PB1_CAN1TX);
-	
 		GPIOPinTypeCAN(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-		
+
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN1);
 		CANInit(CAN1_BASE);
 
-		
-		CANBitRateSet(CAN1_BASE, g_ui32SysClock, 500 * 1000);
+#define CANBUS_BITRATE								(500 * 1000)
+		CANBitRateSet(CAN1_BASE, g_ui32SysClock, CANBUS_BITRATE);
 		CANIntRegister(CAN1_BASE, canbus1_interrupt_handler);
 		CANIntEnable(CAN1_BASE, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
 		IntEnable(INT_CAN1);
+
 		CANEnable(CAN1_BASE);
 	}
 
@@ -437,8 +403,10 @@ int main(void)
 				remain_led_n1_blinking_time_in_ms = LED_N1_BLINKING_INTERVAL_IN_MS;
 			}
 
-		}
-	
-	}
+		}/*while 1*/
+
+	}/*local variables*/
+
+	return 0;
 }/*main*/
 
