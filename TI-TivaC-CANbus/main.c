@@ -113,20 +113,7 @@ void canbus1_interrupt_handler(void)
 	{
 		g_controller_status = CANStatusGet(CAN1_BASE, CAN_STS_CONTROL);
 
-		switch(g_controller_status)
-		{
-			case CAN_STATUS_TXOK:
-				interrupt_cause = SEND_MESSAGE_OBJ;
-			break;
-
-			case CAN_STATUS_RXOK:
-				interrupt_cause = RECEIVE_MESSAGE_OBJ;
-			break;
-
-			default:
-			break;
-		}
-
+		/*avoid the message which should be filtered out triggering the interrupt*/
 		g_controller_status &= ~CAN_STATUS_TXOK;
 		g_controller_status &= ~CAN_STATUS_RXOK;
 		
