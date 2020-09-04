@@ -384,6 +384,5 @@ int main(void)
 
 	}/*local variables*/
 
-	return 0;
 }/*main*/
 
