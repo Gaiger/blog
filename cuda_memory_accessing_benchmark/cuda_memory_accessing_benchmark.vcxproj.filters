@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="AsynchronousSubroutines.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SubroutineCommon.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SynchronousSubroutines.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GPUCompute.cuh">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="AsynchronousSubroutines.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SubroutineCommon.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SynchronousSubroutines.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{67569e9a-e384-4bf3-8beb-b8e1fa5d977a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{86e50ec4-2b4c-4387-ba10-925688173470}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="GPUCompute.cu">
+      <Filter>Source</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>
