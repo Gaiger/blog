@@ -4,7 +4,8 @@
 
 #define ROUND								(10)
 #define DATA_LENGTH							(1024 * 1024 * 4)
-#define ASYNC_NUM_DATA_SET					(8)
+
+#define ASYNC_SECTION_NUM					(4)
 
 
 
@@ -34,12 +35,6 @@ struct timespec
 
 #include "GPUCompute.cuh"
 
-typedef struct
-{
-	CUDAHandle cuda_handle;
-	float *g_p_array[2];
-} GPUProcess;
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -53,11 +48,10 @@ void InitInputBuffer(float **pp_input1, float **pp_input2,
 	int length, BOOL is_pinned_memory);
 
 void FreeBuffer(float *p_input1, float *p_input2, BOOL is_pinned_memory);
+
 #ifdef __cplusplus
 }
 #endif
-
-
 
 
 #endif /*_SUBROUNTINECOMMON_H_ */

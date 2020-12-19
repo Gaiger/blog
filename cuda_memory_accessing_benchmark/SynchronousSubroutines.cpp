@@ -10,12 +10,11 @@
 
 void SyncSubroutineTransmissionDataByDeepCopy(BOOL is_pinned_memory)
 {
-	GPUProcess gpu_process;
+	CUDAHandle cuda_handle;
+	cuda_handle = InitGPUCompute(DATA_LENGTH);
 
-	gpu_process.cuda_handle = InitGPUCompute(DATA_LENGTH);
-
-
-	InitInputBuffer(&gpu_process.g_p_array[0], &gpu_process.g_p_array[1],
+	float *data_ptr_array[2];
+	InitInputBuffer(&data_ptr_array[0], &data_ptr_array[1],
 		DATA_LENGTH, is_pinned_memory);
 
 	struct timespec t1, t2;
@@ -26,13 +25,12 @@ void SyncSubroutineTransmissionDataByDeepCopy(BOOL is_pinned_memory)
 	float elasped_time_excluding_copy_in_ms = 0;
 
 	for (int j = 0; j < ROUND; j++) {
-		GPUSAXPYSynchronousDeepCopy(gpu_process.cuda_handle, DATA_LENGTH, 2.0,
-			gpu_process.g_p_array[0],
-			gpu_process.g_p_array[1]);
+		GPUSAXPYSynchronousDeepCopy(cuda_handle, DATA_LENGTH, 2.0,
+			data_ptr_array[1], data_ptr_array[1]);
 
 		float inlcuding_time, excluding_time;
 
-		GetElaspedTime(gpu_process.cuda_handle,
+		GetElaspedTime(cuda_handle,
 			&inlcuding_time, &excluding_time);
 		elasped_time_including_copy_in_ms += inlcuding_time;
 		elasped_time_excluding_copy_in_ms += excluding_time;
@@ -42,10 +40,9 @@ void SyncSubroutineTransmissionDataByDeepCopy(BOOL is_pinned_memory)
 	clock_gettime(CLOCK_REALTIME, &t2);
 
 
-	CloseGPUCompute(gpu_process.cuda_handle);
-	FreeBuffer(gpu_process.g_p_array[0],
-		gpu_process.g_p_array[1], is_pinned_memory);
-
+	CloseGPUCompute(cuda_handle); cuda_handle = NULL;
+	FreeBuffer(data_ptr_array[0], data_ptr_array[1], is_pinned_memory);
+	data_ptr_array[0] = data_ptr_array[1] = NULL;
 
 	elasped_time_including_copy_in_ms /= ROUND;
 	elasped_time_excluding_copy_in_ms /= ROUND;
@@ -72,12 +69,12 @@ void SyncSubroutineTransmissionDataByDeepCopy(BOOL is_pinned_memory)
 
 void SyncSubroutineTransmissionDataByZeroCopy(void)
 {
-	GPUProcess gpu_process;
+	CUDAHandle cuda_handle;
+	cuda_handle = InitGPUCompute(DATA_LENGTH);
 
-	gpu_process.cuda_handle = InitGPUCompute(DATA_LENGTH);
-
-	InitInputBuffer(&gpu_process.g_p_array[0],
-		&gpu_process.g_p_array[1], DATA_LENGTH, TRUE);
+	float *data_ptr_array[2];
+	InitInputBuffer(&data_ptr_array[0],
+		&data_ptr_array[1], DATA_LENGTH, TRUE);
 
 	struct timespec t1, t2;
 
@@ -87,13 +84,12 @@ void SyncSubroutineTransmissionDataByZeroCopy(void)
 	float elasped_time_excluding_copy_in_ms = 0;
 
 	for (int j = 0; j < ROUND; j++) {
-		GPUSAXPYSynchronousZeroCopy(gpu_process.cuda_handle, DATA_LENGTH, 2.0,
-			gpu_process.g_p_array[0],
-			gpu_process.g_p_array[1]);
+		GPUSAXPYSynchronousZeroCopy(cuda_handle, DATA_LENGTH, 2.0,
+			data_ptr_array[0], data_ptr_array[1]);
 
 		float inlcuding_time, excluding_time;
 
-		GetElaspedTime(gpu_process.cuda_handle,
+		GetElaspedTime(cuda_handle,
 			&inlcuding_time, &excluding_time);
 		elasped_time_including_copy_in_ms += inlcuding_time;
 		elasped_time_excluding_copy_in_ms += excluding_time;
@@ -103,10 +99,9 @@ void SyncSubroutineTransmissionDataByZeroCopy(void)
 	clock_gettime(CLOCK_REALTIME, &t2);
 
 
-	CloseGPUCompute(gpu_process.cuda_handle);
-	FreeBuffer(gpu_process.g_p_array[0],
-		gpu_process.g_p_array[1], TRUE);
-
+	CloseGPUCompute(cuda_handle); cuda_handle = NULL;
+	FreeBuffer(data_ptr_array[0], data_ptr_array[1], TRUE);
+	data_ptr_array[0] = data_ptr_array[1] = NULL;
 
 	elasped_time_including_copy_in_ms /= ROUND;
 	elasped_time_excluding_copy_in_ms /= ROUND;
