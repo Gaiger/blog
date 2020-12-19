@@ -292,7 +292,7 @@ TIMER_LOOP_BEGIN(CUDA_DUMMY, ROUND)
 TIMER_LOOP_END(CUDA_DUMMY)
 
 
-#if(0)
+#if(1)
 TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM, ROUND)
 
 	HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
@@ -325,7 +325,7 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM)
 #endif
 
 
-#if(0)
+#if(1)
 	TIMER_LOOP_BEGIN(SEPAREATE_CONVOLUTION_CUDA_KERNEL_IN_CONST, ROUND)
 
 		HANDLE_ERROR(cudaMemcpy(p_extended_input_dev, p_extended_input,
@@ -352,7 +352,7 @@ TIMER_LOOP_END(SEPAREATE_CONVOLUTION_CUDA_LINEAR_MEM)
 #endif
 
 
-#if(0)
+#if(1)
 	{
 		dim3 num_blocks, num_threads;
 		num_threads.x = X_NUM_THREADS; num_threads.y = Y_NUM_THREADS;
