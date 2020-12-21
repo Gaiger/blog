@@ -5,43 +5,25 @@
 
 
 #define THREADS_IN_BLOCK					(1024)
-#define NUM_BLOCKS							(512)
+#define NUM_BLOCKS							(1)
 
 #define UNUSED(EXPR)						do { (void)(EXPR); } while (0)
 
 //#define _BEST_BLOCK_NUMBER
+
 /**********************************************************************/
 
-__global__ void KernelAdd(float *p_input1, float *p_input2, int length, 
-	float *p_output)
+/**********************************************************************/
+
+__global__ static void KernelSAXPY(float *p_input1, float *p_input2, 
+	float value, int length)
 {
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
 
 	for (; i < length; i += gridDim.x * blockDim.x)
-		p_output[i] = p_input1[i] + p_input2[i];
+		p_input2[i] = p_input1[i] * value  + p_input2[i];
 }
 
-/**********************************************************************/
-
-__global__ void KernelMultiple(float *p_input1, float *p_input2, int length, 
-	float *p_output)
-{
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-
-	for (; i < length; i += gridDim.x * blockDim.x)
-		p_output[i] = p_input1[i] * p_input2[i];
-}
-
-/**********************************************************************/
-
-__global__ void KernelMultipleByConstant(float *p_input, float value,
-	int length, float *p_output)
-{
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-
-	for (; i < length; i += gridDim.x * blockDim.x)
-		p_output[i] = p_input[i] * value;
-}
 
 /**********************************************************************/
 
@@ -52,7 +34,6 @@ typedef struct
 
 	float *p_dev_input1;
 	float *p_dev_input2;
-	float *p_dev_working;
 
 	cudaEvent_t start_including_copy;
 	cudaEvent_t stop_including_copy;
@@ -79,7 +60,6 @@ int GPUSAXPYSynchronousDeepCopy(CUDAHandle handle, int length, float A,
 	cudaStream_t stream  = p_compute_handle->stream;
 	float *p_dev_input1  = p_compute_handle->p_dev_input1;
 	float *p_dev_input2  = p_compute_handle->p_dev_input2;
-	float *p_dev_working = p_compute_handle->p_dev_working;
 	
 	cudaEventRecord(p_compute_handle->start_including_copy, stream);
 
@@ -98,11 +78,8 @@ int GPUSAXPYSynchronousDeepCopy(CUDAHandle handle, int length, float A,
 	int block_num = NUM_BLOCKS;
 #endif
 
-	KernelMultipleByConstant << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
-		p_dev_input1, A, length, p_dev_working);
-
-	KernelAdd << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
-		p_dev_input2, p_dev_working, length, p_dev_input2);
+	KernelSAXPY << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
+		p_dev_input1, p_dev_input2, A, length);
 
 	cudaEventRecord(p_compute_handle->stop_excluding_copy, stream);
 
@@ -133,7 +110,6 @@ int GPUSAXPYSynchronousZeroCopy(CUDAHandle handle, int length, float A,
 	cudaStream_t stream = p_compute_handle->stream;
 	float *p_dev_input1 = p_compute_handle->p_dev_input1;
 	float *p_dev_input2 = p_compute_handle->p_dev_input2;
-	float *p_dev_working = p_compute_handle->p_dev_working;
 
 	cudaEventRecord(p_compute_handle->start_including_copy, stream);
 
@@ -150,11 +126,8 @@ int GPUSAXPYSynchronousZeroCopy(CUDAHandle handle, int length, float A,
 	int block_num = NUM_BLOCKS;
 #endif
 
-	KernelMultipleByConstant << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
-		p_dev_input1, A, length, p_dev_working);
-
-	KernelAdd << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
-		p_dev_input2, p_dev_working, length, p_dev_input2);
+	KernelSAXPY << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
+		p_dev_input1, p_dev_input2, A, length);
 
 	cudaEventRecord(p_compute_handle->stop_excluding_copy, stream);
 	cudaEventRecord(p_compute_handle->stop_including_copy, stream);
@@ -164,6 +137,7 @@ int GPUSAXPYSynchronousZeroCopy(CUDAHandle handle, int length, float A,
 	return 0;
 }
 
+/**********************************************************************/
 
 int GPUSAXPYAsynchronousCopyHostToDevice(CUDAHandle handle, 
 	int length, float A, float *p_input1, float *p_input2)
@@ -182,7 +156,6 @@ int GPUSAXPYAsynchronousCopyHostToDevice(CUDAHandle handle,
 	cudaStream_t stream = p_compute_handle->stream;
 	float *p_dev_input1 = p_compute_handle->p_dev_input1;
 	float *p_dev_input2 = p_compute_handle->p_dev_input2;
-	float *p_dev_working = p_compute_handle->p_dev_working;
 
 	cudaEventRecord(p_compute_handle->start_including_copy, stream);
 
@@ -210,7 +183,6 @@ int GPUSAXPYAsynchronousCompute(CUDAHandle handle,
 	cudaStream_t stream = p_compute_handle->stream;
 	float *p_dev_input1 = p_compute_handle->p_dev_input1;
 	float *p_dev_input2 = p_compute_handle->p_dev_input2;
-	float *p_dev_working = p_compute_handle->p_dev_working;
 
 	cudaEventRecord(p_compute_handle->start_excluding_copy, stream);
 
@@ -223,11 +195,8 @@ int GPUSAXPYAsynchronousCompute(CUDAHandle handle,
 	int block_num = NUM_BLOCKS;
 #endif
 
-	KernelMultipleByConstant << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
-		p_dev_input1, A, length, p_dev_working);
-
-	KernelAdd << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
-		p_dev_input2, p_dev_working, length, p_dev_input2);
+	KernelSAXPY << < THREADS_IN_BLOCK, block_num, 0, stream >> > (
+		p_dev_input1, p_dev_input2, A, length);
 
 	cudaEventRecord(p_compute_handle->stop_excluding_copy, stream);
 	return 0;
@@ -252,7 +221,6 @@ int GPUSAXPYAsynchronousCopyDeviceToHost(CUDAHandle handle,
 	cudaStream_t stream = p_compute_handle->stream;
 	float *p_dev_input1 = p_compute_handle->p_dev_input1;
 	float *p_dev_input2 = p_compute_handle->p_dev_input2;
-	float *p_dev_working = p_compute_handle->p_dev_working;
 
 
 	cudaMemcpyAsync(p_host_input2, p_dev_input2, length * sizeof(float),
@@ -340,7 +308,6 @@ CUDAHandle InitGPUCompute(int length)
 
 	cudaMalloc(&p_compute_handle->p_dev_input1, length * sizeof(float));
 	cudaMalloc(&p_compute_handle->p_dev_input2, length * sizeof(float));
-	cudaMalloc(&p_compute_handle->p_dev_working, length * sizeof(float));
 
 	cudaEventCreate(&p_compute_handle->start_including_copy);
 	cudaEventCreate(&p_compute_handle->stop_including_copy);
@@ -374,8 +341,6 @@ void CloseGPUCompute(CUDAHandle handle)
 
 	cudaFree(&p_compute_handle->p_dev_input1);
 	cudaFree(&p_compute_handle->p_dev_input2);
-	cudaFree(&p_compute_handle->p_dev_working);	
-
 
 	free(p_compute_handle);
 }
@@ -390,7 +355,6 @@ void GetElaspedTime(CUDAHandle handle, float *p_elasped_time_including_copy_in_m
 
 	if (NULL == p_compute_handle)
 		return;
-
 	
 	float elasped_time_including_copy_in_ms;
 	cudaEventElapsedTime(&elasped_time_including_copy_in_ms,
