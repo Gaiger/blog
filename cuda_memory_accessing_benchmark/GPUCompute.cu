@@ -5,7 +5,7 @@
 
 
 #define THREADS_IN_BLOCK					(1024)
-#define NUM_BLOCKS							(1)
+#define NUM_BLOCKS							(512)
 
 #define UNUSED(EXPR)						do { (void)(EXPR); } while (0)
 
