@@ -39,8 +39,18 @@ void AsyncSubroutineDepthFirst(BOOL is_pinned_memory)
 		unsigned int done_flag = 0;
 
 		for (int i = 0; i < ASYNC_SECTION_NUM; i++) {
-			GPUSAXPYAsynchronous(cuda_handle_array[i],
-				DATA_LENGTH / ASYNC_SECTION_NUM, 2.0, 
+			GPUSAXPYAsynchronousCopyHostToDevice(cuda_handle_array[i],
+				DATA_LENGTH / ASYNC_SECTION_NUM, 2.0,
+				&data_ptr_array[0][i * DATA_LENGTH / ASYNC_SECTION_NUM],
+				&data_ptr_array[1][i * DATA_LENGTH / ASYNC_SECTION_NUM]);
+
+			GPUSAXPYAsynchronousCompute(cuda_handle_array[i],
+				DATA_LENGTH / ASYNC_SECTION_NUM, 2.0,
+				&data_ptr_array[0][i * DATA_LENGTH / ASYNC_SECTION_NUM],
+				&data_ptr_array[1][i * DATA_LENGTH / ASYNC_SECTION_NUM]);
+
+			GPUSAXPYAsynchronousCopyDeviceToHost(cuda_handle_array[i],
+				DATA_LENGTH / ASYNC_SECTION_NUM, 2.0,
 				&data_ptr_array[0][i * DATA_LENGTH / ASYNC_SECTION_NUM],
 				&data_ptr_array[1][i * DATA_LENGTH / ASYNC_SECTION_NUM]);
 		}
