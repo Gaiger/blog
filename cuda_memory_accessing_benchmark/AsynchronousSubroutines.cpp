@@ -240,8 +240,8 @@ void AsyncSubroutineBreadthFirst(BOOL is_pinned_memory)
 typedef struct {
 	CUDAHandle cuda_handle_array[ASYNC_SECTION_NUM];
 	float *data_ptr_array[2];
-	HANDLE sending_done_semaphore;
-	HANDLE receiving_done_semaphore;
+	HANDLE feeding_done_semaphore;
+	HANDLE acquiring_done_semaphore;
 
 	float elasped_time_including_copy_in_ms;
 	float elasped_time_excluding_copy_in_ms;
@@ -249,7 +249,7 @@ typedef struct {
 
 
 
-unsigned __stdcall AsyncSenderThread(void *args)
+unsigned __stdcall AsyncFeederThread(void *args)
 {
 	//printf("%s\r\n", __FUNCTION__);
 	ThreadArgs *p_thread_args = (ThreadArgs*)args;
@@ -258,7 +258,7 @@ unsigned __stdcall AsyncSenderThread(void *args)
 	
 	while (k < ROUND)
 	{
-		WaitForSingleObject(p_thread_args->receiving_done_semaphore, 
+		WaitForSingleObject(p_thread_args->acquiring_done_semaphore, 
 			INFINITE);
 
 		for (int i = 0; i < ASYNC_SECTION_NUM; i++) {
@@ -283,7 +283,7 @@ unsigned __stdcall AsyncSenderThread(void *args)
 				&p_thread_args->data_ptr_array[1][i * DATA_LENGTH / ASYNC_SECTION_NUM]);
 		}
 
-		ReleaseSemaphore( p_thread_args->sending_done_semaphore,
+		ReleaseSemaphore( p_thread_args->feeding_done_semaphore,
 			1, NULL);		
 		k++;
 	}
@@ -293,7 +293,7 @@ unsigned __stdcall AsyncSenderThread(void *args)
 
 /**********************************************************************/
 
-unsigned __stdcall AsyncReceiverThread(void *args)
+unsigned __stdcall AsyncAcquirerThread(void *args)
 {
 	//printf("%s\r\n", __FUNCTION__);
 
@@ -308,7 +308,7 @@ unsigned __stdcall AsyncReceiverThread(void *args)
 	int k = 0;
 	while (k < ROUND)
 	{
-		WaitForSingleObject(p_thread_args->sending_done_semaphore,
+		WaitForSingleObject(p_thread_args->feeding_done_semaphore,
 			INFINITE);
 
 		unsigned int done_flag = 0;
@@ -349,7 +349,7 @@ unsigned __stdcall AsyncReceiverThread(void *args)
 				break;
 		}
 
-		ReleaseSemaphore(p_thread_args->receiving_done_semaphore,
+		ReleaseSemaphore(p_thread_args->acquiring_done_semaphore,
 			1, NULL);
 		k++;
 	}
@@ -361,8 +361,8 @@ unsigned __stdcall AsyncReceiverThread(void *args)
 
 void AsyncSubroutineBreadthFirstSendReceiveThread(BOOL is_pinned_memory)
 {
-	HANDLE sender_thread_handle;
-	HANDLE receiver_thread_handle;
+	HANDLE feeder_thread_handle;
+	HANDLE acquirer_thread_handle;
 
 	ThreadArgs thread_args;
 	ZeroMemory(&thread_args, sizeof(ThreadArgs));
@@ -374,26 +374,26 @@ void AsyncSubroutineBreadthFirstSendReceiveThread(BOOL is_pinned_memory)
 		&thread_args.data_ptr_array[1],
 		DATA_LENGTH, is_pinned_memory);
 
-	thread_args.sending_done_semaphore 
+	thread_args.feeding_done_semaphore 
 		= CreateSemaphore(NULL, 0, 1, NULL);
-	thread_args.receiving_done_semaphore
+	thread_args.acquiring_done_semaphore
 		= CreateSemaphore(NULL, 1, 1, NULL);
 
 
-	sender_thread_handle = (HANDLE)_beginthreadex(NULL, 0, AsyncSenderThread,
+	feeder_thread_handle = (HANDLE)_beginthreadex(NULL, 0, AsyncFeederThread,
 		(void*)&thread_args, CREATE_SUSPENDED, NULL);
-	receiver_thread_handle = (HANDLE)_beginthreadex(NULL, 0, AsyncReceiverThread,
+	acquirer_thread_handle = (HANDLE)_beginthreadex(NULL, 0, AsyncAcquirerThread,
 		(void*)&thread_args, CREATE_SUSPENDED, NULL);
 
 	struct timespec t1, t2;
 	clock_gettime(CLOCK_REALTIME, &t1);
 
-	ResumeThread(sender_thread_handle);
-	ResumeThread(receiver_thread_handle);
+	ResumeThread(feeder_thread_handle);
+	ResumeThread(acquirer_thread_handle);
 
 
-	WaitForSingleObject(sender_thread_handle, INFINITE);
-	WaitForSingleObject(receiver_thread_handle, INFINITE);
+	WaitForSingleObject(feeder_thread_handle, INFINITE);
+	WaitForSingleObject(acquirer_thread_handle, INFINITE);
 
 	clock_gettime(CLOCK_REALTIME, &t2);
 
@@ -404,11 +404,11 @@ void AsyncSubroutineBreadthFirstSendReceiveThread(BOOL is_pinned_memory)
 		= (t2.tv_sec - t1.tv_sec) * 1E3 + (t2.tv_nsec - t1.tv_nsec) * 1E-6;
 	averge_whole_process_time_in_ms /= ROUND;
 
-	CloseHandle(sender_thread_handle); sender_thread_handle = NULL;
-	CloseHandle(receiver_thread_handle); receiver_thread_handle = NULL;
+	CloseHandle(feeder_thread_handle); feeder_thread_handle = NULL;
+	CloseHandle(acquirer_thread_handle); acquirer_thread_handle = NULL;
 
-	CloseHandle(thread_args.sending_done_semaphore);
-	CloseHandle(thread_args.receiving_done_semaphore);
+	CloseHandle(thread_args.feeding_done_semaphore);
+	CloseHandle(thread_args.acquiring_done_semaphore);
 
 	for (int i = 0; i < ASYNC_SECTION_NUM; i++) {
 		CloseGPUCompute(thread_args.cuda_handle_array[i]);
