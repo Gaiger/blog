@@ -1,3 +1,4 @@
+#if(0)
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
@@ -48,3 +49,147 @@ int main(void)
 	}
 }
 
+#else
+
+/********************************** (C) COPYRIGHT *******************************
+* File Name          : main.c
+* Author             : WCH
+* Version            : V1.0.0
+* Date               : 2021/06/06
+* Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
+
+/*
+ *@Note
+ task1 and task2 alternate printing
+*/
+
+#include "debug.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+
+/* Global define */
+#define TASK1_TASK_PRIO     5
+#define TASK1_STK_SIZE      256
+#define TASK2_TASK_PRIO     5
+#define TASK2_STK_SIZE      256
+
+/* Global Variable */
+TaskHandle_t Task1Task_Handler;
+TaskHandle_t Task2Task_Handler;
+
+SemaphoreHandle_t g_mutex;
+
+/*********************************************************************
+ * @fn      GPIO_Toggle_INIT
+ *
+ * @brief   Initializes GPIOA.0/1
+ *
+ * @return  none
+ */
+void GPIO_Toggle_INIT(void)
+{
+    GPIO_InitTypeDef  GPIO_InitStructure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE,ENABLE);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
+}
+
+
+/*********************************************************************
+ * @fn      task1_task
+ *
+ * @brief   task1 program.
+ *
+ * @param  *pvParameters - Parameters point of task1
+ *
+ * @return  none
+ */
+void task1_task(void *pvParameters)
+{
+    uint32_t ii = 0;
+    while(1)
+    {
+        xSemaphoreTake(g_mutex, portMAX_DELAY);
+        printf("ch32v307_FreeRTOS task1 entry, %u\r\n", ii++);
+        xSemaphoreGive(g_mutex);
+
+        GPIO_SetBits(GPIOE, GPIO_Pin_11);
+        vTaskDelay(500);
+        GPIO_ResetBits(GPIOE, GPIO_Pin_11);
+        vTaskDelay(500);
+    }
+}
+
+/*********************************************************************
+ * @fn      task2_task
+ *
+ * @brief   task2 program.
+ *
+ * @param  *pvParameters - Parameters point of task2
+ *
+ * @return  none
+ */
+void task2_task(void *pvParameters)
+{
+    uint32_t ii = 0;
+    while(1)
+    {
+        xSemaphoreTake(g_mutex, portMAX_DELAY);
+        printf("ch32v307_FreeRTOS task2 entry, %u\r\n", ii++);
+        xSemaphoreGive(g_mutex);
+
+        GPIO_ResetBits(GPIOE, GPIO_Pin_12);
+        vTaskDelay(250);
+        GPIO_SetBits(GPIOE, GPIO_Pin_12);
+        vTaskDelay(250);
+    }
+}
+
+/*********************************************************************
+ * @fn      main
+ *
+ * @brief   Main program.
+ *
+ * @return  none
+ */
+int main(void)
+{
+    g_mutex = xSemaphoreCreateMutex();
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    Delay_Init();
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf("FreeRTOS Kernel Version:%s\r\n",tskKERNEL_VERSION_NUMBER);
+
+    GPIO_Toggle_INIT();
+    /* create two task */
+    xTaskCreate((TaskFunction_t )task2_task,
+                        (const char*    )"task2",
+                        (uint16_t       )TASK2_STK_SIZE,
+                        (void*          )NULL,
+                        (UBaseType_t    )TASK2_TASK_PRIO,
+                        (TaskHandle_t*  )&Task2Task_Handler);
+
+    xTaskCreate((TaskFunction_t )task1_task,
+                    (const char*    )"task1",
+                    (uint16_t       )TASK1_STK_SIZE,
+                    (void*          )NULL,
+                    (UBaseType_t    )TASK1_TASK_PRIO,
+                    (TaskHandle_t*  )&Task1Task_Handler);
+    vTaskStartScheduler();
+
+    while(1)
+    {
+        printf("shouldn't run at here!!\n");
+    }
+}
+
+#endif
