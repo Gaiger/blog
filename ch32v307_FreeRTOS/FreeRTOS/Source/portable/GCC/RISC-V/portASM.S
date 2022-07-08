@@ -87,7 +87,9 @@ definitions. */
 #endif
 
 #ifndef portasmHANDLE_INTERRUPT
+#if(0)//GAIGER
 	#error portasmHANDLE_INTERRUPT must be defined to the function to be called to handle external/peripheral interrupts.  portasmHANDLE_INTERRUPT can be defined on the assembler command line or in the appropriate freertos_risc_v_chip_specific_extensions.h header file.  https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
+#endif
 #endif
 
 #ifndef portasmHAS_SIFIVE_CLINT
@@ -99,6 +101,12 @@ registers must be saved by the portasmSAVE_ADDITIONAL_REGISTERS and
 portasmRESTORE_ADDITIONAL_REGISTERS macros - which can be defined in a chip
 specific version of freertos_risc_v_chip_specific_extensions.h.  See the notes
 at the top of this file. */
+
+#if(1) //GAIGER
+#define freertos_risc_v_trap_handler SW_Handler
+#endif
+
+
 #define portCONTEXT_SIZE ( 30 * portWORD_SIZE )
 
 .global xPortStartFirstTask
@@ -157,6 +165,8 @@ freertos_risc_v_trap_handler:
 
 	load_x  t0, pxCurrentTCB			/* Load pxCurrentTCB. */
 	store_x  sp, 0( t0 )				/* Write sp to first TCB member. */
+
+#if(0)//GAIGER
 
 	csrr a0, mcause
 	csrr a1, mepc
@@ -247,6 +257,17 @@ as_yet_unhandled:
 	csrr t0, mcause						/* For viewing in the debugger only. */
 	j as_yet_unhandled
 
+#else
+	csrr a1, mepc
+	store_x a1, 0( sp )					/* Save updated exception return address. */
+
+	addi a1, x0, 0x20
+	csrs 0x804, a1
+
+	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
+	jal vTaskSwitchContext
+#endif
+
 processed_source:
 	load_x  t1, pxCurrentTCB			/* Load pxCurrentTCB. */
 	load_x  sp, 0( t1 )				 	/* Read sp from first TCB member. */
@@ -306,6 +327,19 @@ xPortStartFirstTask:
 	la t0, freertos_risc_v_trap_handler
 	csrw mtvec, t0
 #endif /* portasmHAS_CLILNT */
+
+#if(1) //GAIGER
+/* if it is an assembly entry code, the SP offset value is determined by the assembly code,
+but the C code is determined by the compiler, so we subtract 512 here as a reservation.
+When entering the interrupt function of C code, the compiler automatically presses the stack
+into the task stack. We can only change the SP value used by the calling function after switching
+the interrupt stack.This problem can be solved by modifying the interrupt to the assembly entry,
+and there is no need to reserve 512 bytes. You only need to switch the interrupt stack at the
+beginning of the interrupt function */
+	lw t0, xISRStackTop
+	addi t0, t0, -512
+    csrw mscratch,t0
+#endif
 
 	load_x  sp, pxCurrentTCB			/* Load pxCurrentTCB. */
 	load_x  sp, 0( sp )				 	/* Read sp from first TCB member. */
@@ -419,7 +453,11 @@ pxPortInitialiseStack:
 
 	csrr t0, mstatus					/* Obtain current mstatus value. */
 	andi t0, t0, ~0x8					/* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
+#if(0)/*GAIGER*/
 	addi t1, x0, 0x188					/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
+#else
+	addi t1, x0, 0x788 /*0x188 + 0x600, where the 0x600 is to enable the float*/
+#endif
 	slli t1, t1, 4
 	or t0, t0, t1						/* Set MPIE and MPP bits in mstatus value. */
 

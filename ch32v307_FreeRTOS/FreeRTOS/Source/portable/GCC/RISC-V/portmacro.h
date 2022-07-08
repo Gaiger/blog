@@ -92,13 +92,18 @@ not need to be guarded with a critical section. */
 
 /* Scheduler utilities. */
 extern void vTaskSwitchContext( void );
+#if(0) //GAIGER
 #define portYIELD() __asm volatile( "ecall" );
+#else
+#define portYIELD()   NVIC_SetPendingIRQ(Software_IRQn)
+#endif
 #define portEND_SWITCHING_ISR( xSwitchRequired ) do { if( xSwitchRequired ) vTaskSwitchContext(); } while( 0 )
 #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 
 /* Critical section management. */
+#if(0) //GAIGER
 #define portCRITICAL_NESTING_IN_TCB					1
 extern void vTaskEnterCritical( void );
 extern void vTaskExitCritical( void );
@@ -109,7 +114,22 @@ extern void vTaskExitCritical( void );
 #define portENABLE_INTERRUPTS()		__asm volatile( "csrs mstatus, 8" )
 #define portENTER_CRITICAL()	vTaskEnterCritical()
 #define portEXIT_CRITICAL()		vTaskExitCritical()
+#else
+extern void vPortEnterCritical( void );
+extern void vPortExitCritical( void );
+extern portUBASE_TYPE xPortSetInterruptMask(void);
+extern void vPortClearInterruptMask(portUBASE_TYPE uvalue);
+#define portSET_INTERRUPT_MASK_FROM_ISR()  xPortSetInterruptMask()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )  vPortClearInterruptMask(uxSavedStatusValue)
+#define portDISABLE_INTERRUPTS()    __asm volatile( "csrw mstatus,%0" ::"r"(0x7800) )
+#define portENABLE_INTERRUPTS()     __asm volatile( "csrw mstatus,%0" ::"r"(0x7888) )
+#define portENTER_CRITICAL()    vPortEnterCritical()
+#define portEXIT_CRITICAL()     vPortExitCritical()
 
+/* switch interrupt sp, sp is saved at first task switch. */
+#define GET_INT_SP()   __asm volatile("csrrw sp,mscratch,sp")
+#define FREE_INT_SP()  __asm volatile("csrrw sp,mscratch,sp")
+#endif
 /*-----------------------------------------------------------*/
 
 /* Architecture specific optimisations. */

@@ -79,6 +79,9 @@ interrupt stack after the scheduler has started. */
 	const StackType_t xISRStackTop = ( StackType_t ) __freertos_irq_stack_top;
 #endif
 
+#if(1)//GAIGER
+static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
+#endif
 /*
  * Setup the timer to generate the tick interrupts.  The implementation in this
  * file is weak to allow application writers to change the timer used to
@@ -146,10 +149,26 @@ task stack, not the ISR stack). */
 		/* Prepare the time to use after the next tick interrupt. */
 		ullNextTime += ( uint64_t ) uxTimerIncrementsForOneTick;
 	}
+#else  /*GAIGER*/
+/* just for wch's systick,don't have mtime */
+void vPortSetupTimerInterrupt( void )
+{
+    /* set software is lowest priority */
+    NVIC_SetPriority(Software_IRQn,0xf0);
+    NVIC_EnableIRQ(Software_IRQn);
+    /* set systick is lowest priority */
+    NVIC_SetPriority(SysTicK_IRQn,0xf0);
+    NVIC_EnableIRQ(SysTicK_IRQn);
 
+    SysTick->CTLR= 0;
+    SysTick->SR  = 0;
+    SysTick->CNT = 0;
+    SysTick->CMP = configCPU_CLOCK_HZ/configTICK_RATE_HZ;
+    SysTick->CTLR= 0xf;
+}
 #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */
 /*-----------------------------------------------------------*/
-
+#if(0)
 BaseType_t xPortStartScheduler( void )
 {
 extern void xPortStartFirstTask( void );
@@ -201,6 +220,58 @@ extern void xPortStartFirstTask( void );
 	should be executing. */
 	return pdFAIL;
 }
+#else
+BaseType_t xPortStartScheduler( void )
+{
+extern void xPortStartFirstTask( void );
+
+	#if( configASSERT_DEFINED == 1 )
+	{
+		volatile uint32_t mtvec = 0;
+		/* Check the least significant two bits of mtvec are 0b11 - indicating
+		multiply vector mode. */
+		__asm volatile( "csrr %0, mtvec" : "=r"( mtvec ) );
+		configASSERT( ( mtvec & 0x03UL ) == 0x3 );
+		/* Check alignment of the interrupt stack - which is the same as the
+		stack that was being used by main() prior to the scheduler being
+		started. */
+		configASSERT( ( xISRStackTop & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+		#ifdef configISR_STACK_SIZE_WORDS
+		{
+			memset( ( void * ) xISRStack, portISR_STACK_FILL_BYTE, sizeof( xISRStack ) );
+		}
+		#endif	/* configISR_STACK_SIZE_WORDS */
+	}
+	#endif /* configASSERT_DEFINED */
+
+	/* If there is a CLINT then it is ok to use the default implementation
+	in this file, otherwise vPortSetupTimerInterrupt() must be implemented to
+	configure whichever clock is to be used to generate the tick interrupt. */
+	vPortSetupTimerInterrupt();
+
+	#if( ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) )
+	{
+		/* Enable mtime and external interrupts.  1<<7 for timer interrupt, 1<<11
+		for external interrupt.  _RB_ What happens here when mtime is not present as
+		with pulpino? */
+		__asm volatile( "csrw mstatus,%0" ::"r"(0x7880) );
+	}
+	#else
+	{
+		/* Enable external interrupts. */
+		__asm volatile( "csrw mstatus,%0" ::"r"(0x7888) );
+	}
+	#endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) */
+
+	uxCriticalNesting = 0;
+	xPortStartFirstTask();
+
+	/* Should not get here as after calling xPortStartFirstTask() only tasks
+	should be executing. */
+	return pdFAIL;
+}
+#endif
 /*-----------------------------------------------------------*/
 
 void vPortEndScheduler( void )
@@ -209,7 +280,54 @@ void vPortEndScheduler( void )
 	for( ;; );
 }
 
+#if(1) //GAIGER
+/*-----------------------------------------------------------*/
+void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void SysTick_Handler( void )
+{
+	GET_INT_SP();
+	portDISABLE_INTERRUPTS();
+	SysTick->SR=0;
+	if( xTaskIncrementTick() != pdFALSE )
+	{
+		portYIELD();
+	}
+	portENABLE_INTERRUPTS();
+	FREE_INT_SP();
+}
 
+/*-----------------------------------------------------------*/
+void vPortEnterCritical( void )
+{
+	portDISABLE_INTERRUPTS();
+	uxCriticalNesting++;
+}
+
+/*-----------------------------------------------------------*/
+void vPortExitCritical( void )
+{
+	configASSERT( uxCriticalNesting );
+	uxCriticalNesting--;
+
+	if( uxCriticalNesting == 0 )
+	{
+		portENABLE_INTERRUPTS();
+	}
+}
+/*-----------------------------------------------------------*/
+portUBASE_TYPE xPortSetInterruptMask(void)
+{
+	portUBASE_TYPE uvalue=0;
+	__asm volatile("csrrw %0, mstatus, %1":"=r"(uvalue):"r"(0x7800));
+	return uvalue;
+}
+
+/*-----------------------------------------------------------*/
+void vPortClearInterruptMask(portUBASE_TYPE uvalue)
+{
+	__asm volatile("csrw  mstatus, %0"::"r"(uvalue));
+}
+#endif
 
 
 
