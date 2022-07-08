@@ -88,12 +88,14 @@ void vPortSetupTimerInterrupt( void ) __attribute__(( weak ));
 
 /*-----------------------------------------------------------*/
 
+#if( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) /*GAIGER*/
 /* Used to program the machine timer compare register. */
 uint64_t ullNextTime = 0ULL;
 const uint64_t *pullNextTime = &ullNextTime;
 const size_t uxTimerIncrementsForOneTick = ( size_t ) ( ( configCPU_CLOCK_HZ ) / ( configTICK_RATE_HZ ) ); /* Assumes increment won't go over 32-bits. */
 uint32_t const ullMachineTimerCompareRegisterBase = configMTIMECMP_BASE_ADDRESS;
 volatile uint64_t * pullMachineTimerCompareRegister = NULL;
+#endif
 
 /* Set configCHECK_FOR_STACK_OVERFLOW to 3 to add ISR stack checking to task
 stack checking.  A problem in the ISR stack will trigger an assert, not call the
