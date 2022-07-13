@@ -92,7 +92,7 @@ not need to be guarded with a critical section. */
 
 /* Scheduler utilities. */
 extern void vTaskSwitchContext( void );
-#if(0) //GAIGER
+#if(1) //GAIGER
 #define portYIELD() __asm volatile( "ecall" );
 #else
 #define portYIELD()   NVIC_SetPendingIRQ(Software_IRQn)

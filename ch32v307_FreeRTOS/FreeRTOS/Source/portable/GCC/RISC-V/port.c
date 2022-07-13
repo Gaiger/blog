@@ -153,9 +153,10 @@ task stack, not the ISR stack). */
 /* just for wch's systick,don't have mtime */
 void vPortSetupTimerInterrupt( void )
 {
+#if(0)
     /* set software is lowest priority */
-    NVIC_SetPriority(Software_IRQn,0xf0);
-    NVIC_EnableIRQ(Software_IRQn);
+ //   NVIC_SetPriority(Software_IRQn,0xf0);
+ //   NVIC_EnableIRQ(Software_IRQn);
     /* set systick is lowest priority */
     NVIC_SetPriority(SysTicK_IRQn,0xf0);
     NVIC_EnableIRQ(SysTicK_IRQn);
@@ -165,7 +166,22 @@ void vPortSetupTimerInterrupt( void )
     SysTick->CNT = 0;
     SysTick->CMP = configCPU_CLOCK_HZ/configTICK_RATE_HZ;
     SysTick->CTLR= 0xf;
+#else
+    /* Configure SysTick and interrupts. */
+   SysTick->SR = 0UL;
+   SysTick->CTLR = 0UL;
+   SysTick->CNT = 0UL;
+
+   NVIC_EnableIRQ(SysTicK_IRQn);
+
+   SysTick->CMP = (uint64_t)((configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 8)) - 1);
+   SysTick->CTLR = 0x1A; /* COUNTDOWN | AUTO RELOAD | HCLK/8 | INT */
+   SysTick->CTLR |= 0x20; /* INIT */
+   SysTick->CTLR |= 0x01; /* EN */
+
+#endif
 }
+
 #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */
 /*-----------------------------------------------------------*/
 #if(0)
@@ -231,7 +247,7 @@ extern void xPortStartFirstTask( void );
 		/* Check the least significant two bits of mtvec are 0b11 - indicating
 		multiply vector mode. */
 		__asm volatile( "csrr %0, mtvec" : "=r"( mtvec ) );
-		configASSERT( ( mtvec & 0x03UL ) == 0x3 );
+		configASSERT( ( mtvec & 0x03UL ) == 0x0 );
 		/* Check alignment of the interrupt stack - which is the same as the
 		stack that was being used by main() prior to the scheduler being
 		started. */
@@ -282,8 +298,7 @@ void vPortEndScheduler( void )
 
 #if(1) //GAIGER
 /*-----------------------------------------------------------*/
-void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void SysTick_Handler( void )
+void vPortSysTick_Handler( void )
 {
 	GET_INT_SP();
 	portDISABLE_INTERRUPTS();
@@ -328,6 +343,4 @@ void vPortClearInterruptMask(portUBASE_TYPE uvalue)
 	__asm volatile("csrw  mstatus, %0"::"r"(uvalue));
 }
 #endif
-
-
 

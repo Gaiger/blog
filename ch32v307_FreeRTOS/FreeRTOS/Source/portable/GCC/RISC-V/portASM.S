@@ -86,8 +86,8 @@ definitions. */
 	#error freertos_risc_v_chip_specific_extensions.h must define portasmHAS_MTIME to either 1 (MTIME clock present) or 0 (MTIME clock not present).  See https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 #endif
 
+#if(0)
 #ifndef portasmHANDLE_INTERRUPT
-#if(0)//GAIGER
 	#error portasmHANDLE_INTERRUPT must be defined to the function to be called to handle external/peripheral interrupts.  portasmHANDLE_INTERRUPT can be defined on the assembler command line or in the appropriate freertos_risc_v_chip_specific_extensions.h header file.  https://www.FreeRTOS.org/Using-FreeRTOS-on-RISC-V.html
 #endif
 #endif
@@ -102,9 +102,7 @@ portasmRESTORE_ADDITIONAL_REGISTERS macros - which can be defined in a chip
 specific version of freertos_risc_v_chip_specific_extensions.h.  See the notes
 at the top of this file. */
 
-#if(1) //GAIGER
-#define freertos_risc_v_trap_handler SW_Handler
-#endif
+
 
 
 #define portCONTEXT_SIZE ( 30 * portWORD_SIZE )
@@ -121,8 +119,9 @@ at the top of this file. */
 .extern pullNextTime
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
 .extern xISRStackTop
+#if(0)
 .extern portasmHANDLE_INTERRUPT
-
+#endif
 /*-----------------------------------------------------------*/
 
 .align 8
@@ -166,10 +165,16 @@ freertos_risc_v_trap_handler:
 	load_x  t0, pxCurrentTCB			/* Load pxCurrentTCB. */
 	store_x  sp, 0( t0 )				/* Write sp to first TCB member. */
 
-#if(0)//GAIGER
+#if(1)//GAIGER
 
 	csrr a0, mcause
 	csrr a1, mepc
+
+#if(1)
+	store_x a1, 0( sp )
+	j handle_synchronous
+
+#else
 
 test_if_asynchronous:
 	srli a2, a0, __riscv_xlen - 1		/* MSB of mcause is 1 if handing an asynchronous interrupt - shift to LSB to clear other bits. */
@@ -235,7 +240,7 @@ handle_asynchronous:
 	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	jal portasmHANDLE_INTERRUPT			/* Jump to the interrupt handler if there is no CLINT or if there is a CLINT and it has been determined that an external interrupt is pending. */
 	j processed_source
-
+#endif
 handle_synchronous:
 	addi a1, a1, 4						/* Synchronous so updated exception return address to the instruction after the instruction that generated the exeption. */
 	store_x a1, 0( sp )					/* Save updated exception return address. */
