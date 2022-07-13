@@ -120,10 +120,11 @@ void task1_task(void *pvParameters)
         printf("ch32v307_FreeRTOS task1 entry, %u\r\n", ii++);
         xSemaphoreGive(g_mutex);
 
+        const TickType_t task1_delay = 250 / portTICK_PERIOD_MS;
         GPIO_SetBits(GPIOE, GPIO_Pin_11);
-        vTaskDelay(500);
+        vTaskDelay(task1_delay);
         GPIO_ResetBits(GPIOE, GPIO_Pin_11);
-        vTaskDelay(500);
+        vTaskDelay(task1_delay);
     }
 }
 
@@ -146,9 +147,11 @@ void task2_task(void *pvParameters)
         xSemaphoreGive(g_mutex);
 
         GPIO_ResetBits(GPIOE, GPIO_Pin_12);
-        vTaskDelay(250);
+        const TickType_t task2_delay = 500 / portTICK_PERIOD_MS;
+
+        vTaskDelay(task2_delay);
         GPIO_SetBits(GPIOE, GPIO_Pin_12);
-        vTaskDelay(250);
+        vTaskDelay(task2_delay);
     }
 }
 
