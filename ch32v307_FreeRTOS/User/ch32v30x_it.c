@@ -9,40 +9,49 @@
 *******************************************************************************/
 #include "ch32v30x_it.h"
 
-void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+#define __IRQ       __attribute__((interrupt()))
+#define __NAKED     __attribute__((naked))
+#define __IRQ_WEAK __attribute__((interrupt(), weak))
 
-/*********************************************************************
- * @fn      NMI_Handler
- *
- * @brief   This function handles NMI exception.
- *
- * @return  none
- */
-void NMI_Handler(void)
-{
+__NAKED void Ecall_M_Handler(void) {
+    /* Use naked function to generate a short call, without saving stack. */
+    asm("j freertos_risc_v_trap_handler");
 }
 
-/*********************************************************************
- * @fn      HardFault_Handler
- *
- * @brief   This function handles Hard Fault exception.
- *
- * @return  none
- */
-void HardFault_Handler(void)
-{
-  while (1)
-  {
-  }
+__NAKED void Ecall_U_Handler(void) {
+    for(;;) {
+        /* Who called me? */
+    }
 }
+
+__NAKED void Default_Handler(void) {
+    for(;;) {
+        /* Where are you from? */
+    }
+}
+
+__IRQ void NMI_Handler(void)
+{
+    /* NMI handler */
+}
+
 
 extern void vPortSysTick_Handler(void);
 
-void SysTick_Handler(void)
+__IRQ void SysTick_Handler(void)
 {
     vPortSysTick_Handler();
 }
 
+__IRQ_WEAK void EXTI0_IRQHandler(void)
+{
+  if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
+  {
+#if 1
+    printf("Run at EXTI\r\n");
+
+#endif
+    EXTI_ClearITPendingBit(EXTI_Line0);     /* Clear Flag */
+  }
+}
 

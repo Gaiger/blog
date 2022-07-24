@@ -155,6 +155,45 @@ void task2_task(void *pvParameters)
     }
 }
 
+void EXTI0_INT_INIT(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+    EXTI_InitTypeDef EXTI_InitStructure = {0};
+    NVIC_InitTypeDef NVIC_InitStructure = {0};
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /* GPIOA ----> EXTI_Line0 */
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
+    EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
+
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+__attribute__((interrupt())) void EXTI0_IRQHandler(void)
+{
+  if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
+  {
+#if 1
+    printf("Run at EXTI, strong\r\n");
+
+#endif
+    EXTI_ClearITPendingBit(EXTI_Line0);     /* Clear Flag */
+  }
+}
+
 /*********************************************************************
  * @fn      main
  *
@@ -173,6 +212,8 @@ int main(void)
     printf("FreeRTOS Kernel Version:%s\r\n",tskKERNEL_VERSION_NUMBER);
 
     GPIO_Toggle_INIT();
+    EXTI0_INT_INIT();
+
     /* create two task */
     xTaskCreate((TaskFunction_t )task2_task,
                         (const char*    )"task2",

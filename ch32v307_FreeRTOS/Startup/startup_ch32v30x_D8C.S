@@ -511,13 +511,13 @@ ecall_m_handler:
     lw t0, 4(sp)
     lw t1, 8(sp)
     addi sp, sp, 8
-    j freertos_risc_v_trap_handler
+    j Ecall_M_Handler
 
 ecall_u_handler:
     lw t0, 4(sp)
     lw t1, 8(sp)
     addi sp, sp, 8
-    j freertos_risc_v_trap_handler
+    j Ecall_U_Handler
 
 fault_handler:
     lw t0, 4(sp)
