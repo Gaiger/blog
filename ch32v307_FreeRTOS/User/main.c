@@ -182,17 +182,6 @@ void EXTI0_INT_INIT(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-__attribute__((interrupt())) void EXTI0_IRQHandler(void)
-{
-  if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
-  {
-#if 1
-    printf("Run at EXTI, strong\r\n");
-
-#endif
-    EXTI_ClearITPendingBit(EXTI_Line0);     /* Clear Flag */
-  }
-}
 
 /*********************************************************************
  * @fn      main
