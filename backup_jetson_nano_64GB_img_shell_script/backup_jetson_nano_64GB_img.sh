@@ -169,7 +169,7 @@ END_BYTE=$(sudo parted "$LOOP" unit B print | \
 
 TARGET_END_BYTE=$(( END_BYTE - SHRINK_SIZE ))
 PART_LEN_BYTE=$(( TARGET_END_BYTE - START_BYTE + 1 ))
-TARGET_BLOCKS=$(( (PART_LEN_BYTE + BLOCK_SIZE - 1) / BLOCK_SIZE ))
+TARGET_BLOCKS=$(( PART_LEN_BYTE / BLOCK_SIZE ))
 
 echo "   Start: $START_BYTE"
 echo "   End (before): $END_BYTE"
@@ -196,7 +196,7 @@ sudo e2fsck -f -y -v -C 0 "$LOOP_EXT4_DEV"
 echo ">> resize2fs to $TARGET_BLOCKS blocks..."
 sudo resize2fs -p "$LOOP_EXT4_DEV" "$TARGET_BLOCKS"
 
-TARGET_END_SECTOR=$(( TARGET_END_BYTE / SECTOR_SIZE ))
+TARGET_END_SECTOR=$(( (TARGET_END_BYTE + SECTOR_SIZE - 1) / SECTOR_SIZE ))
 echo ">> Resizing partition with parted to sector $TARGET_END_SECTOR..."
 sudo parted ---pretend-input-tty "$LOOP" <<EOF
 resizepart 1 ${TARGET_END_SECTOR}s
