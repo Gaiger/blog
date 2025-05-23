@@ -167,6 +167,15 @@ START_BYTE=$(sudo parted "$LOOP" unit B print | \
 END_BYTE=$(sudo parted "$LOOP" unit B print | \
            awk '/^ 1/ { gsub("B","",$3); print $3 }')
 
+AVAILABLE_SPACE=$(( END_BYTE - START_BYTE ))
+if [ "$AVAILABLE_SPACE" -lt "$SHRINK_SIZE" ]; then
+  echo "⚠️  Partition is smaller than $SHRINK_GB GiB (only $(( AVAILABLE_SPACE / 1024 / 1024 / 1024 )) GiB available)"
+  echo "↪️  Skipping shrink and GPT repair. Proceeding to compression..."
+  sudo losetup -d "$LOOP"
+  compress_and_cleanup "$IMG"
+  exit 0
+fi
+
 TARGET_END_BYTE=$(( END_BYTE - SHRINK_SIZE ))
 PART_LEN_BYTE=$(( TARGET_END_BYTE - START_BYTE + 1 ))
 TARGET_BLOCKS=$(( PART_LEN_BYTE / BLOCK_SIZE ))
