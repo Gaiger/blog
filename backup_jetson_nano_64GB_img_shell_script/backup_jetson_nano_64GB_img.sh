@@ -134,26 +134,35 @@ echo ">> Backing up $DEVICE to $IMG..."
 sudo dd if="$DEVICE" of="$IMG" bs=64M status=progress conv=fsync
 
 IMG_SIZE=$(stat -c %s "$IMG")
-THRESHOLD_DEV=$((59 * 1024 * 1024 * 1024))
+LABELED_GB=64
+THRESHOLD_GB=$(awk "BEGIN { printf \"%d\", (0.89 * $LABELED_GB) + 0.5 }")
+THRESHOLD_SIZE=$((THRESHOLD_GB * 1024 * 1024 * 1024))
+
+if [ "$IMG_SIZE" -lt "$THRESHOLD_SIZE" ]; then
+  echo "✅ SD card image size is less than $THRESHOLD_GB GiB. Skipping all processing and proceeding to compression..."
+  compress_and_cleanup "$IMG"
+  exit 0
+fi
+
 
 echo ">> Attaching loop device..."
 LOOP=$(sudo losetup -Pf --show "$IMG")
-echo "   Mounted as $LOOP"
+echo "   Attached as $LOOP"
 
 echo ">> Partition layout:"
 printf 'F\n' | sudo parted "$LOOP" ---pretend-input-tty unit B print
 
 PART1_END_BYTE=$(sudo parted "$LOOP" unit B print | awk '/^ 1/ { gsub("B","",$3); print $3 }')
-THRESHOLD_IMG=$((57 * 1024 * 1024 * 1024))
 
-if [ "$PART1_END_BYTE" -le "$THRESHOLD_IMG" ]; then
-  echo "   ✅ Partition < 57GiB. Skip resize, truncate + GPT repair only."
+if [ "$PART1_END_BYTE" -le "$THRESHOLD_SIZE" ]; then
+  echo "✅ APP partition size is less than $THRESHOLD_GB GiB. Skipping resize, but will truncate and repair GPT."
   sudo losetup -d "$LOOP"
   truncate_image_to_partition_end "$IMG"
   fix_gpt_header "$IMG"
   compress_and_cleanup "$IMG"
   exit 0
 fi
+
 
 SHRINK_GB=8
 echo ">> Shrinking main partition by ${SHRINK_GB}GB..."
@@ -175,6 +184,7 @@ if [ "$AVAILABLE_SPACE" -lt "$SHRINK_SIZE" ]; then
   compress_and_cleanup "$IMG"
   exit 0
 fi
+
 
 TARGET_END_BYTE=$(( END_BYTE - SHRINK_SIZE ))
 PART_LEN_BYTE=$(( TARGET_END_BYTE - START_BYTE + 1 ))
