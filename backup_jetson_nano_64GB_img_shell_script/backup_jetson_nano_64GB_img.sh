@@ -4,7 +4,7 @@ set -e
 # Ensure the script is running under bash, not sh or dash
 if [ -z "$BASH_VERSION" ]; then
   echo "❌ This script must be run with bash, not sh."
-  echo "👉 Try: bash \"$0\" $*"
+  echo "👉 Try: ./$0 $*"
   exit 1
 fi
 
